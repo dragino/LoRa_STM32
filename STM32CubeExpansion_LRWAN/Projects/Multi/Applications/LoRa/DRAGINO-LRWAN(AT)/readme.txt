@@ -5,8 +5,8 @@
   ******************** (C) COPYRIGHT 2017 STMicroelectronics *******************
   * @file    LoRa/readme.txt 
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.0
+  * @date    15-Dec-2017
   * @brief   This application is a simple demo of a LoRa Object connecting to 
   *          a LoRa Network. 
   ******************************************************************************
@@ -52,9 +52,9 @@
 @par Description
 
 This directory contains a set of source files that implements a simple demo of an end 
-device also known as a LoRa Object connecting to a Lora Network. The LoRa Object can be 
-   - either a STM32LXxx-Nucleo board and Lora Radio expansion board, optionnally a sensor board. 
-   - or a B-L072Z-LRWAN1 (available soon)
+device also known as a LoRa Object connecting to a LoRa Network. The LoRa Object can be 
+   - LoRa ST 
+   - or LSN50
 By setting the LoRa Ids in comissioning.h file according to the LoRa Network requirements, 
 the end device will send periodically the sensor data to the LoRa network.
   ******************************************************************************
@@ -64,47 +64,42 @@ the end device will send periodically the sensor data to the LoRa network.
 @par Directory contents 
 
 
-  - LoRa/Inc/hw_conf.h                file to manage Cube SW family used and debug switch
-  - LoRa/Inc/stm32lXxx_hal_conf.h     Library Configuration file
-  - LoRa/Inc/stm32lXxx_it.h           Header for stm32lXxx_it.c
-  - LoRa/Inc/stm32lXxx_hw_conf.h      Header for stm32lXxx_hw_conf.c
-  - LoRa/Inc/hw_spi.h                 Header for hw_spi.c
-  - LoRa/Inc/hw_rtc.h                 Header for hw_rtc.c
-  - LoRa/Inc/hw_gpio.h                Header for hw_gpio.c
-  - LoRa/Inc/hw.h                     group all hw interface
-  - LoRa/Inc/vcom.h                   interface to vcom.c 
-  - LoRa/Inc/debug.h                  interface to debug functionally
-  - LoRa/Inc/Comissioning.h           End device comissioning parameters
-  - LoRa/Inc/version .h               version file
-  
-  - LoRa/Src/main.c                   Main program file
-  - LoRa/Src/stm32lXxx_it.c           STM32lXxx Interrupt handlers
-  - LoRa/Src/stm32lXxx_hal_msp.c      stm32lXxx specific hardware HAL code
-  - LoRa/Src/stm32lXxx_hw.c           stm32lXxx specific hardware driver code
-  - LoRa/Src/hw_spi.c                 spi driver
-  - LoRa/Src/hw_rtc.c                 rtc driver
-  - LoRa/Src/hw_gpio.c                gpio driver
-  - LoRa/Src/vcom.c                   virtual com port interface on Terminal
-  - LoRa/Src/debug.c                  debug driver
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/hw_conf.h                file to manage Cube SW family used
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/stm32l0xx_hal_conf.h     Library Configuration file
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/stm32l0xx_it.h           Header for stm32l0xx_it.c
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/stm32l0xx_hw_conf.h      Header for stm32l0xx_hw_conf.c(contains hardaware configuration Macros and Constants)
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/hw_spi.h                 Header for hw_spi.c
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/hw_rtc.h                 Header for hw_rtc.c
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/hw_gpio.h                Header for hw_gpio.c
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/hw.h                     group all hw interface
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/vcom.h                   interface to vcom.c 
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/Comissioning.h           End device comissioning parameters
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/version .h               version file
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/at.h                     Header for at.c
+  - LoRa/DRAGINO-LRWAN(AT)/Inc/command.h                Header for command.c
+
+  - LoRa/DRAGINO-LRWAN(AT)/Src/main.c                   Main program file
+  - LoRa/DRAGINO-LRWAN(AT)/Src/stm32l0xx_it.c           STM32l0xx Interrupt handlers
+  - LoRa/DRAGINO-LRWAN(AT)/Src/stm32l0xx_hal_msp.c      STM32l0xx specific hardware HAL code
+  - LoRa/DRAGINO-LRWAN(AT)/Src/stm32l0xx_hw.c           STM32l0xx specific hardware driver code
+  - LoRa/DRAGINO-LRWAN(AT)/Src/hw_spi.c                 spi driver
+  - LoRa/DRAGINO-LRWAN(AT)/Src/hw_rtc.c                 rtc driver
+  - LoRa/DRAGINO-LRWAN(AT)/Src/hw_gpio.c                gpio driver
+  - LoRa/DRAGINO-LRWAN(AT)/Src/vcom.c                   virtual com port interface on Terminal
  
 @par Hardware and Software environment 
 
 
-  - This example runs on STM32L053R8, STM32L073RZ, STM32L152RE and STM32L476RG devices.
+  - This example runs on STM32L072CZT6 devices.
     
-  - This application has been tested with STMicroelectronics:
-    NUCLEO-L053R8 RevC
-    NUCLEO-L073RZ RevC
-    NUCLEO-L152RE RevC
-    NUCLEO-L476RG RevC	
-    B-L072Z-LRWAN1 RevC
-    boards and can be easily tailored to any other supported device 
+  - This application has been tested with Dragino:
+    LoRa ST
+    LSN50
+    boards can be easily tailored to any other supported device 
     and development board.
 
-  - STM32LXxx-Nucleo Set-up    
-    - Connect the Nucleo board to your PC with a USB cable type A to mini-B 
-      to ST-LINK connector (CN1 / CN7 on B-L072Z-LRWAN1).
-    - Please ensure that the ST-LINK connector CN2 (CN8 on B-L072Z-LRWAN1) jumpers are fitted.
+   
+  - Connect the board to your PC with a USB-TTL
   -Set Up:
 
 
@@ -117,11 +112,10 @@ the end device will send periodically the sensor data to the LoRa network.
 
 @par How to use it ? 
 In order to make the program work, you must do the following :
-  - Open your preferred toolchain 
+  - Open your Serial Port Utility 
   - Rebuild all files and load your image into target memory
   - Run the example
-  - Open two Terminals, each connected the respective LoRa Object
-  - Terminal Config = 115200, 8b, 1 stopbit, no parity, no flow control ( in src/vcom.c)
+  - Serial Port Utility Setting Config = 9600, 8b, 1 stopbit, no parity, no flow control ( in src/vcom.c)
    
  * <h3><center>&copy; COPYRIGHT STMicroelectronics</center></h3>
  */
