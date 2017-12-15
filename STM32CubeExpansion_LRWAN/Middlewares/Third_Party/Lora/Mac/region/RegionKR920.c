@@ -581,7 +581,7 @@ bool RegionKR920RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
     Radio.SetRxConfig( MODEM_LORA, rxConfig->Bandwidth, phyDr, 1, 0, 8, rxConfig->WindowTimeout, false, 0, false, 0, 0, true, rxConfig->RxContinuous );
     maxPayload = MaxPayloadOfDatarateKR920[dr];
     Radio.SetMaxPayloadLength( MODEM_LORA, maxPayload + LORA_MAC_FRMPAYLOAD_OVERHEAD );
-    PRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
+//    PRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
 
     *datarate = (uint8_t) dr;
     return true;

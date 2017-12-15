@@ -111,7 +111,7 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_DEUI,
     .size_string = sizeof(AT_DEUI) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_DEUI ": Get the Device EUI\r\n",
+    .help_string = "AT"AT_DEUI ": Get or Set the Device EUI\r\n",
 #endif
     .get = at_DevEUI_get,
     .set = at_DevEUI_set,
@@ -432,7 +432,7 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_VER,
     .size_string = sizeof(AT_VER) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_VER ": Get the version of the AT_Slave FW\r\n",
+    .help_string = "AT"AT_VER ": Get the version of the AT FW\r\n",
 #endif
     .get = at_version_get,
     .set = at_return_error,
@@ -487,7 +487,7 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_TDC,
     .size_string = sizeof(AT_TDC) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_TDC ": Get or set the transmission duty cycle in ms\r\n",
+    .help_string = "AT"AT_TDC ": Get or set the application data transmission duty cycle in ms\r\n",
 #endif
     .get = at_TDC_get,
     .set = at_TDC_set,

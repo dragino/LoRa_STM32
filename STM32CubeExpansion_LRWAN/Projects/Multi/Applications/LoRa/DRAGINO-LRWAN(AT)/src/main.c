@@ -204,7 +204,7 @@ static void LoraTxData( lora_AppData_t *AppData, FunctionalState* IsTxConfirmed)
 	AppData->Buff[i++] =sensor_data.oil2;
 	
 	AppData->Buff[i++]=(int)sensor_data.temp1;     //DS18B20
-  AppData->Buff[i++]=(int)(sensor_data.temp1)%10;
+  AppData->Buff[i++]=(int)(sensor_data.temp1*10)%10;
   AppData->BuffSize = i;
 	
 //	PRINTF("%02X",sensor_data.oil1);PRINTF("%02X ",sensor_data.oil2);

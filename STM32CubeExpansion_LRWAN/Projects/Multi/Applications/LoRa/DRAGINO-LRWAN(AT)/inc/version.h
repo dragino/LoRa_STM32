@@ -72,7 +72,7 @@ extern "C" {
 #define TEST_VERSION (uint32_t) 0x00000000  /*1 lsb is always 0 in releases   */
 #define LRWAN_VERSION  (uint32_t) 0x00001120  /*3 next hex is i_cube release*/
 #define VERSION   (uint32_t) (LORA_MAC_VERSION | LRWAN_VERSION | TEST_VERSION)
-#define AT_VERSION_STRING	"1.1.2"
+#define AT_VERSION_STRING	"1.0"
 
 /* Exported types ------------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/

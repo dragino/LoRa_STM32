@@ -66,20 +66,6 @@ static __IO uint16_t AD_code=0;
 /* Private variables ---------------------------------------------------------*/
 void BSP_sensor_Read( sensor_t *sensor_data)
 {	
-	#if defined(LT_222_L)
-	sensor_data->do1=DO1;
-	sensor_data->do2=DO2;
-	sensor_data->do3=DO3;
-	
-	sensor_data->in5=HAL_GPIO_ReadPin(Oto_IN5_GPIO_PORT,Oto_IN5_PIN);
-  sensor_data->in6=HAL_GPIO_ReadPin(Oto_IN6_GPIO_PORT,Oto_IN6_PIN);
-	sensor_data->in7=HAL_GPIO_ReadPin(Oto_IN7_GPIO_PORT,Oto_IN7_PIN);
-	
-	sensor_data->do4=DO4;
-	sensor_data->do5=DO5;
-	#endif
-	
-
 	#if defined(LoRa_Sensor_Node)
 	sensor_data->temp1=DS18B20_GetTemp_SkipRom();
 	
@@ -94,18 +80,10 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 
 void  BSP_sensor_Init( void  )
 {
-	#if defined(LT_222_L)
-	BSP_mcp3425_Init();
-	BSP_npn_output_Init();
-  BSP_optocoupler_input_Init();
-	BSP_relay_output_Init();
-	#endif
-	
 	#if defined(LoRa_Sensor_Node)
 //	 while(DS18B20_Init()==1);
    BSP_oil_float_Init();
 	#endif
-	
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

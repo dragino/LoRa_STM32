@@ -450,6 +450,12 @@ uint32_t HW_RTC_SetTimerContext( void )
  */
 uint32_t HW_RTC_GetTimerContext( void )
 {
+		if((uint32_t) RtcTimerContext.Rtc_Time>3981312000)//45 days
+	{
+		HW_RTC_SetConfig( );
+    HW_RTC_SetAlarmConfig( );
+    HW_RTC_SetTimerContext( );
+	}
   return (uint32_t) RtcTimerContext.Rtc_Time;
 }
 /* Private functions ---------------------------------------------------------*/

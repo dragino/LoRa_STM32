@@ -642,7 +642,7 @@ bool RegionAS923RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
     }
 
     Radio.SetMaxPayloadLength( modem, maxPayload + LORA_MAC_FRMPAYLOAD_OVERHEAD );
-    PRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
+//    PRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
 
     *datarate = (uint8_t) dr;
     return true;
