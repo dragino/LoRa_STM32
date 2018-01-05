@@ -77,7 +77,7 @@ Maintainer: Miguel Luis and Gregory Cristian
  /* Internal voltage reference, parameter VREFINT_CAL*/
 #define VREFINT_CAL       ((uint16_t*) ((uint32_t) 0x1FF80078))
 #define LORAWAN_MAX_BAT   254
-
+extern uint16_t batteryLevel_mV;
 
 /* Internal temperature sensor: constants data used for indicative values in  */
 /* this example. Refer to device datasheet for min/typ/max values.            */
@@ -321,30 +321,29 @@ uint8_t HW_GetBatteryLevel( void )
 {
   uint8_t batteryLevel = 0;
   uint16_t measuredLevel = 0;
-  uint32_t batteryLevelmV;
 
   measuredLevel = HW_AdcReadChannel( ADC_CHANNEL_VREFINT ); 
 
   if (measuredLevel == 0)
   {
-    batteryLevelmV = 0;
+    batteryLevel_mV = 0;
   }
   else
   {
-    batteryLevelmV= (( (uint32_t) VDDA_VREFINT_CAL * (*VREFINT_CAL ) )/ measuredLevel);
+    batteryLevel_mV= (( (uint32_t) VDDA_VREFINT_CAL * (*VREFINT_CAL ) )/ measuredLevel);
   }
 
-  if (batteryLevelmV > VDD_BAT)
+  if (batteryLevel_mV > VDD_BAT)
   {
     batteryLevel = LORAWAN_MAX_BAT;
   }
-  else if (batteryLevelmV < VDD_MIN)
+  else if (batteryLevel_mV < VDD_MIN)
   {
     batteryLevel = 0;
   }
   else
   {
-    batteryLevel = (( (uint32_t) (batteryLevelmV - VDD_MIN)*LORAWAN_MAX_BAT) /(VDD_BAT-VDD_MIN) ); 
+    batteryLevel = (( (uint32_t) (batteryLevel_mV - VDD_MIN)*LORAWAN_MAX_BAT) /(VDD_BAT-VDD_MIN) ); 
   }
   return batteryLevel;
 }
@@ -393,6 +392,7 @@ void HW_AdcInit( void )
 
     HW_GPIO_Init( BAT_LEVEL_PORT, BAT_LEVEL_PIN, &initStruct );
 		HW_GPIO_Init( Oil_LEVEL_PORT, Oil_LEVEL_PIN, &initStruct );
+		HW_GPIO_Init( ADC_IN1_LEVEL_PORT, ADC_IN1_LEVEL_PIN, &initStruct );
 #endif
   }
 }

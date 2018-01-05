@@ -739,7 +739,36 @@ LoRaMacStatus_t lora_send(const char *buf, unsigned bufSize, unsigned binary)
 
   return LORAMAC_STATUS_OK;
 }
+/**
+ *  MCU wake up from Stop Mode and lora Send raw data 
+ */
+LoRaMacStatus_t lora_send_exti(void)
+{
+	 OnSendEvent();
 
+  if (DeviceState != DEVICE_STATE_SEND)
+  {
+    DeviceState = DEVICE_STATE_SLEEP;
+    return LORAMAC_STATUS_NO_NETWORK_JOINED;
+  }
+	
+	if( NextTx == true )
+  {
+    PrepareTxFrame( );
+    NextTx = SendFrame( );
+    if (NextTx != 0)
+    {
+      /*
+       * Data have not been sent.
+       * main root causes: duty cycles, previous send is not completed (tx not done, rx windows not completed,...)
+       */
+      DeviceState = DEVICE_STATE_SLEEP;
+      return LORAMAC_STATUS_BUSY;
+    }
+  }
+	
+	return LORAMAC_STATUS_OK;
+}
 
 /**
  *  lora Init

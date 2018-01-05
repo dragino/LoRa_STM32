@@ -109,8 +109,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define RADIO_DIO_5_PORT                          GPIOB
 #define RADIO_DIO_5_PIN                           GPIO_PIN_1
 
-#define RADIO_ANT_SWITCH_PORT                     GPIOB
-#define RADIO_ANT_SWITCH_PIN                      GPIO_PIN_4
+#define RADIO_ANT_SWITCH_PORT                     GPIOA
+#define RADIO_ANT_SWITCH_PIN                      GPIO_PIN_8
 
 #define BAT_LEVEL_PORT                            GPIOA
 #define BAT_LEVEL_PIN                             GPIO_PIN_4  
@@ -158,6 +158,28 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define USARTX_IRQn                      LPUART1_IRQn
 #define USARTX_IRQHandler                LPUART1_IRQHandler
 
+/* --------------------------- I2C HW definition -------------------------------*/
+#define I2Cx                            I2C1
+#define RCC_PERIPHCLK_I2Cx              RCC_PERIPHCLK_I2C1
+#define RCC_I2CxCLKSOURCE_SYSCLK        RCC_I2C1CLKSOURCE_SYSCLK
+#define I2Cx_CLK_ENABLE()               __HAL_RCC_I2C1_CLK_ENABLE()
+#define I2Cx_SDA_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
+#define I2Cx_SCL_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE() 
+
+#define I2Cx_FORCE_RESET()              __HAL_RCC_I2C1_FORCE_RESET()
+#define I2Cx_RELEASE_RESET()            __HAL_RCC_I2C1_RELEASE_RESET()
+
+/* Definition for I2Cx Pins */
+#define I2Cx_SCL_PIN                    GPIO_PIN_6
+#define I2Cx_SCL_GPIO_PORT              GPIOB
+#define I2Cx_SDA_PIN                    GPIO_PIN_7
+#define I2Cx_SDA_GPIO_PORT              GPIOB
+#define I2Cx_SCL_SDA_AF                 GPIO_AF1_I2C1
+
+/* Definition for I2Cx's NVIC */
+#define I2Cx_IRQn                       I2C1_IRQn
+#define I2Cx_IRQHandler                 I2C1_IRQHandler
+
 /*Definition LoRa Sensor Pins*/
 /* ---------------------------  DS18B20 HW definition -------------------------------*/
 #define DOUT_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()
@@ -168,11 +190,30 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define DOUT_1             HAL_GPIO_WritePin(DOUT_PORT,DOUT_PIN,GPIO_PIN_SET)
 
 /* ---------------------------  OIL FLOAT definition -------------------------------*/
-#define OIL_CONTROL_PORT          GPIOA	 
-#define OIL_CONTROL_PIN           GPIO_PIN_1
+#define OIL_CLK_ENABLE()   __HAL_RCC_GPIOB_CLK_ENABLE()
+#define OIL_CONTROL_PORT          GPIOB	 
+#define OIL_CONTROL_PIN           GPIO_PIN_4
 #define Oil_LEVEL_PORT            GPIOA
 #define Oil_LEVEL_PIN             GPIO_PIN_0 
 #define ADC_Channel_Oil           ADC_CHANNEL_0
+
+/* ---------------------------  GPIO EXTI definition -------------------------------*/
+#define GPIO_EXTI_CLK_ENABLE()   __HAL_RCC_GPIOB_CLK_ENABLE()
+#define GPIO_EXTI_PORT          GPIOB	 
+#define GPIO_EXTI_PIN           GPIO_PIN_14
+
+/* ---------------------------  GPIO Digital Input definition -------------------------------*/
+#define GPIO_INPUT_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()
+#define GPIO_INPUT_PORT           GPIOA	 
+#define GPIO_INPUT_PIN1           GPIO_PIN_12
+#define GPIO_INPUT_PIN2           GPIO_PIN_11
+#define GPIO_INPUT_PIN3           GPIO_PIN_14
+
+/* ---------------------------  ADC_IN1 definition -------------------------------*/
+#define ADC_IN1_LEVEL_PORT        GPIOA
+#define ADC_IN1_LEVEL_PIN         GPIO_PIN_1
+#define ADC_Channel_IN1           ADC_CHANNEL_1
+
 //#define LED_Toggle( x )
 //#define LED_On( x )
 //#define LED_Off( x )

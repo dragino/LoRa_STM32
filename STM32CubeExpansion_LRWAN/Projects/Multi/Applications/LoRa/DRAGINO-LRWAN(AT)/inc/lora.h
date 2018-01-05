@@ -249,6 +249,13 @@ LoRaMacStatus_t lora_join(void);
 LoRaMacStatus_t lora_send(const char *buf, unsigned size, unsigned binary);
 
 /**
+ * @brief Lora Send EXTI Data
+ * @param [IN] none
+ * @retval LoRa status
+ */
+LoRaMacStatus_t lora_send_exti(void);
+
+/**
  * @brief Lora Initialisation
  * @param [IN] LoRaMainCallback_t
  * @param [IN] application parmaters

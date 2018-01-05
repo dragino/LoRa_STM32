@@ -119,7 +119,7 @@ uint16_t HW_GetTemperatureLevel( void );
 /*!
  * \brief Get the current battery level
  *
- * \retval value  battery level ( 0: very low, 254: fully charged )
+ * \retval value  battery level 
  */
 uint8_t HW_GetBatteryLevel( void );
 /*!

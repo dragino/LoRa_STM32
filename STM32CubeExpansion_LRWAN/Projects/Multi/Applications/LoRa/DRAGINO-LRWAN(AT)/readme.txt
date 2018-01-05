@@ -5,8 +5,8 @@
   ******************** (C) COPYRIGHT 2017 STMicroelectronics *******************
   * @file    LoRa/readme.txt 
   * @author  MCD Application Team
-  * @version V1.0
-  * @date    15-Dec-2017
+  * @version V1.1
+  * @date    5-JAN-2018
   * @brief   This application is a simple demo of a LoRa Object connecting to 
   *          a LoRa Network. 
   ******************************************************************************

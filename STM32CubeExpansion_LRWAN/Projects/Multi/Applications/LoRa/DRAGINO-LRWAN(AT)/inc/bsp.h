@@ -70,26 +70,24 @@ Maintainer: Miguel Luis and Gregory Cristian
 
 typedef struct{
 	
-	float in1;/*mA*/
-	float in2;/*mA*/
-	float in3;/*V*/
-	float in4;/*V*/
-	
-	int   do1;/*NPN output channel 1*/
-	int   do2;/*NPN output channel 2*/
-	int   do3;/*NPN output channel 3*/
-	
-	int   in5;/*Optocoupler input channel 1*/
-	int   in6;/*Optocoupler input channel 2*/
-	int   in7;/*Optocoupler input channel 3*/
-	
-	int   do4;/*Relay output channel 1*/
-	int   do5;/*Relay output channel 2*/
+	int   in1;/*GPIO Digital Input PA12 0 or 1*/
+	int   in2;/*GPIO Digital Input PA11 0 or 1*/
+	int   in3;/*GPIO Digital Input PA14 0 or 1*/
 	
 	float temp1;//DS18B20
 	
 	uint8_t oil1;//oil float
 	uint8_t oil2;//oil float
+	
+	uint8_t ADC_IN1_H;//PA1
+	uint8_t ADC_IN1_L;
+	
+	uint8_t hum_inte;  //sht20 integer
+	uint8_t hum_dec; //decimal
+	
+	uint8_t tem_inte;  //integer
+	uint8_t tem_dec;  //decimal
+	
   /**more may be added*/
 } sensor_t;
 

@@ -64,6 +64,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "low_power.h"
 
 extern UART_HandleTypeDef UartHandle;
+extern int exti_flag;
 /** @addtogroup STM32L1xx_HAL_Examples
   * @{
   */
@@ -246,7 +247,13 @@ void EXTI4_15_IRQHandler( void )
 
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_13 );
 
-  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
+  //  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
+	  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_14) != RESET) 
+  { 
+	 exti_flag=1;
+	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);
+   HAL_GPIO_EXTI_Callback(GPIO_PIN_14);
+  }
 
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_15 );
 }

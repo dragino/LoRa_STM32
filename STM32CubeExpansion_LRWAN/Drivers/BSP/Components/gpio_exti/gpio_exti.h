@@ -1,9 +1,23 @@
+/*
+ / _____)             _              | |
+( (____  _____ ____ _| |_ _____  ____| |__
+ \____ \| ___ |    (_   _) ___ |/ ___)  _ \
+ _____) ) ____| | | || |_| ____( (___| | | |
+(______/|_____)_|_|_| \__)_____)\____)_| |_|
+    (C)2013 Semtech
+
+Description: contains all hardware driver
+
+License: Revised BSD License, see LICENSE.TXT file include in the project
+
+Maintainer: Miguel Luis and Gregory Cristian
+*/
  /******************************************************************************
-  * @file    bsp.c
+  * @file    gpio_exti.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
-  * @brief   manages the sensors on the application
+  * @version V1.1.1
+  * @date    01-June-2017
+  * @brief   contains all hardware driver
   ******************************************************************************
   * @attention
   *
@@ -43,78 +57,33 @@
   *
   ******************************************************************************
   */
-  
-  /* Includes ------------------------------------------------------------------*/
-#include <string.h>
-#include <stdlib.h>
-#include "hw.h"
-#include "timeServer.h"
-#include "bsp.h"
 
-#if defined(LoRa_Sensor_Node)
-#include "ds18b20.h"
-#include "oil_float.h"
-#include "gpio_exti.h"
-#include "sht20.h"
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __GPIO_EXTI_H__
+#define __GPIO_EXTI_H__
+
+#ifdef __cplusplus
+ extern "C" {
 #endif
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
+/* Includes ------------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
 
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Exported functions ---------------------------------------------------------*/
-static __IO uint16_t AD_code1=0;
-static __IO uint16_t AD_code2=0;
-static __IO float temp2=0;
-static __IO float hum1=0;
-/* Private variables ---------------------------------------------------------*/
-void BSP_sensor_Read( sensor_t *sensor_data)
-{	
-	#if defined(LoRa_Sensor_Node)
-	sensor_data->temp1=DS18B20_GetTemp_SkipRom();
-	
-	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);
-	AD_code1=HW_AdcReadChannel( ADC_Channel_Oil );
-	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_SET);
-
-	sensor_data->oil1=(AD_code1>>8)&0x0F;
-	sensor_data->oil2=AD_code1&0xFF;
-	
-	sensor_data->in1=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN1);
-	sensor_data->in2=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN2);
-	sensor_data->in3=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN3);
-	
-	AD_code2=HW_AdcReadChannel( ADC_Channel_IN1 );
-
-	sensor_data->ADC_IN1_H=(AD_code2>>8)&0x0F;
-	sensor_data->ADC_IN1_L=AD_code2&0xFF;
-	
-	 #ifdef USE_SHT20
-	temp2=SHT20_RT();//get temperature
-	hum1=SHT20_RH(); //get humidity
-	sensor_data->tem_inte=(int)temp2;
-	sensor_data->tem_dec=(int)(temp2*100)%100;
-	sensor_data->hum_inte=(int)hum1;
-	sensor_data->hum_dec=(int)(hum1*100)%100;
-	 #endif
-	 
-	#endif
+/* Exported constants --------------------------------------------------------*/
+/* External variables --------------------------------------------------------*/
+/* Exported macros -----------------------------------------------------------*/
+/* Exported functions ------------------------------------------------------- */ 
+/**
+ * @brief  
+ *
+ * @note
+ * @retval None
+ */
+void  GPIO_EXTI_IoInit( void  );
+void  GPIO_EXTI_IoDeInit( void  );
+void  GPIO_INPUT_IoInit(void);
+#ifdef __cplusplus
 }
+#endif
 
-void  BSP_sensor_Init( void  )
-{
-	#if defined(LoRa_Sensor_Node)
-//	 while(DS18B20_Init()==1);
-   BSP_oil_float_Init();
-	 GPIO_EXTI_IoInit();
-	 GPIO_INPUT_IoInit();
-	
-	 #ifdef USE_SHT20
-	 BSP_sht20_Init();
-	 #endif
-	
-	#endif
-}
-
+#endif 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

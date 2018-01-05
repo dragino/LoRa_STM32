@@ -1,8 +1,8 @@
  /******************************************************************************
-  * @file    bsp.c
+  * @file    ogpio_exti.c
   * @author  MCD Application Team
   * @version V1.1.2
-  * @date    08-September-2017
+  * @date    01-June-2017
   * @brief   manages the sensors on the application
   ******************************************************************************
   * @attention
@@ -45,18 +45,10 @@
   */
   
   /* Includes ------------------------------------------------------------------*/
-#include <string.h>
-#include <stdlib.h>
 #include "hw.h"
-#include "timeServer.h"
-#include "bsp.h"
-
-#if defined(LoRa_Sensor_Node)
-#include "ds18b20.h"
-#include "oil_float.h"
 #include "gpio_exti.h"
-#include "sht20.h"
-#endif
+
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
@@ -64,57 +56,41 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/
-static __IO uint16_t AD_code1=0;
-static __IO uint16_t AD_code2=0;
-static __IO float temp2=0;
-static __IO float hum1=0;
+
 /* Private variables ---------------------------------------------------------*/
-void BSP_sensor_Read( sensor_t *sensor_data)
-{	
-	#if defined(LoRa_Sensor_Node)
-	sensor_data->temp1=DS18B20_GetTemp_SkipRom();
-	
-	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);
-	AD_code1=HW_AdcReadChannel( ADC_Channel_Oil );
-	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_SET);
-
-	sensor_data->oil1=(AD_code1>>8)&0x0F;
-	sensor_data->oil2=AD_code1&0xFF;
-	
-	sensor_data->in1=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN1);
-	sensor_data->in2=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN2);
-	sensor_data->in3=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN3);
-	
-	AD_code2=HW_AdcReadChannel( ADC_Channel_IN1 );
-
-	sensor_data->ADC_IN1_H=(AD_code2>>8)&0x0F;
-	sensor_data->ADC_IN1_L=AD_code2&0xFF;
-	
-	 #ifdef USE_SHT20
-	temp2=SHT20_RT();//get temperature
-	hum1=SHT20_RH(); //get humidity
-	sensor_data->tem_inte=(int)temp2;
-	sensor_data->tem_dec=(int)(temp2*100)%100;
-	sensor_data->hum_inte=(int)hum1;
-	sensor_data->hum_dec=(int)(hum1*100)%100;
-	 #endif
-	 
-	#endif
-}
-
-void  BSP_sensor_Init( void  )
+void  GPIO_EXTI_IoInit( void  )
 {
-	#if defined(LoRa_Sensor_Node)
-//	 while(DS18B20_Init()==1);
-   BSP_oil_float_Init();
-	 GPIO_EXTI_IoInit();
-	 GPIO_INPUT_IoInit();
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+	GPIO_EXTI_CLK_ENABLE();
 	
-	 #ifdef USE_SHT20
-	 BSP_sht20_Init();
-	 #endif
-	
-	#endif
-}
+	GPIO_InitStruct.Mode =GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
 
+  HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
+	
+	/* Enable and set EXTI lines 4 to 15 Interrupt to the lowest priority */
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+}
+void  GPIO_EXTI_IoDeInit( void  )
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+	GPIO_InitStruct.Mode =GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+
+  HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
+}
+void GPIO_INPUT_IoInit(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+	GPIO_INPUT_CLK_ENABLE();
+	
+	GPIO_InitStruct.Pin = GPIO_INPUT_PIN1|GPIO_INPUT_PIN2|GPIO_INPUT_PIN3;
+	GPIO_InitStruct.Mode =GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+
+  HW_GPIO_Init( GPIO_INPUT_PORT, GPIO_INPUT_PIN1|GPIO_INPUT_PIN2|GPIO_INPUT_PIN3, &GPIO_InitStruct );
+}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

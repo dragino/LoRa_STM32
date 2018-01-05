@@ -105,6 +105,9 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
  */
 #define JOINREQ_NBTRIALS                            3
 
+int exti_flag=0;
+uint16_t batteryLevel_mV;
+void send_exti(void);
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 
@@ -174,6 +177,7 @@ int main( void )
     /* run the LoRa class A state machine*/
     lora_fsm( );
     CMD_Process();
+		send_exti();
     DISABLE_IRQ( );
     /* if an interrupt has occurred after DISABLE_IRQ, it is kept pending 
      * and cortex will not enter low power anyway  */
@@ -200,13 +204,42 @@ static void LoraTxData( lora_AppData_t *AppData, FunctionalState* IsTxConfirmed)
   AppData->Port = LORAWAN_APP_PORT;
   *IsTxConfirmed =  LORAWAN_CONFIRMED_MSG;
 	
+	HW_GetBatteryLevel( );
+	
+	AppData->Buff[i++] =(batteryLevel_mV>>8) & 0xFF;       //level of battery in mV
+	AppData->Buff[i++] =batteryLevel_mV & 0xFF;
+	
   AppData->Buff[i++] =sensor_data.oil1;          //oil float
 	AppData->Buff[i++] =sensor_data.oil2;
 	
 	AppData->Buff[i++]=(int)sensor_data.temp1;     //DS18B20
   AppData->Buff[i++]=(int)(sensor_data.temp1*10)%10;
-  AppData->BuffSize = i;
 	
+	AppData->Buff[i++] =sensor_data.in1;           //GPIO Digital Input 0 or 1
+	AppData->Buff[i++] =sensor_data.in2;
+	AppData->Buff[i++] =sensor_data.in3;
+	
+	AppData->Buff[i++] =sensor_data.ADC_IN1_H;     //ADC_IN1 PA1
+	AppData->Buff[i++] =sensor_data.ADC_IN1_L;
+	
+		if(exti_flag==1)
+	{
+	  AppData->Buff[i++]=0x11;
+		exti_flag=0;
+	}
+	else
+	{
+		AppData->Buff[i++]=0x00;
+	}
+	
+	#ifdef USE_SHT20
+	AppData->Buff[i++] =sensor_data.tem_inte;      //SHT20
+	AppData->Buff[i++] =sensor_data.tem_dec;
+	AppData->Buff[i++] =sensor_data.hum_inte; 
+	AppData->Buff[i++] =sensor_data.hum_dec;
+	#endif
+	
+	AppData->BuffSize = i;
 //	PRINTF("%02X",sensor_data.oil1);PRINTF("%02X ",sensor_data.oil2);
 //	PRINTF("%d.",(int)sensor_data.temp1);PRINTF("%d\n\r",(int)(sensor_data.temp1)%10);
 	#endif
@@ -221,5 +254,11 @@ static void LoraRxData( lora_AppData_t *AppData )
 {
  set_at_receive(AppData->Port, AppData->Buff, AppData->BuffSize); 
 }
-
+void send_exti(void)
+{
+	if(exti_flag==1)
+	{
+	lora_send_exti();
+	}
+}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
