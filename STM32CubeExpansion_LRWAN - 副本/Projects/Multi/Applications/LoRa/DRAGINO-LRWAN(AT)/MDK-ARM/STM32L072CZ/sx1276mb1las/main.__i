@@ -1,6 +1,0 @@
--c --cpu Cortex-M0+ -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\..\inc -I ..\..\..\..\..\..\..\Drivers\BSP\STM32L0xx_Nucleo -I ..\..\..\..\..\..\..\Drivers\STM32L0xx_HAL_Driver\Inc -I ..\..\..\..\..\..\..\Drivers\CMSIS\Device\ST\STM32L0xx\Include -I ..\..\..\..\..\..\..\Drivers\CMSIS\Include -I ..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Crypto -I ..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac -I ..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Phy -I ..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities -I ..\..\..\..\..\..\..\Drivers\BSP\Components\Common -I ..\..\..\..\..\..\..\Drivers\BSP\Components\sx1276 -I ..\..\..\..\..\..\..\Drivers\BSP\Components\ds18b20 -I ..\..\..\..\..\..\..\Drivers\BSP\Components\oil_float -I ..\..\..\..\..\..\..\Drivers\BSP\Components\gpio_exti -I ..\..\..\..\..\..\..\Drivers\BSP\Components\sht20 -I ..\..\..\..\..\..\..\Drivers\BSP\sx1276mb1las --C99
--I.\RTE\_sx1276mb1las
--ID:\ARM\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include
--ID:\ARM\ARM\CMSIS\Include
--D__UVISION_VERSION="524" -DSTM32L072xx -DSTM32L072xx -DUSE_STM32L0XX_NUCLEO -DUSE_HAL_DRIVER -DREGION_EU868
--o .\sx1276mb1las\main.o --omf_browse .\sx1276mb1las\main.crf --depend .\sx1276mb1las\main.d "..\..\src\main.c"
