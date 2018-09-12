@@ -1,0 +1,727 @@
+<html>
+<head>
+<style>
+<!--
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+{margin-top:0cm;margin-right:0cm;margin-bottom:8pt;margin-left:0cm;line-height:normal;font-size:10.0pt;font-family:Verdana,sans-serif;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+{margin-top:0cm;margin-right:0cm;margin-bottom:2pt;margin-left:0cm;line-height:normal;font-size:10.0pt;font-family:Verdana,sans-serif;}
+-->
+</style>
+<title>
+Release Notes for LoRa software expansion for STM32Cube
+</title>
+</head>
+<body lang=EN-US>
+<p class=MsoNormal align=center style='text-align:center;line-height:normal'><b><span style='font-size:18.0pt;color: rgb(51, 102, 255)'>
+Release Notes for LoRa
+</span></b></p>
+<p class=MsoNormal align=center style='text-align:center;line-height:normal'><b><span style='font-size:18.0pt;color: rgb(51, 102, 255)'>
+software expansion for STM32Cube
+</span></b></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal align=center style='line-height:center;line-height:normal'><span style='font-size:10.0pt'>
+Copyright © 2017 STMicroelectronics
+</span></p>
+<p class=MsoNormal align=center style='line-height:center;line-height:normal'><span style='font-size:10.0pt'>
+Microcontrollers Division - Application Team
+</span></p>
+<p class=MsoNormal align=center> <img style="border: 0px solid ; width: 104px; height: 77px;" alt="" id=_rnc_img0 src=./_htmresc/st_logo.png border=0> </span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;margin-right:4cm;width:80%;background:rgb(51, 102, 255)'>
+<td style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-left:0cm;margin-bottom:0cm;line-height:normal'><b><span style='font-size:12.0pt;color:white'>
+Update History</span></b></p></td></tr></table>
+
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;&nbsp;</span></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;width:23%;background:rgb(51, 102, 255)'>
+<td align=left style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;color:white'>
+V1.1.2  /  08-September-2017</span></b></p></td></tr></table>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'>
+<b><u>
+<span style='font-size:10.0pt'>Main Changes</span>
+</u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+Implementation of LoRa Mac from Semtech/StackForce develop branch (04-August-2017 commits)
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+Radio drivers update
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+AT-Master architecture rework for consistency across projects
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Content
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L0xx HAL Driver V1.8.0. <a href=Drivers\STM32L0xx_HAL_Driver\Release_Notes.html>(Release Notes)</a></span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L1xx HAL Driver V1.2.0. <a href=Drivers\STM32L1xx_HAL_Driver\Release_Notes.html>(Release Notes)</a></span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L4xx HAL Driver V1.6.0. <a href=Drivers\STM32L4xx_HAL_Driver\Release_Notes.html>(Release Notes)</a></span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Middleware V1.1.2. <a href=Middlewares\Third_Party\Lora\st_readme.txt>(Release Notes)</a></span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+X-NUCLEO-IKS01A1 V3.0.0 <a href=Drivers\BSP\X_NUCLEO_IKS01A1\Release_Notes.html>(Release Notes)</a></span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+X-NUCLEO-IKS01A2 V3.0.0 <a href=Drivers\BSP\X_NUCLEO_IKS01A2\Release_Notes.html>(Release Notes)</a></span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1mas V1.0.4 <a href=Drivers\BSP\sx1276mb1mas\Release_Notes.html>(Release Notes)</a></span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1las V1.0.4 <a href=Drivers\BSP\sx1276mb1las\Release_Notes.html>(Release Notes)</a></span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1272mb2das V1.0.4 <a href=Drivers\BSP\sx1272mb2das\Release_Notes.html>(Release Notes)</a></span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+B-L072Z-LRWAN1 V1.0.0 <a href=Drivers\BSP\B-L072Z-LRWAN1\Release_Notes.html>(Release Notes)</a></span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+I_NUCLEO_LRWAN1 V1.0.1 <a href=Drivers\BSP\I_NUCLEO_LRWAN1\Release_Notes.html>(Release Notes)</a></span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+MLM32L07X01 V1.0.3 <a href=Drivers\BSP\MLM32L07X01\Release_Notes.html>(Release Notes)</a></span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+MDM32L07X01 V1.0.0 <a href=Drivers\BSP\MDM32L07X01\Release_Notes.html>(Release Notes)</a></span>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Development Toolchains and Compilers
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+RealView Microcontroller Development Kit (MDK-ARM) toolchain V5.22 + ST- Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+IAR Embedded Workbench for ARM (EWARM) toolchain V8.11.2 + ST-Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+System Workbench for STM32 (SW4STM32) toolchain V2.0.1 + ST-Link
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Supported Devices and EVAL boards
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+B-L072Z-LRWAN1 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L053R8, STM32L073RZ, STM32L152RE and STM32L476RG
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L053R8 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L073RZ Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L152RE Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L476RG Board RevC
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Known Limitations
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Class B is not supported 
+</span></p>
+
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;&nbsp;</span></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;width:23%;background:rgb(51, 102, 255)'>
+<td align=left style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;color:white'>
+V1.1.1  /  01-June-2017</span></b></p></td></tr></table>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'>
+<b><u>
+<span style='font-size:10.0pt'>Main Changes</span>
+</u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+Implementation of LoRa Mac from Semtech/StackForce develop branch (30-May-2017 commits)
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+Externalized radio drivers as components
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+Sensors drivers update and support for X_NUCLEO_IKS01A2
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Content
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L0xx HAL Driver V1.8.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L1xx HAL Driver V1.2.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L4xx HAL Driver V1.6.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Middleware V1.1.1.</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+X-NUCLEO-IKS01A1 V3.0.0</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+X-NUCLEO-IKS01A2 V3.0.0</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1mas V1.0.3</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1las V1.0.3</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1272mb2das V1.0.3</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+B-L072Z-LRWAN1 V1.0.0</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+I_NUCLEO_LRWAN1 V1.0.1</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+MLM32L07X01 V1.0.2</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+MDM32L07X01 V1.0.0</span>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Development Toolchains and Compilers
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+RealView Microcontroller Development Kit (MDK-ARM) toolchain V5.22 + ST- Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+IAR Embedded Workbench for ARM (EWARM) toolchain V7.80.2 + ST-Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+System Workbench for STM32 (SW4STM32) toolchain V1.12 + ST-Link
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Supported Devices and EVAL boards
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+B-L072Z-LRWAN1 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L053R8, STM32L073RZ, STM32L152RE and STM32L476RG
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L053R8 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L073RZ Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L152RE Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L476RG Board RevC
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Known Limitations
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Class B is not supported 
+</span></p>
+
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;&nbsp;</span></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;width:23%;background:rgb(51, 102, 255)'>
+<td align=left style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;color:white'>
+V1.1.0  /  27-February-2017</span></b></p></td></tr></table>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'>
+<b><u>
+<span style='font-size:10.0pt'>Main Changes</span>
+</u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+New AT-Master Example
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+1.0.2 Lora stack implemenatation
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Content
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L0xx HAL Driver V1.8.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L1xx HAL Driver V1.2.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L4xx HAL Driver V1.6.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Middleware V1.1.0.</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+X-NUCLEO-IKS01A1 V2.1.0</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1mas V1.0.2</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1las V1.0.2</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1272mb2das V1.0.2</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+B-L072Z-LRWAN1 V1.0.0</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+I_NUCLEO_LRWAN1 V1.0.0</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+MLM32L07X01 V1.0.0</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+MDM32L07X01 V1.0.0</span>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Development Toolchains and Compilers
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+RealView Microcontroller Development Kit (MDK-ARM) toolchain V5.22 + ST- Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+IAR Embedded Workbench for ARM (EWARM) toolchain V7.80.2 + ST-Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+System Workbench for STM32 (SW4STM32) toolchain V1.12 + ST-Link
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Supported Devices and EVAL boards
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+B-L072Z-LRWAN1 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L053R8, STM32L073RZ, STM32L152RE and STM32L476RG
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L053R8 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L073RZ Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L152RE Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L476RG Board RevC
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Known Limitations
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Class B is not supported 
+</span></p>
+
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;&nbsp;</span></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;width:23%;background:rgb(51, 102, 255)'>
+<td align=left style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;color:white'>
+V1.0.3  /  01-January-2017</span></b></p></td></tr></table>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Main Changes
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+New AT-Slave Example
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+upgraded to latest X-NUCLEO-IKS01A1 driver version.
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+upgraded to latest HAL driver version.
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Content
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L0xx HAL Driver V1.8.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L1xx HAL Driver V1.2.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L4xx HAL Driver V1.6.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Middleware V1.0.3.</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+X-NUCLEO-IKS01A1 V2.1.0</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1mas V1.0.1</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1las V1.0.1</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1272mb2das V1.0.1</span>
+</span>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Development Toolchains and Compilers
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+RealView Microcontroller Development Kit (MDK-ARM) toolchain V5.22 + ST- Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+IAR Embedded Workbench for ARM (EWARM) toolchain V7.80.2 + ST-Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+System Workbench for STM32 (SW4STM32) toolchain V1.12 + ST-Link
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Supported Devices and EVAL boards
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+B-L072Z-LRWAN1 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L053R8, STM32L073RZ, STM32L152RE and STM32L476RG
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L053R8 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L073RZ Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L152RE Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L476RG Board RevC
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Known Limitations
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Class B is not supported 
+</span></p>
+
+
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;&nbsp;</span></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;width:23%;background:rgb(51, 102, 255)'>
+<td align=left style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;color:white'>
+V1.0.2  /  15-November-2016</span></b></p></td></tr></table>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Main Changes
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+supports LoRa Module Discovery board B-L072Z-LRWAN1 RevC. 
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+supports latest driver X-NUCLEO-IKS01A1 V2.1.0.
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Content
+</span></u></b></p>
+
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L0xx HAL Driver V1.6.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L1xx HAL Driver V1.1.1. </span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L4xx HAL Driver V1.3.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Middleware V1.0.2. </span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+X-NUCLEO-IKS01A1 V2.1.0. </span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1mas V1.0.1</span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1las V1.0.1 </span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1272mb2das V1.0.1 </span>
+</span>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Development Toolchains and Compilers
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+RealView Microcontroller Development Kit (MDK-ARM) toolchain V5.21a + ST- Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+IAR Embedded Workbench for ARM (EWARM) toolchain V7.80.1 + ST-Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+System Workbench for STM32 (SW4STM32) toolchain V1.11 + ST-Link
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Supported Devices and EVAL boards
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+B-L072Z-LRWAN1 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L053R8, STM32L073RZ, STM32L152RE and STM32L476RG
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L053R8 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L073RZ Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L152RE Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L476RG Board RevC
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Known Limitations
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Class B is not supported 
+</span></p>
+
+
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;&nbsp;</span></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;width:23%;background:rgb(51, 102, 255)'>
+<td align=left style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;color:white'>
+V1.0.1  /  15-September-2016</span></b></p></td></tr></table>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Main Changes
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+Integrated LoRa Middleware 1.0.1. 
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+added support for NUCLEO-L073RZ Board RevC. 
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+upgraded EWARM project to V7.70.1. 
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Content
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L0xx HAL Driver V1.6.0.</span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L1xx HAL Driver V1.1.1. </span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L4xx HAL Driver V1.3.0. </span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Middleware V1.0.1. </span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+X-NUCLEO-IKS01A1 V1.4.0 </span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1mas V1.0.1 </span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1276mb1las V1.0.1 </span>
+</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+sx1272mb2das V1.0.1 </span>
+</span>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Development Toolchains and Compilers
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+RealView Microcontroller Development Kit (MDK-ARM) toolchain V5.17 + ST- Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+IAR Embedded Workbench for ARM (EWARM) toolchain V7.70.1 + ST-Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+System Workbench for STM32 (SW4STM32) toolchain V1.8 + ST-Link
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Supported Devices and EVAL boards
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L053R8, STM32L073RZ, STM32L152RE and STM32L476RG
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L053R8 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L073RZ Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L152RE Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L476RG Board RevC
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Known Limitations
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Class B is not supported 
+</span></p>
+
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;&nbsp;</span></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;width:23%;background:rgb(51, 102, 255)'>
+<td align=left style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;color:white'>
+V1.0.0  /  01-July-2016</span></b></p></td></tr></table>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Main Changes
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+First release. 
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Content
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L0xx HAL Driver V1.6.0. </span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L1xx HAL Driver V1.1.1. </span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L4xx HAL Driver V1.3.0. </span>
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Middleware 1.0.0.</span>
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+X-NUCLEO-IKS01A1 V1.4.0 </span>
+</span>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Development Toolchains and Compilers
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+RealView Microcontroller Development Kit (MDK-ARM) toolchain V5.17 + ST- Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+IAR Embedded Workbench for ARM (EWARM) toolchain V7.60.1 + ST-Link
+</span>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+System Workbench for STM32 (SW4STM32) toolchain V1.8 + ST-Link
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Supported Devices and EVAL boards
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+STM32L053R8,STM32L152RE and STM32L476RG
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L053R8 Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L152RE Board RevC
+</span></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+NUCLEO-L476RG Board RevC
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;line-height:normal'><b><u><span style='font-size:10.0pt'>
+Known Limitations
+</span></u></b></p>
+<p class=MsoListParagraph style='margin-left:4cm;margin-right:4cm;text-indent:10.0pt;line-height:normal'><spanstyle='font-size:10.0pt;font-family:Symbol'>&#8226;<span style='font:7.0pt'>&nbsp;</span><span style='font-size:10.0pt'>
+LoRa Class B is not supported 
+</span></p>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;margin-right:4cm;width:80%;background:rgb(51, 102, 255)'>
+<td style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-left:0cm;margin-bottom:0cm;line-height:normal'><b><span style='font-size:12.0pt;color:white'>
+License</span></b></p></td></tr></table>
+<p class=MsoNormal style='line-height:normal'><span style='font-size:10.0pt'>&nbsp;</span></p>
+<p class=MsoNormal style='margin-left:4cm;margin-right:4cm;line-height:normal'><span style='font-size:10.0pt;color:black'>This software package is licensed under ST license SLA0048, (the "License"); You may not use this package except in compliance with the License. You may obtain a copy of the License at:
+<a href=http://www.st.com/SLA0048> http://www.st.com/SLA0048</a></span></p>
+<p class=MsoNormal style='line-height:normal'><b><span style='font-size:10.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;</span></b></p>
+<table class=MsoNormal border=0 cellspacing=0 cellpadding=0 width=100%
+style='margin-left:4cm;margin-right:4cm;width:80%;background:rgb(51, 102, 255)'>
+<td style='padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal style='margin-left:0cm;margin-bottom:0cm;line-height:4pt'><b><span style='font-size:10.0pt;color:rgb(51, 102, 255)'>
+---</span></b></p></td></tr></table>
+<p class=MsoNormal style='line-height:normal'><b><span style='font-size:10.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;</span></b></p>
+ <p class="MsoNormal" style="margin: 4.5pt 0in 4.5pt 0.25in; text-align: center;" align="center"><span style="font-size: 10pt; font-family: &quot;Verdana&quot;,&quot;sans-serif&quot;; color: black;">For
+complete documentation on </span><span style="font-size: 10pt; font-family: &quot;Verdana&quot;,&quot;sans-serif&quot;;">STM32<span style="color: black;"> Microcontrollers visit </span><u><span style="color: blue;"><a href="http://www.st.com/internet/mcu/family/141.jsp" target="_blank">www.st.com/STM32</a></span></u></span><u><span style="font-size: 10pt; font-family: Verdana; color: black;"><br>
+            </span></u><u><span style="font-size: 10pt; font-family: Verdana; color: blue;"></span></u><span style="color: black;"><o:p></o:p></span></p>
+<p class=MsoNormal style='line-height:normal'><b><span style='font-size:10.0pt'>&nbsp;&nbsp;&nbsp;</span></b></p>
+</div>
+</body>
+</html>
