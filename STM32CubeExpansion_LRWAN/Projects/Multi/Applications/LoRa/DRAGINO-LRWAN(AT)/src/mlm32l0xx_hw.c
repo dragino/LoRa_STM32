@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /*******************************************************************************
   * @file    mlm32l0xx_hw.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   system hardware driver
   ******************************************************************************
   * @attention
@@ -213,7 +213,7 @@ void HW_GpioInit(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
-//  __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
 
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -225,13 +225,13 @@ void HW_GpioInit(void)
   GPIO_InitStruct.Pin = GPIO_PIN_All;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-//  HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
   /* Disable GPIOs clock */
   __HAL_RCC_GPIOA_CLK_DISABLE();
   __HAL_RCC_GPIOB_CLK_DISABLE();
   __HAL_RCC_GPIOC_CLK_DISABLE();
-//  __HAL_RCC_GPIOH_CLK_DISABLE();
+  __HAL_RCC_GPIOH_CLK_DISABLE();
 }
 
 /**
@@ -497,7 +497,7 @@ uint16_t HW_AdcReadChannel( uint32_t Channel )
   * @param none
   * @retval none
   */
-void HW_EnterStopMode( void)
+void LPM_EnterStopMode( void)
 {
   BACKUP_PRIMASK();
 
@@ -519,7 +519,7 @@ void HW_EnterStopMode( void)
   * @param none
   * @retval none
   */
-void HW_ExitStopMode( void)
+void LPM_ExitStopMode( void)
 {
   /* Disable IRQ while the MCU is not running on HSI */
 
@@ -557,7 +557,7 @@ void HW_ExitStopMode( void)
   * @param none
   * @retval none
   */
-void HW_EnterSleepMode( void)
+void LPM_EnterSleepMode( void)
 {
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 }

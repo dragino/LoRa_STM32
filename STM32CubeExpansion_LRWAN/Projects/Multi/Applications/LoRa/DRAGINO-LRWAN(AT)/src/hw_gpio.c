@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /******************************************************************************
   * @file    hw_gpio.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   driver for GPIO
   ******************************************************************************
   * @attention
@@ -118,6 +118,10 @@ void HW_GPIO_SetIrq( GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint32_t prio,  Gpi
     HAL_NVIC_SetPriority( IRQnb , prio, 0);
     
     HAL_NVIC_EnableIRQ( IRQnb );
+  }
+  else
+  {
+    GpioIrq[ BitPos ] = NULL;
   }
 }
 

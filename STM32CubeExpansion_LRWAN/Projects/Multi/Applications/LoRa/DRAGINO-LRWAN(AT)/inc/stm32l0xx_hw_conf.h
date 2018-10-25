@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /******************************************************************************
   * @file    stm32l0xx_hw_conf.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   contains hardaware configuration Macros and Constants
   ******************************************************************************
   * @attention
@@ -70,13 +70,9 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
-//#define RADIO_DIO_4
-//#define RADIO_DIO_5
-
 /* LORA I/O definition */
-
-
- #define RADIO_RESET_PORT                          GPIOB
+	 
+#define RADIO_RESET_PORT                          GPIOB
 #define RADIO_RESET_PIN                           GPIO_PIN_0
 
 #define RADIO_NSS_PORT                            GPIOA
@@ -113,8 +109,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define RADIO_ANT_SWITCH_PIN                      GPIO_PIN_8
 
 #define BAT_LEVEL_PORT                            GPIOA
-#define BAT_LEVEL_PIN                             GPIO_PIN_4  
-
+#define BAT_LEVEL_PIN                             GPIO_PIN_4
 /*  SPI MACRO redefinition */
 
 #define SPI_CLK_ENABLE()                __HAL_RCC_SPI1_CLK_ENABLE()
@@ -213,10 +208,6 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define ADC_IN1_LEVEL_PORT        GPIOA
 #define ADC_IN1_LEVEL_PIN         GPIO_PIN_1
 #define ADC_Channel_IN1           ADC_CHANNEL_1
-
-//#define LED_Toggle( x )
-//#define LED_On( x )
-//#define LED_Off( x )
 
 #ifdef __cplusplus
 }

@@ -2229,7 +2229,7 @@ LoRaMacStatus_t SendFrameOnChannel( uint8_t channel )
     txConfig.AntennaGain = LoRaMacParams.AntennaGain;
     txConfig.PktLen = LoRaMacBufferPktLen;
 
-    PRINTF( "\n\r*** UplinkCounter= %d ***\n\r", UpLinkCounter );
+    PRINTF( "\n\r***** UpLinkCounter= %d *****\n\r", UpLinkCounter );
 
     RegionTxConfig( LoRaMacRegion, &txConfig, &txPower, &TxTimeOnAir );
 

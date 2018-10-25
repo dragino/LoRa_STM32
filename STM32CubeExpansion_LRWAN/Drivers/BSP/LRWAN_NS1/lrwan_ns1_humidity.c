@@ -2,8 +2,8 @@
  ******************************************************************************
  * @file    lrwan_ns1_humidity.c
  * @author  MEMS Application Team
- * @version V1.0.2
- * @date    08-September-2017
+ * @version V1.0.3
+ * @date    20-December-2017
  * @brief   This file provides a set of functions needed to manage the humidity sensor
  ******************************************************************************
  * @attention
@@ -119,13 +119,13 @@ DrvStatusTypeDef BSP_HUMIDITY_Init( HUMIDITY_ID_t id, void **handle )
 static DrvStatusTypeDef BSP_HTS221_HUMIDITY_Init( void **handle )
 {
   HUMIDITY_Drv_t *driver = NULL;
-
+#if 0
   if(HUMIDITY_SensorHandle[ HTS221_H_0 ].isInitialized == 1)
   {
     /* We have reached the max num of instance for this component */
     return COMPONENT_ERROR;
   }
-
+#endif
   if ( Sensor_IO_Init() == COMPONENT_ERROR )
   {
     return COMPONENT_ERROR;

@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /*******************************************************************************
   * @file    sx1276_lrwan_ns1.c
   * @author  MCD Application Team
-  * @version V1.0.2
-  * @date    08-September-2017
+  * @version V1.0.3
+  * @date    20-December-2017
   * @brief   driver LRWAN_NS1 LoRa Sensor board
   ******************************************************************************
   * @attention

@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /******************************************************************************
   * @file    stm32l0xx_it.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   manages interupt
   ******************************************************************************
   * @attention
@@ -61,8 +61,6 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
 #include "stm32l0xx_it.h"
-#include "low_power.h"
-
 extern UART_HandleTypeDef UartHandle;
 extern int exti_flag;
 /** @addtogroup STM32L1xx_HAL_Examples
@@ -200,11 +198,15 @@ void SysTick_Handler(void)
   * @param  None
   * @retval None
   */
+/*void PPP_IRQHandler(void)
+{
+}*/
 
 void USARTX_IRQHandler( void )
 {
   vcom_IRQHandler(&UartHandle);
 }
+
 void RTC_IRQHandler( void )
 {
   HW_RTC_IrqHandler ( );
@@ -247,8 +249,8 @@ void EXTI4_15_IRQHandler( void )
 
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_13 );
 
-  //  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
-	  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_14) != RESET) 
+//  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
+ if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_14) != RESET) 
   { 
 	 exti_flag=1;
 	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);

@@ -5,8 +5,8 @@
   ******************** (C) COPYRIGHT 2017 STMicroelectronics *******************
   * @file    LoRa/readme.txt 
   * @author  MCD Application Team
-  * @version V1.1
-  * @date    5-JAN-2018
+  * @version V1.2
+  * @date    14-March-2018
   * @brief   This application is a simple demo of a LoRa Object connecting to 
   *          a LoRa Network. 
   ******************************************************************************
@@ -90,7 +90,7 @@ the end device will send periodically the sensor data to the LoRa network.
 @par Hardware and Software environment 
 
 
-  - This example runs on STM32L072CZT6 devices.
+ - This example runs on STM32L072CZT6 devices.
     
   - This application has been tested with Dragino:
     LoRa ST

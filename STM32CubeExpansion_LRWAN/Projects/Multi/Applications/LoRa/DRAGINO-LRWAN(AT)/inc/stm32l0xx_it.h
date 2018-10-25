@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /******************************************************************************
   * @file    stm32l0xx_it.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   manages interupt
   ******************************************************************************
   * @attention
@@ -83,7 +83,8 @@ void PendSV_Handler(void);
 void SysTick_Handler(void);
 void EXTI4_15_IRQHandler(void);
 void TIM21_IRQHandler(void);
-void USARTX_IRQHandler(void);
+void UARTX_IRQHandler(void);
+	
 #ifdef __cplusplus
 }
 #endif

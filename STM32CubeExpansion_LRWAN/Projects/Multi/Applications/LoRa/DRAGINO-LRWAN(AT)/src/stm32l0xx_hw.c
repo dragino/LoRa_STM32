@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /*******************************************************************************
   * @file    stm32l0xx_hw.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   system hardware driver
   ******************************************************************************
   * @attention
@@ -62,7 +62,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "debug.h"
 #include "bsp.h"
 #include "vcom.h"
-#include "ds18b20.h"
+
 /*!
  *  \brief Unique Devices IDs register set ( STM32L0xxx )
  */
@@ -186,7 +186,6 @@ static void HW_IoDeInit( void )
   Radio.IoDeInit( );
   
   //vcom_IoDeInit( );
-	DS18B20_IoDeInit();
 }
 
 
@@ -321,6 +320,7 @@ uint8_t HW_GetBatteryLevel( void )
 {
   uint8_t batteryLevel = 0;
   uint16_t measuredLevel = 0;
+  uint32_t batteryLevelmV;
 
   measuredLevel = HW_AdcReadChannel( ADC_CHANNEL_VREFINT ); 
 
@@ -337,13 +337,13 @@ uint8_t HW_GetBatteryLevel( void )
   {
     batteryLevel = LORAWAN_MAX_BAT;
   }
-  else if (batteryLevel_mV < VDD_MIN)
+  else if (batteryLevelmV < VDD_MIN)
   {
     batteryLevel = 0;
   }
   else
   {
-    batteryLevel = (( (uint32_t) (batteryLevel_mV - VDD_MIN)*LORAWAN_MAX_BAT) /(VDD_BAT-VDD_MIN) ); 
+    batteryLevel = (( (uint32_t) (batteryLevelmV - VDD_MIN)*LORAWAN_MAX_BAT) /(VDD_BAT-VDD_MIN) ); 
   }
   return batteryLevel;
 }
@@ -459,7 +459,7 @@ uint16_t HW_AdcReadChannel( uint32_t Channel )
   * @param none
   * @retval none
   */
-void HW_EnterStopMode( void)
+void LPM_EnterStopMode( void)
 {
   BACKUP_PRIMASK();
 
@@ -469,8 +469,8 @@ void HW_EnterStopMode( void)
   
   /*clear wake up flag*/
   SET_BIT(PWR->CR, PWR_CR_CWUF);
-	
-  CLEAR_BIT(USARTX->CR1, USART_CR1_RXNEIE);
+  
+	CLEAR_BIT(USARTX->CR1, USART_CR1_RXNEIE);
 	
   RESTORE_PRIMASK( );
 
@@ -483,7 +483,7 @@ void HW_EnterStopMode( void)
   * @param none
   * @retval none
   */
-void HW_ExitStopMode( void)
+void LPM_ExitStopMode( void)
 {
   /* Disable IRQ while the MCU is not running on HSI */
 
@@ -521,7 +521,7 @@ void HW_ExitStopMode( void)
   * @param none
   * @retval none
   */
-void HW_EnterSleepMode( void)
+void LPM_EnterSleepMode( void)
 {
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 }

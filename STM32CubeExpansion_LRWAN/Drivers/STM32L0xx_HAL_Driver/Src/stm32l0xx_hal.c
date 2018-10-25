@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l0xx_hal.c
   * @author  MCD Application Team
-  * @version V1.8.0
-  * @date    25-November-2016
+  * @version V1.8.1
+  * @date    14-April-2017
   * @brief   HAL module driver.
   *          This is the common part of the HAL initialization
   *
@@ -86,11 +86,11 @@ __IO uint32_t uwTick;
   */
 
 /**
- * @brief STM32L0xx HAL Driver version number V1.8.0
+ * @brief STM32L0xx HAL Driver version number V1.8.1
  */
 #define __STM32L0xx_HAL_VERSION_MAIN   (0x01U) /*!< [31:24] main version */
 #define __STM32L0xx_HAL_VERSION_SUB1   (0x08U) /*!< [23:16] sub1 version */
-#define __STM32L0xx_HAL_VERSION_SUB2   (0x00U) /*!< [15:8]  sub2 version */
+#define __STM32L0xx_HAL_VERSION_SUB2   (0x01U) /*!< [15:8]  sub2 version */
 #define __STM32L0xx_HAL_VERSION_RC     (0x00U) /*!< [7:0]  release candidate */
 #define __STM32L0xx_HAL_VERSION         ((__STM32L0xx_HAL_VERSION_MAIN << 24U)\
                                         |(__STM32L0xx_HAL_VERSION_SUB1 << 16U)\

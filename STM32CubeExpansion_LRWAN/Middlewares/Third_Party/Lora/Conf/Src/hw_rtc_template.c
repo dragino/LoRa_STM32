@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /*******************************************************************************
   * @file    hw_rtc.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   driver for RTC
   ******************************************************************************
   * @attention
@@ -60,7 +60,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #if 0
 /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
-#include "low_power.h"
+#include "low_power_manager.h"
 
 /* Private typedef -----------------------------------------------------------*/
 typedef struct
@@ -322,16 +322,16 @@ void HW_RTC_SetAlarm( uint32_t timeout )
   /* we don't go in Low Power mode for timeout below MIN_ALARM_DELAY */
   if ( (MIN_ALARM_DELAY + McuWakeUpTimeCal ) < ((timeout - HW_RTC_GetTimerElapsedTime( ) )) )
   {
-    LowPower_Enable( e_LOW_POWER_RTC );
+    LPM_SetStopMode(LPM_RTC_Id , LPM_Enable );
   }
   else
   {
-    LowPower_Disable( e_LOW_POWER_RTC );
+    LPM_SetStopMode(LPM_RTC_Id , LPM_Disable );
   }
 
-  if( LowPower_GetState() == 0 )
+  /*In case stop mode is required */
+  if( LPM_GetMode() == LPM_StopMode )
   {
-    LowPower_Enable( e_LOW_POWER_RTC );
     timeout = timeout -  McuWakeUpTimeCal;
   }
 
@@ -393,7 +393,7 @@ void HW_RTC_IrqHandler ( void )
 {
   RTC_HandleTypeDef* hrtc=&RtcHandle;
   /* enable low power at irq*/
-  LowPower_Enable( e_LOW_POWER_RTC );
+  LPM_SetStopMode(LPM_RTC_Id , LPM_Enable );
   
     /* Get the AlarmA interrupt source enable status */
   if(__HAL_RTC_ALARM_GET_IT_SOURCE(hrtc, RTC_IT_ALRA) != RESET)

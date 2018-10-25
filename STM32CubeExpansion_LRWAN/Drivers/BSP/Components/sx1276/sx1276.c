@@ -83,17 +83,6 @@ typedef struct
  * Private functions prototypes
  */
 
-/*!
- * Performs the Rx chain calibration for LF and HF bands
- * \remark Must be called just after the reset so all registers are at their
- *         default values
- */
-static void RxChainCalibration( void );
-
-/*!
- * \brief Resets the SX1276
- */
-void SX1276Reset( void );
 
 /*!
  * \brief Sets the SX1276 in transmission mode for the given time
@@ -380,7 +369,7 @@ uint32_t SX1276Random( void )
  * \remark Must be called just after the reset so all registers are at their
  *         default values
  */
-static void RxChainCalibration( void )
+void RxChainCalibration( void )
 {
     uint8_t regPaConfigInitVal;
     uint32_t initialFreq;

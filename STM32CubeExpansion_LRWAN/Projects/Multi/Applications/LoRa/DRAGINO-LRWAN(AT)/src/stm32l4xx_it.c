@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /******************************************************************************
   * @file    stm32l4xx_it.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   manages interrupt
   ******************************************************************************
   * @attention
@@ -61,7 +61,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
 #include "stm32l4xx_it.h"
-#include "low_power.h"
+
 
 /** @addtogroup STM32L1xx_HAL_Examples
   * @{

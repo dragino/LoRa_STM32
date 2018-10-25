@@ -2,8 +2,8 @@
  ******************************************************************************
  * @file    lrwan_ns1_pressure.c
  * @author  MEMS Application Team
- * @version V1.0.2
- * @date    08-September-2017
+ * @version V1.0.3
+ * @date    20-December-2017
  * @brief   This file provides a set of functions needed to manage the pressure sensor
  ******************************************************************************
  * @attention
@@ -243,13 +243,13 @@ static DrvStatusTypeDef BSP_LPS25HB_PRESSURE_Init( int id, void **handle )
 static DrvStatusTypeDef BSP_LPS22HB_PRESSURE_Init( void **handle )
 {
   PRESSURE_Drv_t *driver = NULL;
-
+#if 0
   if(PRESSURE_SensorHandle[ LPS22HB_P_0 ].isInitialized == 1)
   {
     /* We have reached the max num of instance for this component */
     return COMPONENT_ERROR;
   }
-
+#endif
   if ( Sensor_IO_Init() == COMPONENT_ERROR )
   {
     return COMPONENT_ERROR;

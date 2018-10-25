@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /******************************************************************************
   * @file    bsp.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   contains all hardware driver
   ******************************************************************************
   * @attention
@@ -69,25 +69,18 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Exported types ------------------------------------------------------------*/
 
 typedef struct{
-	
-	int   in1;/*GPIO Digital Input PA12 0 or 1*/
-	int   in2;/*GPIO Digital Input PA11 0 or 1*/
-	int   in3;/*GPIO Digital Input PA14 0 or 1*/
+  int   in1;/*GPIO Digital Input 0 or 1*/
 	
 	float temp1;//DS18B20
 	
-	uint8_t oil1;//oil float
-	uint8_t oil2;//oil float
+	float oil;  //oil float
 	
-	uint8_t ADC_IN1_H;//PA1
-	uint8_t ADC_IN1_L;
+	uint8_t PA1_mv;//PA1
+
 	
-	uint8_t hum_inte;  //sht20 integer
-	uint8_t hum_dec; //decimal
-	
-	uint8_t tem_inte;  //integer
-	uint8_t tem_dec;  //decimal
-	
+	float temp_sht;
+	float hum_sht;
+
   /**more may be added*/
 } sensor_t;
 

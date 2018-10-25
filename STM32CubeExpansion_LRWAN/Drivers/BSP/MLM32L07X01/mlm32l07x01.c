@@ -55,12 +55,9 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "sx1276.h"
 #include "mlm32l07x01.h"
 #include "delay.h"
-#include "timeServer.h"
+
 
 #define IRQ_HIGH_PRIORITY  0
-
-/* Delay in ms between radio set in sleep mode and TCXO off*/
-#define TCXO_OFF_DELAY 3
 
 #define TCXO_ON()   HW_GPIO_Write( RADIO_TCXO_VCC_PORT, RADIO_TCXO_VCC_PIN, 1) 
 
@@ -79,8 +76,6 @@ void SX1276IoIrqInit( DioIrqHandler **irqHandlers );
 uint8_t SX1276GetPaSelect( uint8_t power );
 
 void SX1276SetAntSwLowPower( bool status );
-
-void SX1276SetRfTxPower( int8_t power );
 
 void SX1276SetAntSw( uint8_t opMode );
 /*!
@@ -163,7 +158,12 @@ void SX1276IoInit( void )
   HW_GPIO_Init( RADIO_DIO_1_PORT, RADIO_DIO_1_PIN, &initStruct );
   HW_GPIO_Init( RADIO_DIO_2_PORT, RADIO_DIO_2_PIN, &initStruct );
   HW_GPIO_Init( RADIO_DIO_3_PORT, RADIO_DIO_3_PIN, &initStruct );
-  
+#ifdef RADIO_DIO_4
+  HW_GPIO_Init( RADIO_DIO_4_PORT, RADIO_DIO_4_PIN, &initStruct );
+#endif
+#ifdef RADIO_DIO_5
+  HW_GPIO_Init( RADIO_DIO_5_PORT, RADIO_DIO_5_PIN, &initStruct );
+#endif
   initStruct.Mode =GPIO_MODE_OUTPUT_PP;
   initStruct.Pull = GPIO_NOPULL;  
   HW_GPIO_Init( RADIO_TCXO_VCC_PORT, RADIO_TCXO_VCC_PIN, &initStruct );
@@ -188,6 +188,13 @@ void SX1276IoDeInit( void )
   HW_GPIO_Init( RADIO_DIO_1_PORT, RADIO_DIO_1_PIN, &initStruct );
   HW_GPIO_Init( RADIO_DIO_2_PORT, RADIO_DIO_2_PIN, &initStruct );
   HW_GPIO_Init( RADIO_DIO_3_PORT, RADIO_DIO_3_PIN, &initStruct );
+  
+#ifdef RADIO_DIO_4
+  HW_GPIO_Init( RADIO_DIO_4_PORT, RADIO_DIO_4_PIN, &initStruct );
+#endif
+#ifdef RADIO_DIO_5
+  HW_GPIO_Init( RADIO_DIO_5_PORT, RADIO_DIO_5_PIN, &initStruct );
+#endif
 }
 
 void SX1276SetRfTxPower( int8_t power )

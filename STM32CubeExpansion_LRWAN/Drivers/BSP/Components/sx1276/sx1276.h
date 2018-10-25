@@ -263,6 +263,11 @@ typedef struct sBoardCallback
  * ============================================================================
  */
 void SX1276BoardInit( LoRaBoardCallback_t *callbacks );
+
+/*!
+ * \brief Resets the SX1276
+ */
+void SX1276Reset( void );
 /*!
  * \brief Initializes the radio
  *
@@ -472,6 +477,20 @@ void SX1276SetTxContinuousWave( uint32_t freq, int8_t power, uint16_t time );
  * \retval rssiValue Current RSSI value in [dBm]
  */
 int16_t SX1276ReadRssi( RadioModems_t modem );
+
+/*!
+ * Performs the Rx chain calibration for LF and HF bands
+ * \remark Must be called just after the reset so all registers are at their
+ *         default values
+ */
+void RxChainCalibration( void );
+/*!
+ * \brief Set a SyncSword in the radio
+ *
+ * \param [IN]: data SyncSword
+ */
+
+void SX1276SetSyncWord( uint8_t data );
 
 /*!
  * \brief Writes the radio register at the specified address

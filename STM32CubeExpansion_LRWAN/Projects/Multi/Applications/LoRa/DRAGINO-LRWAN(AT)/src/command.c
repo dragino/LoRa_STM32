@@ -1,8 +1,8 @@
 /*******************************************************************************
  * @file    command.c
  * @author  MCD Application Team
- * @version V1.1.2
- * @date    08-September-2017
+ * @version V1.1.4
+ * @date    08-January-2018
  * @brief   main command driver dedicated to command AT
  ******************************************************************************
  * @attention
@@ -49,6 +49,7 @@
 #include "at.h"
 #include "hw.h"
 #include "command.h"
+#include "lora.h"
 
 /* comment the following to have help message */
 /* #define NO_HELP */
@@ -104,6 +105,17 @@ static const struct ATCommand_s ATCommand[] =
     .get = at_return_error,
     .set = at_return_error,
     .run = at_reset,
+  },
+	
+	{
+	  .string = AT_FDR,
+    .size_string = sizeof(AT_FDR) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_FDR ": Factory data reset\r\n",
+#endif
+    .get = at_return_error,
+    .set = at_return_error,
+    .run = at_FDR,
   },
 
 #ifndef NO_KEY_ADDR_EUI
@@ -432,7 +444,7 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_VER,
     .size_string = sizeof(AT_VER) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_VER ": Get the version of the AT FW\r\n",
+    .help_string = "AT"AT_VER ": Get the version of the AT_Slave FW\r\n",
 #endif
     .get = at_version_get,
     .set = at_return_error,
@@ -632,6 +644,7 @@ static void parse_cmd(const char *cmd)
             else
             {
               status = Current_ATCommand->set(cmd + 1);
+							Store_Config();
             }
             break;
           case '?':

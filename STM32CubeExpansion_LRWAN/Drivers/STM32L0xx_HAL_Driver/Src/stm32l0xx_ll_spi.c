@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l0xx_ll_spi.c
   * @author  MCD Application Team
-  * @version V1.8.0
-  * @date    25-November-2016
+  * @version V1.8.1
+  * @date    14-April-2017
   * @brief   SPI LL module driver.
   ******************************************************************************
   * @attention

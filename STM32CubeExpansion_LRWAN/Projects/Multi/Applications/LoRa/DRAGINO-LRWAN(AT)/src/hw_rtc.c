@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /*******************************************************************************
   * @file    hw_rtc.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   driver for RTC
   ******************************************************************************
   * @attention
@@ -60,7 +60,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 
 /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
-#include "low_power.h"
+#include "low_power_manager.h"
 
 /* Private typedef -----------------------------------------------------------*/
 typedef struct
@@ -260,8 +260,6 @@ void HW_RTC_setMcuWakeUpTime( void )
     McuWakeUpTimeInitialized = true;
     now = HW_RTC_GetCalendarValue( &RTC_DateStruct, &RTC_TimeStruct );
 
-//    DBG_GPIO_SET(GPIOB, GPIO_PIN_13);
-//    DBG_GPIO_RST(GPIOB, GPIO_PIN_13);
     HAL_RTC_GetAlarm(&RtcHandle, &RTC_AlarmStructure, RTC_ALARM_A, RTC_FORMAT_BIN );
     hit = RTC_AlarmStructure.AlarmTime.Seconds+
           60*(RTC_AlarmStructure.AlarmTime.Minutes+
@@ -271,7 +269,7 @@ void HW_RTC_setMcuWakeUpTime( void )
       
     McuWakeUpTime = (int16_t) ((now-hit));
     McuWakeUpTimeCal += McuWakeUpTime;
-    //PRINTF("Cal=%d, %d\n\r",McuWakeUpTimeCal, McuWakeUpTime);
+    DBG_PRINTF("Cal=%d, %d\n\r",McuWakeUpTimeCal, McuWakeUpTime);
   }
 }
 
@@ -322,16 +320,16 @@ void HW_RTC_SetAlarm( uint32_t timeout )
   /* we don't go in Low Power mode for timeout below MIN_ALARM_DELAY */
   if ( (MIN_ALARM_DELAY + McuWakeUpTimeCal ) < ((timeout - HW_RTC_GetTimerElapsedTime( ) )) )
   {
-    LowPower_Enable( e_LOW_POWER_RTC );
+    LPM_SetStopMode(LPM_RTC_Id , LPM_Enable );
   }
   else
   {
-    LowPower_Disable( e_LOW_POWER_RTC );
+    LPM_SetStopMode(LPM_RTC_Id , LPM_Disable );
   }
 
-  if( LowPower_GetState() == 0 )
+  /*In case stop mode is required */
+  if( LPM_GetMode() == LPM_StopMode )
   {
-    LowPower_Enable( e_LOW_POWER_RTC );
     timeout = timeout -  McuWakeUpTimeCal;
   }
 
@@ -393,7 +391,7 @@ void HW_RTC_IrqHandler ( void )
 {
   RTC_HandleTypeDef* hrtc=&RtcHandle;
   /* enable low power at irq*/
-  LowPower_Enable( e_LOW_POWER_RTC );
+  LPM_SetStopMode(LPM_RTC_Id , LPM_Enable );
   
     /* Get the AlarmA interrupt source enable status */
   if(__HAL_RTC_ALARM_GET_IT_SOURCE(hrtc, RTC_IT_ALRA) != RESET)
@@ -450,12 +448,6 @@ uint32_t HW_RTC_SetTimerContext( void )
  */
 uint32_t HW_RTC_GetTimerContext( void )
 {
-		if((uint32_t) RtcTimerContext.Rtc_Time>3981312000)//45 days
-	{
-		HW_RTC_SetConfig( );
-    HW_RTC_SetAlarmConfig( );
-    HW_RTC_SetTimerContext( );
-	}
   return (uint32_t) RtcTimerContext.Rtc_Time;
 }
 /* Private functions ---------------------------------------------------------*/
@@ -487,7 +479,6 @@ static void HW_RTC_StartWakeUpAlarm( uint32_t timeoutValue )
   RTC_DateTypeDef RTC_DateStruct = RtcTimerContext.RTC_Calndr_Date;
 
   HW_RTC_StopAlarm( );
-//  DBG_GPIO_SET(GPIOB, GPIO_PIN_13);
   
   /*reverse counter */
   rtcAlarmSubSeconds =  PREDIV_S - RTC_TimeStruct.SubSeconds;
@@ -580,11 +571,9 @@ static void HW_RTC_StartWakeUpAlarm( uint32_t timeoutValue )
   HAL_RTC_SetAlarm_IT( &RtcHandle, &RTC_AlarmStructure, RTC_FORMAT_BIN );
   
   /* Debug Printf*/
-//  DBG( HW_RTC_GetCalendarValue( &RTC_DateStruct, &RTC_TimeStruct ); );
-//  PRINTF("it's %d:%d:%d:%d ", RTC_TimeStruct.Hours, RTC_TimeStruct.Minutes, RTC_TimeStruct.Seconds, ((PREDIV_S - RTC_TimeStruct.SubSeconds)*1000)>>N_PREDIV_S);
-//  PRINTF("WU@ %d:%d:%d:%d\n\r", rtcAlarmHours, rtcAlarmMinutes, rtcAlarmSeconds, (rtcAlarmSubSeconds*1000)>>N_PREDIV_S );
-  
-//  DBG_GPIO_RST(GPIOB, GPIO_PIN_13);
+  DBG( HW_RTC_GetCalendarValue( &RTC_DateStruct, &RTC_TimeStruct ); );
+  DBG_PRINTF("it's %d:%d:%d:%d ", RTC_TimeStruct.Hours, RTC_TimeStruct.Minutes, RTC_TimeStruct.Seconds, ((PREDIV_S - RTC_TimeStruct.SubSeconds)*1000)>>N_PREDIV_S);
+  DBG_PRINTF("WU@ %d:%d:%d:%d\n\r", rtcAlarmHours, rtcAlarmMinutes, rtcAlarmSeconds, (rtcAlarmSubSeconds*1000)>>N_PREDIV_S );
 }
 
 

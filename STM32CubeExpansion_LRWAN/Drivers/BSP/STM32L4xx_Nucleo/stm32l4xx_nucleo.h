@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l4xx_nucleo.h
   * @author  MCD Application Team
-  * @version V2.0.0
-  * @date    16-September-2015
+  * @version V2.1.0
+  * @date    16-June-2017
   * @brief   This file contains definitions for:
   *          - LEDs and push-button available on STM32L4XX-Nucleo Kit 
   *            from STMicroelectronics
@@ -62,12 +62,21 @@
 /** @defgroup STM32L4XX_NUCLEO_Exported_Types Exported Types
   * @{
   */
+#ifdef USE_STM32L4XX_NUCLEO_64_SMPS
+typedef enum 
+{
+  LED4 = 0,
+
+  LED_GREEN = LED4
+} Led_TypeDef;
+#else   
 typedef enum 
 {
   LED2 = 0,
 
   LED_GREEN = LED2
 } Led_TypeDef;
+#endif
 
 typedef enum 
 {  
@@ -111,18 +120,43 @@ typedef enum
   * @{
   */
 #define LEDn                               1
-
+#ifdef USE_STM32L4XX_NUCLEO_64_SMPS
+#define LED4_PIN                           GPIO_PIN_13
+#define LED4_GPIO_PORT                     GPIOB
+#define LED4_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOB_CLK_ENABLE()  
+#define LED4_GPIO_CLK_DISABLE()            __HAL_RCC_GPIOB_CLK_DISABLE()
+#define LEDx_GPIO_CLK_ENABLE(__LED__)      do { if((__LED__) == LED4) { LED4_GPIO_CLK_ENABLE(); } } while(0)
+#define LEDx_GPIO_CLK_DISABLE(__LED__)     do { if((__LED__) == LED4) { LED4_GPIO_CLK_DISABLE(); } } while(0)
+#else
 #define LED2_PIN                           GPIO_PIN_5
 #define LED2_GPIO_PORT                     GPIOA
 #define LED2_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOA_CLK_ENABLE()  
 #define LED2_GPIO_CLK_DISABLE()            __HAL_RCC_GPIOA_CLK_DISABLE()
-  
 #define LEDx_GPIO_CLK_ENABLE(__LED__)      do { if((__LED__) == LED2) { LED2_GPIO_CLK_ENABLE(); } } while(0)
-
 #define LEDx_GPIO_CLK_DISABLE(__LED__)     do { if((__LED__) == LED2) { LED2_GPIO_CLK_DISABLE(); } } while(0)
+#endif
+  
+
 /**
   * @}
   */ 
+
+#ifdef USE_STM32L4XX_NUCLEO_64_SMPS
+#ifdef USE_ADP5301ACBZ          /* ADP5301ACBZ */
+                                                
+/** @addtogroup STM32L4XX_NUCLEO_64_SMPS
+  * @{
+  */
+#define PWR_AND_CLK_SMPS()   do { __HAL_RCC_PWR_CLK_ENABLE(); \
+                                  __HAL_RCC_GPIOA_CLK_ENABLE(); } while(0)
+                                  
+/**
+  * @}
+  */
+
+#endif                          /* ADP5301ACBZ */
+#endif /* USE_STM32L4XX_NUCLEO_64_SMPS */
+
 
 /** @defgroup STM32L4XX_NUCLEO_BUTTON BUTTON Constants
   * @{
@@ -232,6 +266,28 @@ typedef enum
 #define NUCLEO_ADCx_GPIO_CLK_ENABLE()               __HAL_RCC_GPIOB_CLK_ENABLE()
 #define NUCLEO_ADCx_GPIO_CLK_DISABLE()              __HAL_RCC_GPIOB_CLK_DISABLE()
 
+/*##################### SMPS###################################*/
+#ifdef USE_STM32L4XX_NUCLEO_64_SMPS
+
+#ifdef USE_ADP5301ACBZ          /* ADP5301ACBZ */
+#define PORT_SMPS               GPIOA
+#define PIN_SMPS_ENABLE         GPIO_PIN_4
+#define PIN_SMPS_V1             GPIO_PIN_5
+#define PIN_SMPS_POWERGOOD      GPIO_PIN_6
+#define PIN_SMPS_SWITCH_ENABLE  GPIO_PIN_7
+
+#define PWR_GPIO_SMPS           PWR_GPIO_A
+#define PWR_GPIO_ENABLE         PWR_GPIO_BIT_4
+#define PWR_GPIO_SWITCH_ENABLE  PWR_GPIO_BIT_7
+#define PWR_PU_REG              PUCRA
+
+#define NUCLEO_SMPS_GPIO_CLK_ENABLE()               __HAL_RCC_GPIOA_CLK_ENABLE()
+#define NUCLEO_SMPS_GPIO_CLK_DISABLE()              __HAL_RCC_GPIOA_CLK_DISABLE()
+    
+#endif                          /* ADP5301ACBZ */
+
+#endif /* USE_STM32L4XX_NUCLEO_64_SMPS */
+
 /**
   * @}
   */
@@ -280,6 +336,23 @@ JOYState_TypeDef BSP_JOY_GetState(void);
 /**
   * @}
   */ 
+
+#ifdef USE_STM32L4XX_NUCLEO_64_SMPS
+
+/**
+  * @brief SMPS OK-KO
+  */
+#define SMPS_OK			0
+#define SMPS_KO			1
+
+uint32_t BSP_SMPS_DeInit(void);
+uint32_t BSP_SMPS_Init(uint32_t VoltageRange);
+uint32_t BSP_SMPS_Enable(uint32_t Delay, uint32_t Power_Good_Check);
+uint32_t BSP_SMPS_Disable(void);
+uint32_t BSP_SMPS_Supply_Enable(uint32_t Delay, uint32_t Power_Good_Check);
+uint32_t BSP_SMPS_Supply_Disable(void);
+#endif /* USE_STM32L4XX_NUCLEO_64_SMPS */
+
 
 #ifdef __cplusplus
 }

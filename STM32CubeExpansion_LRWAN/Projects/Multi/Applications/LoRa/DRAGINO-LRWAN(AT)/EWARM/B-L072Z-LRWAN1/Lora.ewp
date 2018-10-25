@@ -1439,6 +1439,9 @@
             <group>
                 <name>Core</name>
                 <file>
+                    <name>$PROJ_DIR$\..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Core\lora-test.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Core\lora.c</name>
                 </file>
             </group>
@@ -1505,7 +1508,7 @@
                     <name>$PROJ_DIR$\..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities\delay.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities\low_power.c</name>
+                    <name>$PROJ_DIR$\..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities\low_power_manager.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities\timeServer.c</name>

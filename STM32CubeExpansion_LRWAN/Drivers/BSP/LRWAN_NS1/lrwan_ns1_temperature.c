@@ -2,8 +2,8 @@
  ******************************************************************************
  * @file    lrwan_ns1_temperature.c
  * @author  MEMS Application Team
- * @version V1.0.2
- * @date    08-September-2017
+ * @version V1.0.3
+ * @date    20-December-2017
  * @brief   This file provides a set of functions needed to manage the temperature sensor
  ******************************************************************************
  * @attention
@@ -166,12 +166,13 @@ DrvStatusTypeDef BSP_TEMPERATURE_Init( TEMPERATURE_ID_t id, void **handle )
 static DrvStatusTypeDef BSP_HTS221_TEMPERATURE_Init( void **handle )
 {
   TEMPERATURE_Drv_t *driver = NULL;
-
+#if 0
   if(TEMPERATURE_SensorHandle[ HTS221_T_0 ].isInitialized == 1)
   {
     /* We have reached the max num of instance for this component */
     return COMPONENT_ERROR;
   }
+#endif
 
   if ( Sensor_IO_Init() == COMPONENT_ERROR )
   {

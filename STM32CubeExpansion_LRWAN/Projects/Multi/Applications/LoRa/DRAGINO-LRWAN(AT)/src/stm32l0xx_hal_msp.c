@@ -2,8 +2,8 @@
  /******************************************************************************
   * @file    stm32l0xx_hal_msp.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   msp file for HAL
   ******************************************************************************
   * @attention
@@ -47,7 +47,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
-#include "low_power.h"
 #include "delay.h"
 #include "timeServer.h"
 /* when fast wake up is enabled, the mcu wakes up in ~20us  * and 

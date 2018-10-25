@@ -1,22 +1,8 @@
- /*
- / _____)             _              | |
-( (____  _____ ____ _| |_ _____  ____| |__
- \____ \| ___ |    (_   _) ___ |/ ___)  _ \
- _____) ) ____| | | || |_| ____( (___| | | |
-(______/|_____)_|_|_| \__)_____)\____)_| |_|
-    (C)2013 Semtech
-
-Description: Generic lora driver implementation
-
-License: Revised BSD License, see LICENSE.TXT file include in the project
-
-Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
-*/
 /******************************************************************************
   * @file    main.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   this is the main!
   ******************************************************************************
   * @attention
@@ -60,7 +46,7 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 
 /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
-#include "low_power.h"
+#include "low_power_manager.h"
 #include "lora.h"
 #include "bsp.h"
 #include "timeServer.h"
@@ -68,33 +54,34 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 #include "version.h"
 #include "command.h"
 #include "at.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+
 /*!
  * CAYENNE_LPP is myDevices Application server.
  */
 //#define CAYENNE_LPP
 #define LPP_DATATYPE_DIGITAL_INPUT  0x0
-#define LPP_DATATYPE_DIGITAL_OUTPUT 0x1
+#define LPP_DATATYPE_ANOLOG_INPUT   0x02
 #define LPP_DATATYPE_HUMIDITY       0x68
 #define LPP_DATATYPE_TEMPERATURE    0x67
-#define LPP_DATATYPE_BAROMETER      0x73
 
 #define LPP_APP_PORT 99
-
 /*!
- * Defines the application data transmission duty cycle. 30s, value in [ms].
+ * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            30000
+uint32_t APP_TX_DUTYCYCLE=30000;
 /*!
  * LoRaWAN Adaptive Data Rate
  * @note Please note that when ADR is enabled the end-device should be static
  */
-#define LORAWAN_ADR_ON                              1
+#define LORAWAN_ADR_STATE LORAWAN_ADR_ON
 /*!
- * LoRaWAN confirmed messages
+ * LoRaWAN Default data Rate Data Rate
+ * @note Please note that LORAWAN_DEFAULT_DATA_RATE is used only when ADR is disabled 
  */
-#define LORAWAN_CONFIRMED_MSG                    DISABLE
+#define LORAWAN_DEFAULT_DATA_RATE DR_0
 /*!
  * LoRaWAN application port
  * @note do not use 224. It is reserved for certification
@@ -104,27 +91,67 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
  * Number of trials for the join request.
  */
 #define JOINREQ_NBTRIALS                            3
+/*!
+ * LoRaWAN default endNode class port
+ */
+#define LORAWAN_DEFAULT_CLASS                       CLASS_A
+/*!
+ * LoRaWAN default confirm state
+ */
+#define LORAWAN_DEFAULT_CONFIRM_MSG_STATE           LORAWAN_UNCONFIRMED_MSG
+/*!
+ * User application data buffer size
+ */
+#define LORAWAN_APP_DATA_BUFF_SIZE                           64
+/*!
+ * User application data
+ */
+static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
 
 int exti_flag=0;
 uint16_t batteryLevel_mV;
 void send_exti(void);
+
+/*!
+ * User application data structure
+ */
+static lora_AppData_t AppData={ AppDataBuff,  0 ,0 };
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 
-/* call back when LoRa will transmit a frame*/
-static void LoraTxData( lora_AppData_t *AppData, FunctionalState* IsTxConfirmed);
+/* call back when LoRa endNode has received a frame*/
+static void LORA_RxData( lora_AppData_t *AppData);
 
-/* call back when LoRa has received a frame*/
-static void LoraRxData( lora_AppData_t *AppData);
+/* call back when LoRa endNode has just joined*/
+static void LORA_HasJoined( void );
+
+/* call back when LoRa endNode has just switch the class*/
+static void LORA_ConfirmClass ( DeviceClass_t Class );
+
+/* LoRa endNode send request*/
+static void Send( void );
+
+/* start the tx process*/
+static void LoraStartTx(TxEventType_t EventType);
+
+/* tx timer callback function*/
+static void OnTxTimerEvent( void );
 
 /* Private variables ---------------------------------------------------------*/
-/* load call backs*/
+/* load Main call backs structure*/
 static LoRaMainCallback_t LoRaMainCallbacks ={ HW_GetBatteryLevel,
+                                               HW_GetTemperatureLevel,
                                                HW_GetUniqueId,
                                                HW_GetRandomSeed,
-                                               LoraTxData,
-                                               LoraRxData};
+                                               LORA_RxData,
+                                               LORA_HasJoined,
+                                               LORA_ConfirmClass};
 
+/*!
+ * Specifies the state of the application LED
+ */
+                                               
+static TimerEvent_t TxTimer;
 
 #ifdef USE_B_L072Z_LRWAN1
 /*!
@@ -136,11 +163,8 @@ static void OnTimerLedEvent( void );
 /* !
  *Initialises the Lora Parameters
  */
-static  LoRaParam_t LoRaParamInit= {TX_ON_TIMER,
-                                    APP_TX_DUTYCYCLE,
-                                    CLASS_A,
-                                    LORAWAN_ADR_ON,
-                                    DR_5,
+static  LoRaParam_t LoRaParamInit= {LORAWAN_ADR_STATE,
+                                    LORAWAN_DEFAULT_DATA_RATE,  
                                     LORAWAN_PUBLIC_NETWORK,
                                     JOINREQ_NBTRIALS};
 
@@ -164,29 +188,33 @@ int main( void )
   
   /* Configure the hardware*/
   HW_Init( );
-  
+ 
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
-  CMD_Init();
-  /* Configure the Lora Stack*/
-  lora_Init( &LoRaMainCallbacks, &LoRaParamInit);
+   CMD_Init();
+	
+  /*Disbale Stand-by mode*/
+  LPM_SetOffMode(LPM_APPLI_Id , LPM_Disable );
   
-  /* main loop*/
+  /* Configure the Lora Stack*/
+  LORA_Init( &LoRaMainCallbacks, &LoRaParamInit);
+  
   while( 1 )
   {
-    /* run the LoRa class A state machine*/
-    lora_fsm( );
+		/* Handle UART commands */
     CMD_Process();
 		send_exti();
     DISABLE_IRQ( );
     /* if an interrupt has occurred after DISABLE_IRQ, it is kept pending 
      * and cortex will not enter low power anyway  */
-    if ((lora_getDeviceState() == DEVICE_STATE_SLEEP) && (IsNewCharReceived() == RESET))
+
+    if ( (IsNewCharReceived() == RESET))
     {
 #ifndef LOW_POWER_DISABLE
-      LowPower_Handler( );
+      LPM_EnterLowPower();
 #endif
     }
+
     ENABLE_IRQ();
     
     /* USER CODE BEGIN 2 */
@@ -194,71 +222,184 @@ int main( void )
   }
 }
 
-static void LoraTxData( lora_AppData_t *AppData, FunctionalState* IsTxConfirmed)
+static void LORA_HasJoined( void )
 {
-	sensor_t sensor_data;  	
-  BSP_sensor_Read( &sensor_data );
-  uint32_t i = 0;
+  AT_PRINTF("JOINED\n\r");
+  LORA_RequestClass( LORAWAN_DEFAULT_CLASS );
 	
 	#if defined(LoRa_Sensor_Node)
-  AppData->Port = LORAWAN_APP_PORT;
-  *IsTxConfirmed =  LORAWAN_CONFIRMED_MSG;
+	LoraStartTx( TX_ON_TIMER);
+	#endif
+	
+	#if defined(AT_Data_Send)
+	AT_PRINTF("Please using AT+SEND or AT+SENDB to send you data!\n\r");
+	#endif
+}
+
+static void Send( void )
+{
+  sensor_t sensor_data;
+  
+  if ( LORA_JoinStatus () != LORA_SET)
+  {
+    /*Not joined, try again later*/
+    return;
+  }
+
+	BSP_sensor_Read( &sensor_data );
+	
+	#if defined(LoRa_Sensor_Node)
+	
+	uint32_t i = 0;
+
+  AppData.Port = LORAWAN_APP_PORT;
 	
 	HW_GetBatteryLevel( );
 	
-	AppData->Buff[i++] =(batteryLevel_mV>>8) & 0xFF;       //level of battery in mV
-	AppData->Buff[i++] =batteryLevel_mV & 0xFF;
+	#ifdef CAYENNE_LPP
 	
-  AppData->Buff[i++] =sensor_data.oil1;          //oil float
-	AppData->Buff[i++] =sensor_data.oil2;
+	AppData.Buff[i++] = 0x01;
+  AppData.Buff[i++] = LPP_DATATYPE_ANOLOG_INPUT;   //level of battery
+	AppData.Buff[i++] =(int)(batteryLevel_mV*0.1)>>8;       
+	AppData.Buff[i++] =(int)(batteryLevel_mV*0.1);
 	
-	AppData->Buff[i++]=(int)sensor_data.temp1;     //DS18B20
-  AppData->Buff[i++]=(int)(sensor_data.temp1*10)%10;
+  AppData.Buff[i++] = 0x02;
+	AppData.Buff[i++] =LPP_DATATYPE_TEMPERATURE;     //DS18B20
+	AppData.Buff[i++] =(int)(sensor_data.temp1*10)>>8;       
+	AppData.Buff[i++] =(int)(sensor_data.temp1*10);
 	
-	AppData->Buff[i++] =sensor_data.in1;           //GPIO Digital Input 0 or 1
-	AppData->Buff[i++] =sensor_data.in2;
-	AppData->Buff[i++] =sensor_data.in3;
+	AppData.Buff[i++] = 0x03;
+	AppData.Buff[i++] =LPP_DATATYPE_DIGITAL_INPUT;   //GPIO Digital Input 0 or 1
+	AppData.Buff[i++] =sensor_data.in1;      
 	
-	AppData->Buff[i++] =sensor_data.ADC_IN1_H;     //ADC_IN1 PA1
-	AppData->Buff[i++] =sensor_data.ADC_IN1_L;
+	#if defined( REGION_US915 ) || defined( REGION_US915_HYBRID ) || defined ( REGION_AU915 ) || defined ( REGION_AS923 )
+  /* The maximum payload size does not allow to send more data for lowest DRs */
+#else
+
+  AppData.Buff[i++] =0x04;
+	AppData.Buff[i++] = LPP_DATATYPE_ANOLOG_INPUT;
+	AppData.Buff[i++] =(int)(sensor_data.oil*0.1)>>8;          //oil float
+	AppData.Buff[i++] =(int)(sensor_data.oil*0.1);
 	
-		if(exti_flag==1)
+	AppData.Buff[i++] =0x05;
+	AppData.Buff[i++] = LPP_DATATYPE_DIGITAL_INPUT;
+	
+	if(exti_flag==1)
 	{
-	  AppData->Buff[i++]=0x11;
+	  AppData.Buff[i++]=0x01;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData->Buff[i++]=0x00;
+		AppData.Buff[i++]=0x00;
 	}
 	
 	#ifdef USE_SHT20
-	AppData->Buff[i++] =sensor_data.tem_inte;      //SHT20
-	AppData->Buff[i++] =sensor_data.tem_dec;
-	AppData->Buff[i++] =sensor_data.hum_inte; 
-	AppData->Buff[i++] =sensor_data.hum_dec;
+	
+	AppData.Buff[i++] =0x06;
+	AppData.Buff[i++] = LPP_DATATYPE_TEMPERATURE;
+	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      //SHT20
+	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10);
+	
+	AppData.Buff[i++] =0x07;
+	AppData.Buff[i++] = LPP_DATATYPE_HUMIDITY;
+	AppData.Buff[i++] =(int)(sensor_data.hum_sht*2);
+	
 	#endif
 	
-	AppData->BuffSize = i;
-//	PRINTF("%02X",sensor_data.oil1);PRINTF("%02X ",sensor_data.oil2);
-//	PRINTF("%d.",(int)sensor_data.temp1);PRINTF("%d\n\r",(int)(sensor_data.temp1)%10);
 	#endif
 	
-	#if defined(AT_Data_Send)
-	AppData->Port = lora_config_application_port_get();
-  *IsTxConfirmed =  lora_config_reqack_get();
+	#else  /* not CAYENNE_LPP */
+	
+	AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
+	AppData.Buff[i++] =batteryLevel_mV & 0xFF;
+	
+	AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
+  AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+	
+	AppData.Buff[i++] =sensor_data.in1;           //GPIO Digital Input 0 or 1
+	
+  AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
+	AppData.Buff[i++] =(int)sensor_data.oil;
+	
+	if(exti_flag==1)
+	{
+	  AppData.Buff[i++]=0x01;
+		exti_flag=0;
+	}
+	else
+	{
+		AppData.Buff[i++]=0x00;
+	}
+	
+	#ifdef USE_SHT20
+	
+	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      //SHT20
+	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10);
+	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10)>>8; 
+	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10);
+	
 	#endif
+	#endif
+	AppData.BuffSize = i;
+  LORA_send( &AppData, lora_config_reqack_get());
+	#endif
+	
 }
-    
-static void LoraRxData( lora_AppData_t *AppData )
+
+
+static void LORA_RxData( lora_AppData_t *AppData )
 {
- set_at_receive(AppData->Port, AppData->Buff, AppData->BuffSize); 
+  set_at_receive(AppData->Port, AppData->Buff, AppData->BuffSize);
+	AT_PRINTF("Receive data\n\r");
+	AT_PRINTF("%d:",AppData->Port);
+	 for (int i = 0; i < AppData->BuffSize; i++)
+  {
+    AT_PRINTF("%02x", AppData->Buff[i]);
+  }
+	AT_PRINTF("\n\r");
 }
+
+static void OnTxTimerEvent( void )
+{
+  Send( );
+	
+	#if defined(LoRa_Sensor_Node)
+	TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE-750);
+	#endif
+	
+  /*Wait for next tx slot*/
+  TimerStart( &TxTimer);
+}
+
+static void LoraStartTx(TxEventType_t EventType)
+{
+  if (EventType == TX_ON_TIMER)
+  {
+    /* send everytime timer elapses */
+    TimerInit( &TxTimer, OnTxTimerEvent );
+    TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE-750); 
+    OnTxTimerEvent();
+  }
+}
+
+static void LORA_ConfirmClass ( DeviceClass_t Class )
+{
+  PRINTF("switch to class %c done\n\r","ABC"[Class] );
+
+  /*Optionnal*/
+  /*informs the server that switch has occurred ASAP*/
+  AppData.BuffSize = 0;
+  AppData.Port = LORAWAN_APP_PORT;
+  
+  LORA_send( &AppData, LORAWAN_UNCONFIRMED_MSG);
+}
+
 void send_exti(void)
 {
 	if(exti_flag==1)
 	{
-	lora_send_exti();
+	 Send( );
 	}
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

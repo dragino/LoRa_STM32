@@ -15,8 +15,8 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 /******************************************************************************
   * @file    lora.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   lora API to drive the lora state Machine
   ******************************************************************************
   * @attention
@@ -72,6 +72,12 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 #include "region/Region.h"
 
 /* Exported constants --------------------------------------------------------*/
+   /*!
+ * LoRaWAN confirmed messages
+ */
+
+#define LORAWAN_ADR_ON                              1
+#define LORAWAN_ADR_OFF                             0
 /* Exported types ------------------------------------------------------------*/
 
 /*!
@@ -88,18 +94,31 @@ typedef struct
   
 } lora_AppData_t;
 
-/*!
- * LoRa State Machine states 
- */
-typedef enum eDevicState
+
+
+typedef enum 
 {
-    DEVICE_STATE_INIT,
-    DEVICE_STATE_JOIN,
-    DEVICE_STATE_JOINED,
-    DEVICE_STATE_SEND,
-    DEVICE_STATE_CYCLE,
-    DEVICE_STATE_SLEEP
-} DeviceState_t;
+  LORA_RESET = 0, 
+  LORA_SET = !LORA_RESET
+} LoraFlagStatus;
+
+typedef enum 
+{
+  LORA_ERROR = -1, 
+  LORA_SUCCESS = 0
+} LoraErrorStatus;
+
+typedef enum 
+{
+  LORAWAN_UNCONFIRMED_MSG = 0, 
+  LORAWAN_CONFIRMED_MSG = !LORAWAN_UNCONFIRMED_MSG
+} LoraConfirm_t;
+
+typedef enum 
+{
+  LORA_TRUE = 0, 
+  LORA_FALSE = !LORA_TRUE
+} LoraBool_t;
 
 /*!
  * LoRa State Machine states 
@@ -122,22 +141,6 @@ typedef enum eTxEventType
  */
 typedef struct sLoRaParam
 {
-/*!
- * @brief Event type
- *
- * @retval value  battery level ( 0: very low, 254: fully charged )
- */
-    TxEventType_t TxEvent;
-/*!
- * @brief Application data transmission duty cycle in ms
- *
- * @note when TX_ON_TIMER Event type is selected
- */
-    uint32_t TxDutyCycleTime;
-/*!
- * @brief LoRaWAN device class
- */
-    DeviceClass_t Class;
 /*!
  * @brief Activation state of adaptativeDatarate
  */
@@ -167,7 +170,12 @@ typedef struct sLoRaMainCallback
  * @retval value  battery level ( 0: very low, 254: fully charged )
  */
     uint8_t ( *BoardGetBatteryLevel )( void );
-  
+/*!
+ * \brief Get the current temperature
+ *
+ * \retval value  temperature in degreeCelcius( q7.8 )
+ */
+  uint16_t ( *BoardGetTemperatureLevel)( void );
 /*!
  * @brief Gets the board 64 bits unique ID 
  *
@@ -181,19 +189,21 @@ typedef struct sLoRaMainCallback
  */
     uint32_t ( *BoardGetRandomSeed ) (void);
 /*!
- * @brief Prepares Tx Data to be sent on Lora network 
- *
- * @param [IN] AppData is a buffer to fill
- *
- * @param [IN] port is a Application port on wicth Appdata will be sent
- *
- * @param [IN] length of the AppDataBuffer to send
- *
- * @param [IN] requests a confirmed Frame from the Network
- */
-    void ( *LoraTxData ) ( lora_AppData_t *AppData, FunctionalState* IsTxConfirmed);
-/*!
  * @brief Process Rx Data received from Lora network 
+ *
+ * @param [IN] AppData structure
+ *
+ */
+    void ( *LORA_RxData ) ( lora_AppData_t *AppData);
+    
+    /*!
+ * @brief callback indicating EndNode has jsu joiny 
+ *
+ * @param [IN] None
+ */
+    void ( *LORA_HasJoined)( void );
+    /*!
+ * @brief Confirms the class change 
  *
  * @param [IN] AppData is a buffer to process
  *
@@ -201,7 +211,7 @@ typedef struct sLoRaMainCallback
  *
  * @param [IN] length is the number of recieved bytes
  */
-    void ( *LoraRxData ) ( lora_AppData_t *AppData);
+    void ( *LORA_ConfirmClass) ( DeviceClass_t Class );
   
 } LoRaMainCallback_t;
 
@@ -216,32 +226,46 @@ typedef struct sLoRaMainCallback
  * @param [IN] application parmaters
  * @retval none
  */
-void lora_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam );
+void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam );
 
 /**
  * @brief run Lora classA state Machine 
  * @param [IN] none
  * @retval none
  */
-void lora_fsm( void );
+bool LORA_send(lora_AppData_t* AppData, LoraConfirm_t IsTxConfirmed);
 
 /**
- * @brief functionl requesting loRa state machine to send data 
- * @note function to link in mode TX_ON_EVENT 
- * @param  none
+ * @brief Join a Lora Network in classA
+ * @Note if the device is ABP, this is a pass through functon
+ * @param [IN] none
  * @retval none
  */
-void OnSendEvent( void );
-
+void LORA_Join( void);
 
 /**
- * @brief API returns the state of the lora state machine
- * @note return @DeviceState_t state
+ * @brief Check whether the Device is joined to the network
  * @param [IN] none
- * @retval return @FlagStatus
-  */
-DeviceState_t lora_getDeviceState( void );
+ * @retval returns LORA_SET if joined
+ */
+LoraFlagStatus LORA_JoinStatus( void);
 
+/**
+ * @brief change Lora Class
+ * @Note callback LORA_ConfirmClass informs upper layer that the change has occured
+ * @Note Only switch from class A to class B/C OR from  class B/C to class A is allowed
+ * @Attention can be calld only in LORA_ClassSwitchSlot or LORA_RxData callbacks
+ * @param [IN] DeviceClass_t NewClass
+ * @retval LoraErrorStatus
+ */
+LoraErrorStatus LORA_RequestClass( DeviceClass_t newClass );
+
+/**
+ * @brief get the current Lora Class
+ * @param [IN] DeviceClass_t NewClass
+ * @retval None
+ */
+void LORA_GetCurrentClass( DeviceClass_t *currentClass );
 #ifdef __cplusplus
 }
 #endif

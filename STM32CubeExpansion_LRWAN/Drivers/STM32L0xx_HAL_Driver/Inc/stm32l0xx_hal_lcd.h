@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l0xx_hal_lcd.h
   * @author  MCD Application Team
-  * @version V1.8.0
-  * @date    25-November-2016
+  * @version V1.8.1
+  * @date    14-April-2017
   * @brief   Header file of LCD Controller HAL module.
   ******************************************************************************
   * @attention
@@ -794,14 +794,13 @@ HAL_StatusTypeDef     LCD_WaitForSynchro(LCD_HandleTypeDef *hlcd);
   * @}
   */
 
+#endif /* STM32L053xx || STM32L063xx || STM32L073xx || STM32L083xx */
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* __STM32L0xx_HAL_LCD_H */
-
-
-#endif /* STM32L053xx || STM32L063xx || STM32L073xx || STM32L083xx */
 
 /******************* (C) COPYRIGHT 2016 STMicroelectronics *****END OF FILE****/
 

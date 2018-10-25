@@ -6,18 +6,18 @@
 (______/|_____)_|_|_| \__)_____)\____)_| |_|
     (C)2015 Semtech
 
-Description: End device comissioning parameters
+Description: End device commissioning parameters
 
 License: Revised BSD License, see LICENSE.TXT file include in the project
 
 Maintainer: Miguel Luis and Gregory Cristian
 */
  /******************************************************************************
-  * @file    comissioning.h
+  * @file    commissioning.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    01-June-2017
-  * @brief   End device comissioning parameters
+  * @version V1.1.4
+  * @date    08-January-2018
+  * @brief   End device commissioning parameters
   ******************************************************************************
   * @attention
   *
@@ -58,8 +58,8 @@ Maintainer: Miguel Luis and Gregory Cristian
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __LORA_COMISSIONING_H__
-#define __LORA_COMISSIONING_H__
+#ifndef __LORA_COMMISSIONING_H__
+#define __LORA_COMMISSIONING_H__
 
 #ifdef __cplusplus
  extern "C" {
@@ -93,16 +93,18 @@ Maintainer: Miguel Luis and Gregory Cristian
  *
  * \remark see STATIC_DEVICE_EUI comments
  */
-#define LORAWAN_DEVICE_EUI {0x34, 0x44, 0x34, 0x22, 0x33, 0x45, 0x55, 0x55}
+#define LORAWAN_DEVICE_EUI                          {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01}
+
 
 /*!
  * Application IEEE EUI (big endian)
  */
-#define LORAWAN_APPLICATION_EUI {0x70,0xB3,0xD5,0x7E,0xF0,0x00,0x4D,0x34}
+#define LORAWAN_APPLICATION_EUI                     {0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01}
+
 /*!
  * AES encryption/decryption cipher application key
  */
-#define LORAWAN_APPLICATION_KEY {0x34, 0x35, 0x55, 0x55, 0x22, 0x23, 0x55, 0x53, 0x43, 0x24, 0x23, 0x42, 0x34, 0x35, 0x35, 0x35}
+#define LORAWAN_APPLICATION_KEY                     {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01}
 
 
 /*!
@@ -122,20 +124,19 @@ Maintainer: Miguel Luis and Gregory Cristian
  *
  * \remark see STATIC_DEVICE_ADDRESS comments
  */
-#define LORAWAN_DEVICE_ADDRESS  ( uint32_t )0x26011232
+#define LORAWAN_DEVICE_ADDRESS  ( uint32_t )0x01010101
 /*!
  * AES encryption/decryption cipher network session key
  */
-#define LORAWAN_NWKSKEY { 0x93,0x4F,0x19,0x25,0x52,0xCE,0x97,0x09,0xD7,0xFA,0x84,0x71,0xDB,0x51,0x02,0x92 }
+#define LORAWAN_NWKSKEY { 0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 }
 /*!
  * AES encryption/decryption cipher application session key
  */
-#define LORAWAN_APPSKEY { 0xFF,0x7D,0xDC,0x73,0x33,0xD3,0xEB,0x9E,0x14,0x38,0xD5,0xA4,0x3E,0x62,0x5B,0xE2 }
-
+#define LORAWAN_APPSKEY { 0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 ,0x01 }
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __LORA_COMISSIONING_H__ */
+#endif /* __LORA_COMMISSIONING_H__ */

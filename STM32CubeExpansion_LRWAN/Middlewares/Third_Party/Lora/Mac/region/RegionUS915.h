@@ -63,7 +63,7 @@
 /*!
  * Default datarate used by the node
  */
-#define US915_DEFAULT_DATARATE                      DR_3
+#define US915_DEFAULT_DATARATE                      DR_0
 
 /*!
  * Minimal Rx1 receive datarate offset
@@ -93,7 +93,7 @@
 /*!
  * Default Tx output power used by the node
  */
-#define US915_DEFAULT_TX_POWER                      TX_POWER_5
+#define US915_DEFAULT_TX_POWER                      TX_POWER_0
 
 /*!
  * Default Max ERP
@@ -172,9 +172,9 @@
 
 /*!
  * Band 0 definition
- * { DutyCycle, TxMaxPower, LastTxDoneTime, TimeOff }
+ * { DutyCycle, TxMaxPower, LastJoinTxDoneTime, LastTxDoneTime, TimeOff }
  */
-#define US915_BAND0                                 { 1, US915_MAX_TX_POWER, 0,  0 } //  100.0 %
+#define US915_BAND0                                 { 1, US915_MAX_TX_POWER, 0, 0, 0 } //  100.0 %
 
 /*!
  * Defines the first channel for RX window 1 for US band

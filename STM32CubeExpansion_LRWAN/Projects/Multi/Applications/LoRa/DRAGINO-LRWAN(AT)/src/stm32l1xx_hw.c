@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /*******************************************************************************
   * @file    stm32l1xx_hw.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   system hardware driver
   ******************************************************************************
   * @attention
@@ -63,7 +63,6 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "bsp.h"
 #include "vcom.h"
 
-
 /*!
  *  \brief Unique Devices IDs register set ( STM32L1xxx )
  */
@@ -78,6 +77,31 @@ Maintainer: Miguel Luis and Gregory Cristian
  /* Internal voltage reference, parameter VREFINT_CAL*/
 #define VREFINT_CAL       ((uint16_t*) ((uint32_t) 0x1FF800F8))
 #define LORAWAN_MAX_BAT   254
+
+
+/* Internal temperature sensor: constants data used for indicative values in  */
+/* this example. Refer to device datasheet for min/typ/max values.            */
+
+/* Internal temperature sensor, parameter TS_CAL1: TS ADC raw data acquired at 
+ *a temperature of 110 DegC (+-5 DegC), VDDA = 3.3 V (+-10 mV). */
+#define TEMP30_CAL_ADDR   ((uint16_t*) ((uint32_t) 0x1FF8007A))
+
+/* Internal temperature sensor, parameter TS_CAL2: TS ADC raw data acquired at 
+ *a temperature of  30 DegC (+-5 DegC), VDDA = 3.3 V (+-10 mV). */
+#define TEMP110_CAL_ADDR  ((uint16_t*) ((uint32_t) 0x1FF8007E))
+
+/* Vdda value with which temperature sensor has been calibrated in production 
+   (+-10 mV). */
+#define VDDA_TEMP_CAL                  ((uint32_t) 3000)        
+
+
+#define COMPUTE_TEMPERATURE(TS_ADC_DATA, VDDA_APPLI)                           \
+  ((((( ((int32_t)((TS_ADC_DATA * VDDA_APPLI) / VDDA_TEMP_CAL)                  \
+        - (int32_t) *TEMP30_CAL_ADDR)                                          \
+     ) * (int32_t)(110 - 30)                                                   \
+    )<<8) / (int32_t)(*TEMP110_CAL_ADDR - *TEMP30_CAL_ADDR)                        \
+   ) + (30<<8)                                                                      \
+  )
 
 static ADC_HandleTypeDef hadc;
 /*!
@@ -130,13 +154,11 @@ void HW_DeInit( void )
   HW_SPI_DeInit( );
   
   Radio.IoDeInit( );
-
-  vcom_DeInit( ); 
-
+  
+  vcom_DeInit( );
+   
   McuInitialized = false;
 }
-
-
 
 /**
   * @brief This function Initializes the hardware Ios
@@ -208,6 +230,7 @@ void HW_GpioInit(void)
   __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_DISABLE();
 }
+
 /**
   * @brief  System Clock Configuration
   *         The system Clock is configured as follow :
@@ -223,8 +246,6 @@ void HW_GpioInit(void)
   *            Flash Latency(WS)              = 1
   * @retval None
   */
-
-
 
 void SystemClock_Config( void )
 {
@@ -292,6 +313,40 @@ void HW_GetUniqueId( uint8_t *id )
     id[0] = ( ( *( uint32_t* )ID2 ) );
 }
 
+uint16_t HW_GetTemperatureLevel( void ) 
+{
+  uint16_t measuredLevel =0; 
+  uint32_t batteryLevelmV;
+  uint16_t temperatureDegreeC;
+
+  measuredLevel = HW_AdcReadChannel( ADC_CHANNEL_VREFINT ); 
+
+  if (measuredLevel ==0)
+  {
+    batteryLevelmV =0;
+  }
+  else
+  {
+    batteryLevelmV= (( (uint32_t) VDDA_VREFINT_CAL * (*VREFINT_CAL ) )/ measuredLevel);
+  }
+#if 0  
+  PRINTF("VDDA= %d\n\r", batteryLevelmV);
+#endif
+  
+  measuredLevel = HW_AdcReadChannel( ADC_CHANNEL_TEMPSENSOR ); 
+  
+  temperatureDegreeC = COMPUTE_TEMPERATURE( measuredLevel, batteryLevelmV);
+
+#if 0 
+  {
+    uint16_t temperatureDegreeC_Int= (temperatureDegreeC)>>8;
+    uint16_t temperatureDegreeC_Frac= ((temperatureDegreeC-(temperatureDegreeC_Int<<8))*100)>>8;  
+    PRINTF("temp= %d, %d,%d\n\r", temperatureDegreeC, temperatureDegreeC_Int, temperatureDegreeC_Frac);
+  }
+#endif
+  
+  return (uint16_t) temperatureDegreeC;
+}
 /**
   * @brief This function return the battery level
   * @param none
@@ -314,11 +369,11 @@ uint8_t HW_GetBatteryLevel( void )
     batteryLevelmV= (( (uint32_t) VDDA_VREFINT_CAL * (*VREFINT_CAL ) )/ measuredLevel);
   }
 
-  if ( batteryLevelmV > VDD_BAT)
+  if (batteryLevelmV > VDD_BAT)
   {
     batteryLevel = LORAWAN_MAX_BAT;
   }
-  else if ( batteryLevelmV < VDD_MIN)
+  else if (batteryLevelmV < VDD_MIN)
   {
     batteryLevel = 0;
   }
@@ -334,7 +389,7 @@ uint8_t HW_GetBatteryLevel( void )
   * @param none
   * @retval none
   */
-void HW_AdcInit(  void )
+void HW_AdcInit( void )
 {
   if( AdcInitialized == false )
   {
@@ -381,7 +436,7 @@ void HW_AdcDeInit( void )
   * @param Channel
   * @retval Value
   */
-uint16_t HW_AdcReadChannel( uint32_t Channel)
+uint16_t HW_AdcReadChannel( uint32_t Channel )
 {
 
   ADC_ChannelConfTypeDef adcConf;
@@ -389,7 +444,7 @@ uint16_t HW_AdcReadChannel( uint32_t Channel)
   
   if( AdcInitialized == true )
   {
-    /* wait the the Vrefint used by adc is set*/
+    /* wait the the Vrefint used by adc is set */
     while (__HAL_PWR_GET_FLAG(PWR_FLAG_VREFINTRDY) == RESET) {};
       
     ADCCLK_ENABLE();
@@ -427,12 +482,12 @@ uint16_t HW_AdcReadChannel( uint32_t Channel)
   * @param none
   * @retval none
   */
-void HW_EnterStopMode( void)
+void LPM_EnterStopMode( void)
 {
   BACKUP_PRIMASK();
 
   DISABLE_IRQ( );
-  
+
   HW_IoDeInit( );
   
   /*clear wake up flag*/
@@ -449,7 +504,7 @@ void HW_EnterStopMode( void)
   * @param none
   * @retval none
   */
-void HW_ExitStopMode( void)
+void LPM_ExitStopMode( void)
 {
   /* Disable IRQ while the MCU is not running on HSI */
 
@@ -487,7 +542,7 @@ void HW_ExitStopMode( void)
   * @param none
   * @retval none
   */
-void HW_EnterSleepMode( void)
+void LPM_EnterSleepMode( void)
 {
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 }

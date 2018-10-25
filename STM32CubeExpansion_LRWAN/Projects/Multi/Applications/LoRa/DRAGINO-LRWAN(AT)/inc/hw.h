@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /******************************************************************************
   * @file    hw.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   contains all hardware driver
   ******************************************************************************
   * @attention
@@ -75,7 +75,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "hw_rtc.h"
 #include "hw_msp.h"
 #include "debug.h"
-typedef enum
+
+	 typedef enum
 {
   HW_UNLOCKED = 0x00U,
   HW_LOCKED   = 0x01U

@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    lrwan_ns1.h
   * @author  MEMS Application Team
- * @version V1.0.2
- * @date    08-September-2017
+  * @version V1.0.3
+  * @date    20-December-2017
   * @brief   This file contains definitions for the lrwan_ns1.c
   ******************************************************************************
   * @attention

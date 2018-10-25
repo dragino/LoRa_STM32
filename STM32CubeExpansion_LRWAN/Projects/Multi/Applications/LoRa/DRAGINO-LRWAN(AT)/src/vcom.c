@@ -48,7 +48,7 @@
 #include "vcom.h"
 #include <stdarg.h>
 #include "tiny_vsnprintf.h"
-#include "low_power.h"
+#include "low_power_manager.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -341,7 +341,7 @@ void vcom_IRQHandler(UART_HandleTypeDef *huart)
       __HAL_UART_CLEAR_IT(huart, UART_CLEAR_WUF);
       
        /* forbid stop mode */
-      LowPower_Disable(e_LOW_POWER_UART);  
+      LPM_SetStopMode(LPM_UART_RX_Id, LPM_Disable);  
        
       /* Enable the UART Data Register not empty Interrupts */
       SET_BIT(huart->Instance->CR1, USART_CR1_RXNEIE);
@@ -355,9 +355,10 @@ void vcom_IRQHandler(UART_HandleTypeDef *huart)
     if(((isrflags & USART_ISR_RXNE) != RESET) && ((cr1its & USART_CR1_RXNEIE) != RESET))
     {
 		        /*RXNE flag is auto cleared by reading the data*/
-             rx= (uint8_t)READ_REG(huart->Instance->RDR);	                        
+             rx= (uint8_t)READ_REG(huart->Instance->RDR);	  
+			
              /* allow stop mode*/
-             LowPower_Enable(e_LOW_POWER_UART);                       			
+             LPM_SetStopMode(LPM_UART_RX_Id, LPM_Enable);                       			
 		         rx_ready = 1;
 		}
 			/* If error occurs */
@@ -447,7 +448,7 @@ void vcom_IoInit(void)
 
   HAL_GPIO_Init(USARTX_RX_GPIO_PORT, &GPIO_InitStruct);
 	
-	HAL_NVIC_SetPriority(USARTX_IRQn, 0, 1);
+	HAL_NVIC_SetPriority(USARTX_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(USARTX_IRQn);
  
 }

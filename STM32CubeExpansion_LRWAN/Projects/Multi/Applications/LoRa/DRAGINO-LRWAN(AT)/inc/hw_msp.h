@@ -16,8 +16,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /******************************************************************************
   * @file    hw_msp.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   Header for driver hw msp module
   ******************************************************************************
   * @attention
@@ -119,7 +119,7 @@ uint16_t HW_GetTemperatureLevel( void );
 /*!
  * \brief Get the current battery level
  *
- * \retval value  battery level 
+ * \retval value  battery level ( 0: very low, 254: fully charged )
  */
 uint8_t HW_GetBatteryLevel( void );
 /*!
@@ -165,12 +165,6 @@ void HW_ExitStopMode( void);
   */
 void HW_EnterSleepMode( void);
 
-typedef enum
-  {
-    e_LOW_POWER_RTC = (1<<0),
-    e_LOW_POWER_GPS = (1<<1),
-    e_LOW_POWER_UART = (1<<2), /* can be used to forbid stop mode in case of uart Xfer*/
-  } e_LOW_POWER_State_Id_t;
 
 /* ADC */
 

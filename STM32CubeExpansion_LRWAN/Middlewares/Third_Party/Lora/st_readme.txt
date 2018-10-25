@@ -49,6 +49,17 @@
   ******************************************************************************
   @endverbatim
 
+### V1.1.4/08-January-2018 ###
+===============================
+   + Bug fix in McpsIndication related to downlink Application data buffer
+
+### V1.1.3/20-December-2017 ###
+===============================
+   +  Implements LoRa Mac from Semtech/StackForce develop branch (10-Oct-2017 commits, 4.4.1 release candidate)
+      https://github.com/Lora-net/LoRaMac-node/tree/ae0c9cc5d53ebbc11437dfe9711a1c3a1114dc5f
+
+   + Merge pull request #302 from nestorayuso/patch-3
+  
 ### V1.1.2/08-September-2017 ###
 ===============================
    +  Implements LoRa Mac 4.4.0 release from Semtech/StackForce

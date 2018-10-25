@@ -235,7 +235,8 @@ float DS18B20_GetTemp_SkipRom ( void )
         DS18B20_SkipRom();
         DS18B20_WriteByte(0X44);                                
         
-        
+        HAL_Delay(750);
+	
         DS18B20_SkipRom ();
         DS18B20_WriteByte(0XBE);                                
         
@@ -247,7 +248,7 @@ float DS18B20_GetTemp_SkipRom ( void )
         s_tem = s_tem | tplsb;
         
         if( s_tem < 0 )                
-                f_tem = (~s_tem+1) * 0.0625;        
+                f_tem = (~s_tem+1) * -0.0625;        
         else
                 f_tem = s_tem * 0.0625;
         

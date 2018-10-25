@@ -2,8 +2,8 @@
  ******************************************************************************
  * @file    lrwan_ns1.c
  * @author  MEMS Application Team
- * @version V1.0.2
- * @date    08-September-2017
+ * @version V1.0.3
+ * @date    20-December-2017
  * @brief   This file provides LRWAN_NS1 shield board specific functions
  ******************************************************************************
  * @attention
@@ -39,10 +39,6 @@
 
 #include "lrwan_ns1.h"
 
-#if (!defined( REGION_CN470 ) && !defined( REGION_EU433 ))
-#error "LRWAN-NS1 shield supports frequencies below 520 MHz"
-#endif
-
 /** @addtogroup BSP BSP
  * @{
  */
@@ -61,7 +57,8 @@
 
 static uint32_t I2C_EXPBD_Timeout =
  NUCLEO_I2C_EXPBD_TIMEOUT_MAX;    /*<! Value of Timeout when I2C communication fails */
-static I2C_HandleTypeDef I2C_EXPBD_Handle;
+//static I2C_HandleTypeDef I2C_EXPBD_Handle;
+I2C_HandleTypeDef I2C_EXPBD_Handle;
 
 /**
  * @}
@@ -132,7 +129,7 @@ DrvStatusTypeDef LSM6DS3_Sensor_IO_ITConfig( void )
   GPIO_InitTypeDef GPIO_InitStructureInt2;
   /* Enable INT1 GPIO clock */
   LSM6DS3_INT1_GPIO_CLK_ENABLE();
-	
+
 
   /* Configure GPIO PINs to detect Interrupts */
   GPIO_InitStructureInt1.Pin = LSM6DS3_INT1_PIN;
@@ -150,7 +147,7 @@ DrvStatusTypeDef LSM6DS3_Sensor_IO_ITConfig( void )
   /* Enable and set EXTI Interrupt priority */
   HAL_NVIC_SetPriority(LSM6DS3_INT1_EXTI_IRQn, 0x00, 0x00);
   HAL_NVIC_EnableIRQ(LSM6DS3_INT1_EXTI_IRQn);
-	  
+
   /* Enable INT2 GPIO clock */
   LSM6DS3_INT2_GPIO_CLK_ENABLE();
 
@@ -192,7 +189,7 @@ DrvStatusTypeDef LPS22HB_Sensor_IO_ITConfig( void )
   LPS22HB_INT1_GPIO_CLK_ENABLE();
 
   /* Configure GPIO PINs to detect Interrupts */
-  GPIO_InitStructureInt1.Pin = LPS22HB_INT1_PIN;	
+  GPIO_InitStructureInt1.Pin = LPS22HB_INT1_PIN;
   GPIO_InitStructureInt1.Mode = GPIO_MODE_IT_RISING;
 #if ((defined (USE_STM32F4XX_NUCLEO)) || (defined (USE_STM32L0XX_NUCLEO)) || (defined (USE_STM32L4XX_NUCLEO)))
   GPIO_InitStructureInt1.Speed = GPIO_SPEED_FAST;

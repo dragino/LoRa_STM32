@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l1xx_nucleo.h
   * @author  MCD Application Team
-  * @version V1.1.0
-  * @date    04-March-2016
+  * @version 21-April-2017
+  * @date    V1.1.1
   * @brief   This file contains definitions for:
   *          - LEDs and push-button available on STM32L1XX-Nucleo Kit 
   *            from STMicroelectronics
@@ -12,7 +12,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2016 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:

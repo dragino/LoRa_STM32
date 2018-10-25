@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l1xx_nucleo.c
   * @author  MCD Application Team
-  * @version V1.1.0
-  * @date    04-March-2016
+  * @version 21-April-2017
+  * @date    V1.1.1
   * @brief   This file provides set of firmware functions to manage:
   *          - LEDs and push-button available on STM32L1XX-Nucleo Kit 
   *            from STMicroelectronics
@@ -12,7 +12,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2016 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -64,7 +64,7 @@
 */
 #define __STM32L1XX_NUCLEO_BSP_VERSION_MAIN   (0x01) /*!< [31:24] main version */
 #define __STM32L1XX_NUCLEO_BSP_VERSION_SUB1   (0x01) /*!< [23:16] sub1 version */
-#define __STM32L1XX_NUCLEO_BSP_VERSION_SUB2   (0x00) /*!< [15:8]  sub2 version */
+#define __STM32L1XX_NUCLEO_BSP_VERSION_SUB2   (0x01) /*!< [15:8]  sub2 version */
 #define __STM32L1XX_NUCLEO_BSP_VERSION_RC     (0x00) /*!< [7:0]  release candidate */ 
 #define __STM32L1XX_NUCLEO_BSP_VERSION       ((__STM32L1XX_NUCLEO_BSP_VERSION_MAIN << 24)\
                                              |(__STM32L1XX_NUCLEO_BSP_VERSION_SUB1 << 16)\
@@ -412,7 +412,9 @@ static void SPIx_Init(void)
 
 /**
   * @brief  SPI Write a byte to device
-  * @param  Value: value to be written
+  * @param  DataIn value to be written
+  * @param  DataLength number of bytes to write
+  * @param  DataOut read value
   * @retval None
 */
 static void SPIx_WriteReadData(const uint8_t *DataIn, uint8_t *DataOut, uint16_t DataLength)
@@ -431,8 +433,8 @@ static void SPIx_WriteReadData(const uint8_t *DataIn, uint8_t *DataOut, uint16_t
 
 /**
   * @brief  SPI Write an amount of data to device
-  * @param  Value: value to be written
-  * @param  DataLength: number of bytes to write
+  * @param  DataIn value to be written
+  * @param  DataLength number of bytes to write
   * @retval None
   */
 static void SPIx_WriteData(uint8_t *DataIn, uint16_t DataLength)
@@ -532,7 +534,7 @@ void SD_IO_Init(void)
 
 /**
   * @brief  Set the SD_CS pin.
-  * @param  pin value.
+  * @param  val pin value.
   * @retval None
   */
 void SD_IO_CSState(uint8_t val)
@@ -562,7 +564,7 @@ void SD_IO_WriteReadData(const uint8_t *DataIn, uint8_t *DataOut, uint16_t DataL
 
 /**
   * @brief  Write a byte on the SD.
-  * @param  Data: byte to send.
+  * @param  Data byte to send.
   * @retval Data written
   */
 uint8_t SD_IO_WriteByte(uint8_t Data)
@@ -576,8 +578,8 @@ uint8_t SD_IO_WriteByte(uint8_t Data)
 
 /**
   * @brief  Write an amount of data on the SD.
-  * @param  Data: byte to send.
-  * @param  DataLength: number of bytes to write
+  * @param  DataOut byte to send.
+  * @param  DataLength number of bytes to write
   * @retval none
   */
 void SD_IO_ReadData(uint8_t *DataOut, uint16_t DataLength)
@@ -588,8 +590,8 @@ void SD_IO_ReadData(uint8_t *DataOut, uint16_t DataLength)
  
 /**
   * @brief  Write an amount of data on the SD.
-  * @param  Data: byte to send.
-  * @param  DataLength: number of bytes to write
+  * @param  Data byte to send.
+  * @param  DataLength number of bytes to write
   * @retval none
   */
 void SD_IO_WriteData(const uint8_t *Data, uint16_t DataLength)
@@ -717,6 +719,7 @@ void LCD_Delay(uint32_t Delay)
 /******************************* LINK JOYSTICK ********************************/
 /**
   * @brief  Initialize ADC MSP.
+  * @param hadc ADC peripheral
   * @retval None
   */
 static void ADCx_MspInit(ADC_HandleTypeDef *hadc)
@@ -740,7 +743,7 @@ static void ADCx_MspInit(ADC_HandleTypeDef *hadc)
 
 /**
   * @brief  DeInitializes ADC MSP.
-  * @param  None
+  * @param hadc ADC peripheral
   * @note ADC DeInit does not disable the GPIO clock
   * @retval None
   */
@@ -805,7 +808,6 @@ static HAL_StatusTypeDef ADCx_Init(void)
 
 /**
   * @brief  Initializes ADC HAL.
-  * @param  None
   * @retval None
   */
 static void ADCx_DeInit(void)

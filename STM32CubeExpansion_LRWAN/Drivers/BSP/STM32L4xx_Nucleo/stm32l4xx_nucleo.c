@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l4xx_nucleo.c
   * @author  MCD Application Team
-  * @version V2.0.0
-  * @date    16-September-2015
+  * @version V2.1.0
+  * @date    16-June-2017
   * @brief   This file provides set of firmware functions to manage:
   *          - LEDs and push-button available on STM32L4XX-Nucleo Kit 
   *            from STMicroelectronics
@@ -60,10 +60,10 @@
   */ 
   
 /**
-  * @brief STM32L476RG NUCLEO BSP Driver version V2.0.0
+  * @brief STM32L4xx NUCLEO BSP Driver version V2.1.0
   */
 #define __STM32L4XX_NUCLEO_BSP_VERSION_MAIN   (0x02) /*!< [31:24] main version */
-#define __STM32L4XX_NUCLEO_BSP_VERSION_SUB1   (0x00) /*!< [23:16] sub1 version */
+#define __STM32L4XX_NUCLEO_BSP_VERSION_SUB1   (0x01) /*!< [23:16] sub1 version */
 #define __STM32L4XX_NUCLEO_BSP_VERSION_SUB2   (0x00) /*!< [15:8]  sub2 version */
 #define __STM32L4XX_NUCLEO_BSP_VERSION_RC     (0x00) /*!< [7:0]  release candidate */ 
 #define __STM32L4XX_NUCLEO_BSP_VERSION       ((__STM32L4XX_NUCLEO_BSP_VERSION_MAIN << 24)\
@@ -82,12 +82,43 @@
   */ 
 
 
+#ifdef USE_STM32L4XX_NUCLEO_64_SMPS
+
+/**
+  * @brief SMPS 
+  */
+
+
+#ifdef USE_ADP5301ACBZ          /* ADP5301ACBZ */
+
+/* ######################################################################## */
+/* #define PORT_SMPS               GPIOA                                    */
+/* #define PIN_SMPS_ENABLE         GPIO_PIN_4                               */
+/* #define PIN_SMPS_POWERGOOD      GPIO_PIN_6                               */
+/* #define PIN_SMPS_SWITCH_ENABLE  GPIO_PIN_7                               */
+
+/* IN CASE OF SMPS VOLTAGE RANGE SELECTION                                  */
+/* #define PIN_SMPS_V1             GPIO_PIN_5                               */
+/* ######################################################################## */
+
+#endif                          /* ADP5301ACBZ */
+
+/**
+  * @}
+  */ 
+
+#endif /* USE_STM32L4XX_NUCLEO_64_SMPS */
+
 /** @defgroup STM32L4XX_NUCLEO_Private_Variables Exported Variables
   * @{
   */ 
+#ifdef USE_STM32L4XX_NUCLEO_64_SMPS
+GPIO_TypeDef* GPIO_PORT[LEDn] = {LED4_GPIO_PORT};
+const uint16_t GPIO_PIN[LEDn] = {LED4_PIN};
+#else
 GPIO_TypeDef* GPIO_PORT[LEDn] = {LED2_GPIO_PORT};
-
 const uint16_t GPIO_PIN[LEDn] = {LED2_PIN};
+#endif
 
 GPIO_TypeDef*  BUTTON_PORT[BUTTONn] = {USER_BUTTON_GPIO_PORT};
 const uint16_t BUTTON_PIN[BUTTONn] = {USER_BUTTON_PIN};
@@ -165,7 +196,7 @@ uint32_t BSP_GetVersion(void)
   * @brief  Configures LED GPIO.
   * @param  Led: LED to be configured. 
   *          This parameter can be one of the following values:
-  *            @arg  LED2
+  *            @arg  LED2 or LED4 on Nucleo-64 with external SMPS
   * @retval None
   */
 void BSP_LED_Init(Led_TypeDef Led)
@@ -187,7 +218,7 @@ void BSP_LED_Init(Led_TypeDef Led)
   * @brief  Turns selected LED On.
   * @param  Led: Specifies the Led to be set on. 
   *   This parameter can be one of following parameters:
-  *            @arg  LED2
+  *            @arg  LED2 or LED4 on Nucleo-64 with external SMPS
   * @retval None
   */
 void BSP_LED_On(Led_TypeDef Led)
@@ -199,7 +230,7 @@ void BSP_LED_On(Led_TypeDef Led)
   * @brief  Turns selected LED Off.
   * @param  Led: Specifies the Led to be set off. 
   *   This parameter can be one of following parameters:
-  *            @arg  LED2
+  *            @arg  LED2 or LED4 on Nucleo-64 with external SMPS
   * @retval None
   */
 void BSP_LED_Off(Led_TypeDef Led)
@@ -211,7 +242,7 @@ void BSP_LED_Off(Led_TypeDef Led)
   * @brief  Toggles the selected LED.
   * @param  Led: Specifies the Led to be toggled. 
   *   This parameter can be one of following parameters:
-  *            @arg  LED2
+  *            @arg  LED2 or LED4 on Nucleo-64 with external SMPS
   * @retval None
   */
 void BSP_LED_Toggle(Led_TypeDef Led)
@@ -280,6 +311,240 @@ uint32_t BSP_PB_GetState(Button_TypeDef Button)
 {
   return HAL_GPIO_ReadPin(BUTTON_PORT[Button], BUTTON_PIN[Button]);
 }
+
+#ifdef USE_STM32L4XX_NUCLEO_64_SMPS
+#ifdef USE_ADP5301ACBZ          /* ADP5301ACBZ */
+
+/******************************************************************************
+                            SMPS OPERATIONS
+*******************************************************************************/
+
+/**
+  * @brief  DeInitialize the external SMPS component
+  * @param  None
+  * @note   Low power consumption GPIO settings
+  * @retval SMPS status
+  */
+uint32_t BSP_SMPS_DeInit(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct;
+  
+  PWR_AND_CLK_SMPS(); 
+
+  /* --------------------------------------------------------------------------------------  */
+  /* Added for Deinit if No PIN_SMPS_ENABLE & PIN_SMPS_SWITCH_ENABLE are not disabled before */
+
+  /* Disable SMPS SWITCH */
+  HAL_GPIO_WritePin(PORT_SMPS, PIN_SMPS_SWITCH_ENABLE, GPIO_PIN_RESET);
+ 
+  HAL_Delay(1);
+  
+  /* Disable SMPS */
+  HAL_GPIO_WritePin(PORT_SMPS, PIN_SMPS_ENABLE, GPIO_PIN_RESET);
+ 
+  /* --------------------------------------------------------------------------------------  */
+  /* Set all GPIO in output push/pull pulldown state to reduce power consumption  */
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull =  GPIO_PULLDOWN;
+  
+  /* Consider all SMPS pins but V1, not used on ADP5301ACBZ */
+  GPIO_InitStruct.Pin = PIN_SMPS_ENABLE | PIN_SMPS_SWITCH_ENABLE | PIN_SMPS_POWERGOOD; 
+  HAL_GPIO_Init(PORT_SMPS, &GPIO_InitStruct);
+  
+  return SMPS_OK;
+}
+
+/**
+  * @brief  Initialize the external SMPS component
+  * @param  VoltageRange: Select operating SMPS supply 
+  *           @arg DCDC_AND_BOARD_DEPENDENT
+  * @note   VoltageRange is not used with all boards. When not
+  *         used, resort to PWR_REGULATOR_VOLTAGE_SCALE2 by default.
+  * @retval SMPS status
+  */
+uint32_t BSP_SMPS_Init(uint32_t VoltageRange)
+{
+  PWR_AND_CLK_SMPS();
+  
+  GPIO_InitTypeDef GPIO_InitStruct;
+
+  /* Reconfigure PWR_PUCRx/PDCRx registers only when not coming */
+  /* back from Standby or Shutdown states.                      */
+  /* Consider as well non-SMPS related pins.                     */
+  if(!(READ_BIT(PWR->PWR_PU_REG, PWR_GPIO_ENABLE)))
+  {
+    HAL_PWREx_EnableGPIOPullDown (PWR_GPIO_SMPS, PWR_GPIO_SWITCH_ENABLE);
+    HAL_PWREx_EnableGPIOPullDown (PWR_GPIO_SMPS, PWR_GPIO_ENABLE); 
+     
+    /* HW limitation: Level shifter consumes because of dangling, so pull PA2 up 
+      (LPUART1_TX), PA13 (SWD/TMS) and PB3 (SWO) */
+    HAL_PWREx_EnableGPIOPullUp(PWR_GPIO_A,GPIO_PIN_2);  /* LPUART1_TX */   
+    HAL_PWREx_EnableGPIOPullUp(PWR_GPIO_A,GPIO_PIN_13); /* SWD/TMS    */
+    HAL_PWREx_EnableGPIOPullUp(PWR_GPIO_B,GPIO_PIN_3);  /* SWO        */
+    
+    /* Don't set PWR_CR3 APC bit at this time as it increases power
+      consumption in non-Standby/Shutdown modes. It will have to be
+      set with HAL_PWREx_EnablePullUpPullDownConfig() API upon
+      Standby or Shutdown modes entering */
+  }
+  /* ------------------------------------------------------------------------ */
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+
+  GPIO_InitStruct.Pin = PIN_SMPS_POWERGOOD;
+  HAL_GPIO_Init(PORT_SMPS, &GPIO_InitStruct);  
+
+  /* ------------------------------------------------------------------------ */
+  
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+ 
+  GPIO_InitStruct.Pin = PIN_SMPS_ENABLE | PIN_SMPS_SWITCH_ENABLE;   
+  HAL_GPIO_Init(PORT_SMPS, &GPIO_InitStruct);
+    
+ /* --------- SMPS VOLTAGE RANGE SELECTION ----------------------------------*/   
+ /* ######################################################################## */   
+ /* - > Not applicable to ADP5301ACBZ on MB1319 */
+ /* ######################################################################## */   
+ /* - > Applicable to ST1PS02D1QTR */
+ /* Control to be added */
+
+ /* ST1PS02D1QTR on MB1312 */  
+ /* if (VoltageRange == ST1PS02D1QTR_VOUT_1_25) */
+ /* HAL_GPIO_WritePin(PORT_SMPS, PIN_SMPS_V1, GPIO_PIN_SET); */
+ /* 1.25V                  */
+ /* D0/D1/D2 = H/L/L       */
+ /* else */
+ 
+ /* */
+ /* ST1PS02D1QTR on MB1312 */
+ /* ST1PS02D1QTR_VOUT_1_05 */
+ /* 1.05V                  */
+ /* D0/D1/D2 = L/L/L       */
+ /* HAL_GPIO_WritePin(PORT_SMPS, PIN_SMPS_V1, GPIO_PIN_RESET); */
+ /* ######################################################################## */    
+  return SMPS_OK;
+}
+
+/**
+  * @brief  Enable the external SMPS component
+  * @param  Delay: delay in ms after enable 
+  * @param  Power_Good_Check: Enable Power good check 
+  * @note   Power_Good_Check is not used with all external
+  *         SMPS components  
+  * @retval SMPS status
+  *           @arg SMPS_OK: SMPS ENABLE OK
+  *           @arg SMPS_KO: POWER GOOD CHECK FAILS
+  */
+uint32_t BSP_SMPS_Enable (uint32_t Delay, uint32_t Power_Good_Check)
+{
+  PWR_AND_CLK_SMPS();
+  
+  HAL_GPIO_WritePin(PORT_SMPS, PIN_SMPS_ENABLE, GPIO_PIN_SET);
+    
+  /* Delay upon request */
+  if (Delay != 0)
+  {
+    HAL_Delay(Delay);
+  }
+  
+  /* CHECK POWER GOOD or NOT */
+  if (Power_Good_Check != 0)
+  {
+    if (GPIO_PIN_RESET == (HAL_GPIO_ReadPin(PORT_SMPS, PIN_SMPS_POWERGOOD)))
+    {
+      /* POWER GOOD KO */
+      return SMPS_KO;
+    }
+  } 
+  
+  /* SMPS ENABLE */ 
+  return SMPS_OK; 
+}
+
+/**
+  * @brief  Disable the external SMPS component
+  * @param  NONE 
+  * @note   SMPS SWITCH should be disabled first !
+  * @retval SMPS status
+  *           @arg SMPS_OK: SMPS DISABLE OK - DONE
+  *           @arg SMPS_KO: POWER GOOD CHECK FAILS
+  *
+  */
+uint32_t BSP_SMPS_Disable (void)
+{
+
+  PWR_AND_CLK_SMPS(); 
+ 
+  /* Check if SMPS SWITCH is disabled */
+  if (HAL_GPIO_ReadPin(PORT_SMPS, PIN_SMPS_SWITCH_ENABLE) != GPIO_PIN_RESET)
+  {
+    /* ERROR AS SWITCH SHOULD BE DISABLE */
+    return SMPS_KO; 
+  }
+ 
+  /* Disable SMPS */
+  HAL_GPIO_WritePin(PORT_SMPS, PIN_SMPS_ENABLE, GPIO_PIN_RESET);
+  
+ /* SMPS DISABLE */ 
+  return SMPS_OK; 
+}
+
+/**
+  * @brief  Enable the external SMPS SWITCH component
+  * @param  Delay: delay in ms before SMPS SWITCH ENABLE 
+  * @param  Power_Good_Check: Enable Power good check 
+  * @note   Power_Good_Check is not used with all boards
+  * @retval SMPS status
+  *           @arg SMPS_OK: SMPS ENABLE OK
+  *           @arg SMPS_KO: POWER GOOD CHECK FAILS
+  */
+uint32_t BSP_SMPS_Supply_Enable (uint32_t Delay, uint32_t Power_Good_Check)
+{
+  PWR_AND_CLK_SMPS();
+
+  if (Delay != 0)
+  {
+    HAL_Delay(Delay);
+  }
+  /* CHECK POWER GOOD or NOT */
+  if (Power_Good_Check != 0)
+  {
+    if (GPIO_PIN_RESET == (HAL_GPIO_ReadPin(PORT_SMPS, PIN_SMPS_POWERGOOD)))
+    {
+      /* POWER GOOD KO */
+      return SMPS_KO;
+    }
+  }
+  
+  /* SMPS SWITCH ENABLE */ 
+  HAL_GPIO_WritePin(PORT_SMPS, PIN_SMPS_SWITCH_ENABLE, GPIO_PIN_SET);
+  
+  
+  return SMPS_OK;
+}
+
+/**
+  * @brief  Disable the external SMPS SWITCH component
+  * @param  None
+  * @retval SMPS status
+  *           @arg SMPS_OK: SMPS SWITCH DISABLE OK
+  */
+uint32_t BSP_SMPS_Supply_Disable (void)
+{
+  PWR_AND_CLK_SMPS();
+  /* SMPS SWITCH DISABLE */
+  HAL_GPIO_WritePin(PORT_SMPS, PIN_SMPS_SWITCH_ENABLE, GPIO_PIN_RESET);
+
+  return SMPS_OK;
+}
+
+#endif /* ADP5301ACBZ */
+#endif /* USE_STM32L4XX_NUCLEO_64_SMPS */
+
 
 #ifdef HAL_ADC_MODULE_ENABLED
 /**

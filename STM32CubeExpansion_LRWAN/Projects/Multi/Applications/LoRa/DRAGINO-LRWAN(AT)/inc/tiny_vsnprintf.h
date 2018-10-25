@@ -1,8 +1,8 @@
 /******************************************************************************
  * @file    tiny_vsnprintf.h
  * @author  MCD Application Team
- * @version V1.1.2
- * @date    08-September-2017
+ * @version V1.1.4
+ * @date    08-January-2018
  * @brief   Header for tiny_vsnprintf.c module
  ******************************************************************************
  * @attention

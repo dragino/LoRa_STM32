@@ -331,6 +331,11 @@
 			<locationURI>PARENT-8-PROJECT_LOC/Drivers/BSP/sx1276mb1mas/sx1276mb1mas.c</locationURI>
 		</link>
 		<link>
+			<name>Middlewares/Lora/Core/lora-test.c</name>
+			<type>1</type>
+			<locationURI>PARENT-8-PROJECT_LOC/Middlewares/Third_Party/Lora/Core/lora-test.c</locationURI>
+		</link>
+		<link>
 			<name>Middlewares/Lora/Core/lora.c</name>
 			<type>1</type>
 			<locationURI>PARENT-8-PROJECT_LOC/Middlewares/Third_Party/Lora/Core/lora.c</locationURI>
@@ -361,9 +366,9 @@
 			<locationURI>PARENT-8-PROJECT_LOC/Middlewares/Third_Party/Lora/Utilities/delay.c</locationURI>
 		</link>
 		<link>
-			<name>Middlewares/Lora/Utilities/low_power.c</name>
+			<name>Middlewares/Lora/Utilities/low_power_manager.c</name>
 			<type>1</type>
-			<locationURI>PARENT-8-PROJECT_LOC/Middlewares/Third_Party/Lora/Utilities/low_power.c</locationURI>
+			<locationURI>PARENT-8-PROJECT_LOC/Middlewares/Third_Party/Lora/Utilities/low_power_manager.c</locationURI>
 		</link>
 		<link>
 			<name>Middlewares/Lora/Utilities/timeServer.c</name>

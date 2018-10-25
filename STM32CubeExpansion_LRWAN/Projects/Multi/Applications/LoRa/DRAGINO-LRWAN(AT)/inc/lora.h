@@ -15,8 +15,8 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 /******************************************************************************
   * @file    lora.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   lora API to drive the lora state Machine
   ******************************************************************************
   * @attention
@@ -68,34 +68,19 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
    
 /* Includes ------------------------------------------------------------------*/
 #include "Commissioning.h"
-#include "utilities.h"
 #include "LoRaMac.h"
 #include "region/Region.h"
 
 /* Exported constants --------------------------------------------------------*/
+   /*!
+ * LoRaWAN confirmed messages
+ */
+
+#define LORAWAN_ADR_ON                              1
+#define LORAWAN_ADR_OFF                             0
 /* Exported types ------------------------------------------------------------*/
 
- 
- /**
-   * Lora Configuration
-   */
- typedef struct
- {
-   FunctionalState otaa;        /*< ENABLE if over the air activation, DISABLE otherwise */
-   FunctionalState duty_cycle;  /*< ENABLE if dutycyle is on, DISABLE otherwise */
-	 uint32_t DevAddr;          /*< Device  Address*/
-   uint8_t DevEui[8];           /*< Device EUI */
-   uint8_t AppEui[8];           /*< Application EUI */
-   uint8_t AppKey[16];          /*< Application Key */
-   uint8_t NwkSKey[16];         /*< Network Session Key */
-   uint8_t AppSKey[16];         /*< Application Session Key */
-   int16_t Rssi;                /*< Rssi of the received packet */
-   uint8_t Snr;                 /*< Snr of the received packet */
-   uint8_t application_port;    /*< Application port we will receive to */
-   FunctionalState ReqAck;      /*< ENABLE if acknowledge is requested */
-   McpsConfirm_t *McpsConfirm;  /*< pointer to the confirm structure */
- } lora_configuration_t;
- 
+
 /*!
  * Application Data structure
  */
@@ -110,18 +95,35 @@ typedef struct
   
 } lora_AppData_t;
 
-/*!
- * LoRa State Machine states 
- */
-typedef enum eDevicState
+typedef enum 
 {
-    DEVICE_STATE_INIT,
-    DEVICE_STATE_JOIN,
-    DEVICE_STATE_JOINED,
-    DEVICE_STATE_SEND,
-    DEVICE_STATE_CYCLE,
-    DEVICE_STATE_SLEEP
-} DeviceState_t;
+  LORA_RESET = 0, 
+  LORA_SET = !LORA_RESET
+} LoraFlagStatus;
+
+typedef enum 
+{
+  LORA_DISABLE = 0, 
+  LORA_ENABLE = !LORA_DISABLE
+} LoraState_t;
+
+typedef enum 
+{
+  LORA_ERROR = -1, 
+  LORA_SUCCESS = 0
+} LoraErrorStatus;
+
+typedef enum 
+{
+  LORAWAN_UNCONFIRMED_MSG = 0, 
+  LORAWAN_CONFIRMED_MSG = !LORAWAN_UNCONFIRMED_MSG
+} LoraConfirm_t;
+
+typedef enum 
+{
+  LORA_TRUE = 0, 
+  LORA_FALSE = !LORA_TRUE
+} LoraBool_t;
 
 /*!
  * LoRa State Machine states 
@@ -144,22 +146,6 @@ typedef enum eTxEventType
  */
 typedef struct sLoRaParam
 {
-/*!
- * @brief Event type
- *
- * @retval value  battery level ( 0: very low, 254: fully charged )
- */
-    TxEventType_t TxEvent;
-/*!
- * @brief Application data transmission duty cycle in ms
- *
- * @note when TX_ON_TIMER Event type is selected
- */
-    uint32_t TxDutyCycleTime;
-/*!
- * @brief LoRaWAN device class
- */
-    DeviceClass_t Class;
 /*!
  * @brief Activation state of adaptativeDatarate
  */
@@ -189,7 +175,12 @@ typedef struct sLoRaMainCallback
  * @retval value  battery level ( 0: very low, 254: fully charged )
  */
     uint8_t ( *BoardGetBatteryLevel )( void );
-  
+/*!
+ * \brief Get the current temperature
+ *
+ * \retval value  temperature in degreeCelcius( q7.8 )
+ */
+  uint16_t ( *BoardGetTemperatureLevel)( void );
 /*!
  * @brief Gets the board 64 bits unique ID 
  *
@@ -203,19 +194,21 @@ typedef struct sLoRaMainCallback
  */
     uint32_t ( *BoardGetRandomSeed ) (void);
 /*!
- * @brief Prepares Tx Data to be sent on Lora network 
- *
- * @param [IN] AppData is a buffer to fill
- *
- * @param [IN] port is a Application port on wicth Appdata will be sent
- *
- * @param [IN] length of the AppDataBuffer to send
- *
- * @param [IN] requests a confirmed Frame from the Network
- */
-  void ( *LoraTxData ) ( lora_AppData_t *AppData, FunctionalState* IsTxConfirmed);
-/*!
  * @brief Process Rx Data received from Lora network 
+ *
+ * @param [IN] AppData structure
+ *
+ */
+    void ( *LORA_RxData ) ( lora_AppData_t *AppData);
+    
+    /*!
+ * @brief callback indicating EndNode has jsu joiny 
+ *
+ * @param [IN] None
+ */
+    void ( *LORA_HasJoined)( void );
+    /*!
+ * @brief Confirms the class change 
  *
  * @param [IN] AppData is a buffer to process
  *
@@ -223,7 +216,7 @@ typedef struct sLoRaMainCallback
  *
  * @param [IN] length is the number of recieved bytes
  */
-    void ( *LoraRxData ) ( lora_AppData_t *AppData);
+    void ( *LORA_ConfirmClass) ( DeviceClass_t Class );
   
 } LoRaMainCallback_t;
 
@@ -233,87 +226,78 @@ typedef struct sLoRaMainCallback
 /* Exported macros -----------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */ 
 /**
- * @brief Lora Join procedure
- * @param [IN] none
- * @retval status (ok or busy)
- */
-LoRaMacStatus_t lora_join(void);
-
-/**
- * @brief Lora Send command
- * @param [IN] buf Pointer to buffer of data
- * @param [IN] size Size of data
- * @param [IN] binary Whether buffer contains raw data or a string of hexadecimal values (ie binary data)
- * @retval LoRa status
- */
-LoRaMacStatus_t lora_send(const char *buf, unsigned size, unsigned binary);
-
-/**
- * @brief Lora Send EXTI Data
- * @param [IN] none
- * @retval LoRa status
- */
-LoRaMacStatus_t lora_send_exti(void);
-
-/**
  * @brief Lora Initialisation
  * @param [IN] LoRaMainCallback_t
  * @param [IN] application parmaters
  * @retval none
  */
-void lora_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParamInit );
+void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam );
 
 /**
  * @brief run Lora classA state Machine 
  * @param [IN] none
  * @retval none
  */
-void lora_fsm( void );
+LoraErrorStatus LORA_send(lora_AppData_t* AppData, LoraConfirm_t IsTxConfirmed);
 
 /**
- * @brief functionl requesting loRa state machine to send data 
- * @note function to link in mode TX_ON_EVENT 
- * @param  none
+ * @brief Join a Lora Network in classA
+ * @Note if the device is ABP, this is a pass through functon
+ * @param [IN] none
  * @retval none
  */
-void OnSendEvent( void );
-
+void LORA_Join( void);
 
 /**
- * @brief API returns the state of the lora state machine
- * @note return @DeviceState_t state
+ * @brief Check whether the Device is joined to the network
  * @param [IN] none
- * @retval return @FlagStatus
-  */
-DeviceState_t lora_getDeviceState( void );
+ * @retval returns LORA_SET if joined
+ */
+LoraFlagStatus LORA_JoinStatus( void);
 
+/**
+ * @brief change Lora Class
+ * @Note callback LORA_ConfirmClass informs upper layer that the change has occured
+ * @Note Only switch from class A to class B/C OR from  class B/C to class A is allowed
+ * @Attention can be calld only in LORA_ClassSwitchSlot or LORA_RxData callbacks
+ * @param [IN] DeviceClass_t NewClass
+ * @retval LoraErrorStatus
+ */
+LoraErrorStatus LORA_RequestClass( DeviceClass_t newClass );
+
+/**
+ * @brief get the current Lora Class
+ * @param [IN] DeviceClass_t NewClass
+ * @retval None
+ */
+void LORA_GetCurrentClass( DeviceClass_t *currentClass );
 /**
   * @brief  Set join activation process: OTAA vs ABP
   * @param  Over The Air Activation status to set: enable or disable
   * @retval None
   */
-void lora_config_otaa_set(FunctionalState otaa);
+void lora_config_otaa_set(LoraState_t otaa);
 
 /**
   * @brief  Get join activation process: OTAA vs ABP
   * @param  None
   * @retval ENABLE if OTAA is used, DISABLE if ABP is used
   */
-FunctionalState lora_config_otaa_get(void);
+LoraState_t lora_config_otaa_get(void);
 
 /**
   * @brief  Set duty cycle: ENABLE or DISABLE
   * @param  Duty cycle to set: enable or disable
   * @retval None
   */
-void lora_config_duty_cycle_set(FunctionalState duty_cycle);
+void lora_config_duty_cycle_set(LoraState_t duty_cycle);
 
 /**
   * @brief  Get Duty cycle: OTAA vs ABP
   * @param  None
   * @retval ENABLE / DISABLE
   */
-FunctionalState lora_config_duty_cycle_get(void);
+LoraState_t lora_config_duty_cycle_get(void);
 
 /**
   * @brief  Get Device EUI
@@ -344,6 +328,91 @@ uint8_t *lora_config_appeui_get(void);
 void lora_config_appeui_set(uint8_t appeui[8]);
 
 /**
+  * @brief  Get Application Key
+  * @param  None
+  * @retval AppKey
+  */
+uint8_t *lora_config_appkey_get(void);
+
+/**
+  * @brief  Set Application Key
+  * @param  AppKey
+  * @retval None
+  */
+void lora_config_appkey_set(uint8_t appkey[16]);
+
+/**
+ * @brief  Set whether or not acknowledgement is required
+ * @param  ENABLE or DISABLE
+ * @retval None
+ */
+void lora_config_reqack_set(LoraConfirm_t reqack);
+
+/**
+ * @brief  Get whether or not acknowledgement is required
+ * @param  None
+ * @retval ENABLE or DISABLE
+ */
+LoraConfirm_t lora_config_reqack_get(void);
+
+/**
+ * @brief  Get the SNR of the last received data
+ * @param  None
+ * @retval SNR
+ */
+int8_t lora_config_snr_get(void);
+
+/**
+ * @brief  Get the RSSI of the last received data
+ * @param  None
+ * @retval RSSI
+ */
+int16_t lora_config_rssi_get(void);
+
+/**
+ * @brief  Get whether or not the last sent data were acknowledged
+ * @param  None
+ * @retval ENABLE if so, DISABLE otherwise
+ */
+LoraState_t lora_config_isack_get(void);
+
+/**
+ * @brief  Launch LoraWan certification tests
+ * @param  None
+ * @retval The application port
+ */ 
+void lora_wan_certif(void);
+
+/**
+ * @brief  set tx datarate
+ * @param  None
+ * @retval The application port
+ */ 
+void lora_config_tx_datarate_set(int8_t TxDataRate);
+
+/**
+ * @brief  get tx datarate
+ * @param  None
+ * @retval tx datarate
+ */ 
+int8_t lora_config_tx_datarate_get(void );
+
+/**
+  * @brief  get 
+  * @param  
+  * @retval None
+  */
+void lora_config_devaddr_get(void);
+
+
+/**
+  * @brief  set 
+  * @param  
+  * @retval None
+  */
+void lora_config_devaddr_set(uint32_t devaddr);
+
+/**
   * @brief  Get 
   * @param  None
   * @retval 
@@ -371,90 +440,12 @@ void lora_config_nwkskey_set(uint8_t nwkskey[16]);
   */
 uint8_t *lora_config_nwkskey_get(void);
 
-/**
-  * @brief  Get Application Key
-  * @param  None
-  * @retval AppKey
-  */
-uint8_t *lora_config_appkey_get(void);
-
-/**
-  * @brief  Set Application Key
-  * @param  AppKey
-  * @retval None
-  */
-void lora_config_appkey_set(uint8_t appkey[16]);
-
-/**
-  * @brief  get 
-  * @param  
-  * @retval None
-  */
-void lora_config_devaddr_get(void);
-
-
-/**
-  * @brief  set 
-  * @param  
-  * @retval None
-  */
-void lora_config_devaddr_set(uint32_t devaddr);
-/**
- * @brief  Set whether or not acknowledgement is required
- * @param  ENABLE or DISABLE
- * @retval None
- */
-void lora_config_reqack_set(FunctionalState reqack);
-
-/**
- * @brief  Get whether or not acknowledgement is required
- * @param  None
- * @retval ENABLE or DISABLE
- */
-FunctionalState lora_config_reqack_get(void);
-
-/**
- * @brief  Get the SNR of the last received data
- * @param  None
- * @retval SNR
- */
-int8_t lora_config_snr_get(void);
-
-/**
- * @brief  Get the RSSI of the last received data
- * @param  None
- * @retval RSSI
- */
-int16_t lora_config_rssi_get(void);
-
-/**
- * @brief  Get whether or not the last sent data were acknowledged
- * @param  None
- * @retval ENABLE if so, DISABLE otherwise
- */
-FunctionalState lora_config_isack_get(void);
-
-/**
- * @brief  Set the application port we will receive the data to
- * @param  The application port
- * @retval None
- */
-void lora_config_application_port_set(uint8_t application_port);
-
-/**
- * @brief  Get the application port we will receive the data to
- * @param  None
- * @retval The application port
- */
-uint8_t lora_config_application_port_get(void);
-
-/**
- * @brief  Launch LoraWan certification tests
- * @param  None
- * @retval The application port
- */ 
-void lora_wan_certif(void);
-
+void Store_Config(void);
+void store_data(uint8_t size,uint8_t *data1,uint32_t data2);
+void read_data(uint8_t size,uint8_t *data1,uint32_t data3,uint32_t data4,uint32_t data5,uint32_t data6);	 
+void Read_Config(void);
+uint8_t configcount(void);
+  
 #ifdef __cplusplus
 }
 #endif

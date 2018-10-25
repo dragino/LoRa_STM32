@@ -15,8 +15,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  /******************************************************************************
   * @file    hw_conf.h
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   contains hardware configuration Macros and Constants
   ******************************************************************************
   * @attention
@@ -116,15 +116,22 @@ Maintainer: Miguel Luis and Gregory Cristian
   #include "stm32l4xx_hal_conf.h"
   #include "stm32l4xx_hw_conf.h"
 #endif
+
+#ifdef USE_B_L072Z_LRWAN1
+  #include "stm32l0xx_hal.h"
+  #include "b-l072z-lrwan1.h"
+  #include "stm32l0xx_hal_conf.h"
+  #include "mlm32l0xx_hw_conf.h"
+#endif
+
+/* --------Preprocessor compile swicth------------ */
+
+#define LoRa_Sensor_Node   /*LSN50*/
+//#define AT_Data_Send     /*AT+SEND or AT+SENDB*/
    
 /* uncomment below line to never enter lowpower modes in main.c*/
 //#define LOW_POWER_DISABLE
-
-   
-#define LoRa_Sensor_Node   /*LSN50*/
-//#define AT_Data_Send     /*AT+SEND or AT+SENDB*/
-//#define LT_33240_433_L         /*Sensor*/
-
+  
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 

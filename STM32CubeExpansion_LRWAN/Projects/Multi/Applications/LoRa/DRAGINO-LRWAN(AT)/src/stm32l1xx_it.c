@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file  stm32l1xx_it.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   Main Interrupt Service Routines.
   *      This file provides template for all exceptions handler and 
   *      peripherals interrupt service routine.
@@ -50,7 +50,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
 #include "stm32l1xx_it.h"
-#include "low_power.h"
+
 
 /** @addtogroup STM32L1xx_HAL_Examples
   * @{

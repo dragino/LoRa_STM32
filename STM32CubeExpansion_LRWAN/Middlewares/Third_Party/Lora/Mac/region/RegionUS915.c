@@ -313,12 +313,12 @@ void RegionUS915InitDefaults( InitType_t type )
                 Channels[i].Band = 0;
             }
             // 500 kHz channels
-//            for( uint8_t i = US915_MAX_NB_CHANNELS - 8; i < US915_MAX_NB_CHANNELS; i++ )
-//            {
-//                Channels[i].Frequency = 903000000 + ( i - ( US915_MAX_NB_CHANNELS - 8 ) ) * 1600000;
-//                Channels[i].DrRange.Value = ( DR_4 << 4 ) | DR_4;
-//                Channels[i].Band = 0;
-//            }
+            for( uint8_t i = US915_MAX_NB_CHANNELS - 8; i < US915_MAX_NB_CHANNELS; i++ )
+            {
+                Channels[i].Frequency = 903000000 + ( i - ( US915_MAX_NB_CHANNELS - 8 ) ) * 1600000;
+                Channels[i].DrRange.Value = ( DR_4 << 4 ) | DR_4;
+                Channels[i].Band = 0;
+            }
 
             // ChannelsMask
             ChannelsDefaultMask[0] = 0xFFFF;

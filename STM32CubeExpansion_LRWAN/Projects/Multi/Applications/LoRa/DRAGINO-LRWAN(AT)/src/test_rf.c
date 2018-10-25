@@ -1,8 +1,8 @@
  /******************************************************************************
   * @file    test_tx.c
   * @author  MCD Application Team
-  * @version V1.1.2
-  * @date    08-September-2017
+  * @version V1.1.4
+  * @date    08-January-2018
   * @brief   manages tx tests
   ******************************************************************************
   * @attention
@@ -49,7 +49,7 @@
 #include <stdarg.h>
 #include "radio.h"
 #include "sx1276.h"
-//#include "mlm32l07x01.h"
+#include "mlm32l07x01.h"
 #include "at.h"
 #include "test_rf.h"
 #include "tiny_sscanf.h"
