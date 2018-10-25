@@ -58,6 +58,7 @@
 #include "oil_float.h"
 #include "gpio_exti.h"
 #include "sht20.h"
+#include "pwr_out.h"
 #endif
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -68,11 +69,14 @@
 static __IO uint16_t AD_code1=0;
 static __IO uint16_t AD_code2=0;
 
-
+//static GPIO_InitTypeDef  GPIO_InitStruct;
 extern uint16_t batteryLevel_mV;
 void BSP_sensor_Read( sensor_t *sensor_data)
 {
  	#if defined(LoRa_Sensor_Node)
+	
+	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_RESET);//Enable 5v power supply
+	
 	sensor_data->temp1=DS18B20_GetTemp_SkipRom();
 	
 	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);
@@ -94,6 +98,8 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 
 	 #endif
 	 
+	 HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
+	 
 	#endif
 }
 
@@ -109,6 +115,7 @@ void  BSP_sensor_Init( void  )
 	 BSP_sht20_Init();
 	 #endif
 	
+	pwr_control_IoInit();
 	#endif
 }
 

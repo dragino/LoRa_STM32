@@ -33,6 +33,7 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 #include "RegionCN779.h"
 #include "debug.h"
 
+#include "lora.h"
 // Definitions
 #define CHANNELS_MASK_SIZE              1
 
@@ -310,10 +311,16 @@ void RegionCN779SetBandTxDone( SetBandTxDoneParams_t* txDone )
 
 void RegionCN779InitDefaults( InitType_t type )
 {
+	uint32_t channel_single;
+	
+	channel_single=customize_freq1_get();
+	
     switch( type )
     {
         case INIT_TYPE_INIT:
         {
+					if(channel_single==0)
+					{
             // Channels
             Channels[0] = ( ChannelParams_t ) CN779_LC1;
             Channels[1] = ( ChannelParams_t ) CN779_LC2;
@@ -324,6 +331,16 @@ void RegionCN779InitDefaults( InitType_t type )
             // Update the channels mask
             RegionCommonChanMaskCopy( ChannelsMask, ChannelsDefaultMask, 1 );
             break;
+					}
+					else
+					{
+						Channels[0] = ( ChannelParams_t ) { channel_single, 0, { ( ( DR_5 << 4 ) | DR_0 ) }, 0 };
+						// Initialize the channels default mask
+            ChannelsDefaultMask[0] = 1;
+            // Update the channels mask
+            RegionCommonChanMaskCopy( ChannelsMask, ChannelsDefaultMask, 1 );
+            break;
+					}
         }
         case INIT_TYPE_RESTORE:
         {

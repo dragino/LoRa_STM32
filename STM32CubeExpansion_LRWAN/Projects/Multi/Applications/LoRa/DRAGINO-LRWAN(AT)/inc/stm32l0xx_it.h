@@ -84,6 +84,7 @@ void SysTick_Handler(void);
 void EXTI4_15_IRQHandler(void);
 void TIM21_IRQHandler(void);
 void UARTX_IRQHandler(void);
+void USARTX_DMA_TX_IRQHandler(void);
 	
 #ifdef __cplusplus
 }

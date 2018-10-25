@@ -33,6 +33,7 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 #include "RegionCN470.h"
 #include "debug.h"
 
+#include "lora.h"
 // Definitions
 #define CHANNELS_MASK_SIZE              6
 
@@ -288,6 +289,10 @@ void RegionCN470SetBandTxDone( SetBandTxDoneParams_t* txDone )
 
 void RegionCN470InitDefaults( InitType_t type )
 {
+	uint32_t channel_single;
+	
+	channel_single=customize_freq1_get();
+	
     switch( type )
     {
         case INIT_TYPE_INIT:
@@ -296,19 +301,42 @@ void RegionCN470InitDefaults( InitType_t type )
             // 125 kHz channels
             for( uint8_t i = 0; i < CN470_MAX_NB_CHANNELS; i++ )
             {
+							if(channel_single==0)
+				    	{
                 Channels[i].Frequency = 470300000 + i * 200000;
+							}
+							else
+              {
+								Channels[i].Frequency =channel_single;
+							}
                 Channels[i].DrRange.Value = ( DR_5 << 4 ) | DR_0;
                 Channels[i].Band = 0;
             }
 
             // Initialize the channels default mask
-            ChannelsDefaultMask[0] = 0xFFFF;
-            ChannelsDefaultMask[1] = 0xFFFF;
-            ChannelsDefaultMask[2] = 0xFFFF;
-            ChannelsDefaultMask[3] = 0xFFFF;
-            ChannelsDefaultMask[4] = 0xFFFF;
-            ChannelsDefaultMask[5] = 0xFFFF;
+            ChannelsDefaultMask[0] = 0x0000;
+            ChannelsDefaultMask[1] = 0x0000;
+            ChannelsDefaultMask[2] = 0x0000;
+            ChannelsDefaultMask[3] = 0x0000;
+            ChannelsDefaultMask[4] = 0x0000;
+            ChannelsDefaultMask[5] = 0x0000;
 
+						uint8_t num,channel_num,k;
+						
+						channel_num=customize_set8channel_get();
+						
+						num=(customize_set8channel_get()%2==1)? 0:8;
+						
+						if(channel_num>=1&&channel_num<=2)
+							k=5;
+						else 
+							k=6;
+						
+						ChannelsDefaultMask[k]=0x00FF<<num;	
+						
+						if(k==6)
+						{ChannelsDefaultMask[5] = 0xFFFF;}
+						
             // Update the channels mask
             RegionCommonChanMaskCopy( ChannelsMask, ChannelsDefaultMask, 6 );
             break;

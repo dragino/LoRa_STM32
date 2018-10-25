@@ -398,6 +398,20 @@ void lora_config_tx_datarate_set(int8_t TxDataRate);
 int8_t lora_config_tx_datarate_get(void );
 
 /**
+  * @brief  set 
+  * @param  
+  * @retval None
+  */
+void lora_config_application_port_set(int8_t application_port);
+
+/**
+  * @brief  get 
+  * @param  
+  * @retval None
+  */
+int8_t lora_config_application_port_get(void );
+
+/**
   * @brief  get 
   * @param  
   * @retval None
@@ -440,12 +454,23 @@ void lora_config_nwkskey_set(uint8_t nwkskey[16]);
   */
 uint8_t *lora_config_nwkskey_get(void);
 
+void Store_key(void);
 void Store_Config(void);
 void store_data(uint8_t size,uint8_t *data1,uint32_t data2);
 void read_data(uint8_t size,uint8_t *data1,uint32_t data3,uint32_t data4,uint32_t data5,uint32_t data6);	 
 void Read_Config(void);
-uint8_t configcount(void);
-  
+void key_printf(void);
+
+uint32_t customize_freq1_get(void);
+
+void customize_freq1_set(uint32_t Freq);
+
+uint32_t customize_set8channel_get(void);
+
+void customize_set8channel_set(uint8_t Freq);
+
+void region_printf(void);
+
 #ifdef __cplusplus
 }
 #endif

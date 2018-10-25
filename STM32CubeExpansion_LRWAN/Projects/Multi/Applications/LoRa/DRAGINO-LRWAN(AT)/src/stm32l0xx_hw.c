@@ -62,6 +62,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "debug.h"
 #include "bsp.h"
 #include "vcom.h"
+#include "pwr_out.h"
 
 /*!
  *  \brief Unique Devices IDs register set ( STM32L0xxx )
@@ -136,7 +137,7 @@ void HW_Init( void )
 
     HW_RTC_Init( );
     
-    vcom_Init( );
+    TraceInit( );
     
     BSP_sensor_Init( );
 
@@ -170,8 +171,10 @@ static void HW_IoInit( void )
   HW_SPI_IoInit( );
   
   Radio.IoInit( );
-  
-  //vcom_IoInit( );
+	
+  #if defined(LoRa_Sensor_Node)
+  pwr_control_IoInit();
+	#endif
 }
 
 /**
@@ -184,8 +187,10 @@ static void HW_IoDeInit( void )
   HW_SPI_IoDeInit( );
   
   Radio.IoDeInit( );
-  
-  //vcom_IoDeInit( );
+	
+	#if defined(LoRa_Sensor_Node)
+  pwr_control_IoDeInit();
+	#endif
 }
 
 
@@ -215,7 +220,7 @@ void SystemClock_Config( void )
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
 
-  /* Enable HSE Oscillator and Activate PLL with HSE as source */
+  /* Enable HSI Oscillator and Activate PLL with HSI as source */
   RCC_OscInitStruct.OscillatorType      = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSEState            = RCC_HSE_OFF;
   RCC_OscInitStruct.HSIState            = RCC_HSI_ON;
@@ -469,8 +474,6 @@ void LPM_EnterStopMode( void)
   
   /*clear wake up flag*/
   SET_BIT(PWR->CR, PWR_CR_CWUF);
-  
-	CLEAR_BIT(USARTX->CR1, USART_CR1_RXNEIE);
 	
   RESTORE_PRIMASK( );
 

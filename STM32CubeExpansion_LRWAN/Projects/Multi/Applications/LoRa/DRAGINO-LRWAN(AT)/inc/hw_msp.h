@@ -204,7 +204,6 @@ void SystemClock_Config( void );
   * @retval None
   */
 void HW_GpioInit(void);
-  
 
 #ifdef __cplusplus
 }

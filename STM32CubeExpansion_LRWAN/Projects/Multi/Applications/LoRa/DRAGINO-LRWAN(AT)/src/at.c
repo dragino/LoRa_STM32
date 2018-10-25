@@ -58,6 +58,7 @@
 #include "version.h"
 #include "hw_msp.h"
 #include "flash_eraseprogram.h"
+#include "timeServer.h"
 
 /* External variables --------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -67,6 +68,7 @@
  */
 #define MAX_RECEIVED_DATA 255
 extern uint32_t APP_TX_DUTYCYCLE;
+
 /* Private macro -------------------------------------------------------------*/
 /**
  * @brief Macro to return when an error occurs
@@ -194,8 +196,8 @@ ATEerror_t at_reset(const char *param)
 
 ATEerror_t at_FDR(const char *param)
 {
-	FLASH_erase(0x8018F80);
-	FLASH_erase(0x8019000);
+	FLASH_erase(0x8018F80);//page 799
+	FLASH_erase(FLASH_USER_START_ADDR_CONFIG);
 	AT_PRINTF("OK\n\r");
 	NVIC_SystemReset();
   return AT_OK;
@@ -770,6 +772,7 @@ ATEerror_t at_NetworkJoinMode_set(const char *param)
   }
 
   lora_config_otaa_set(status);
+	
   return AT_OK;
 }
 
@@ -1069,7 +1072,9 @@ ATEerror_t at_Receive(const char *param)
 
 ATEerror_t at_version_get(const char *param)
 {
-  AT_PRINTF(AT_VERSION_STRING"\r\n");
+  AT_PRINTF(AT_VERSION_STRING" ");
+	region_printf();
+	
   return AT_OK;
 }
 
@@ -1125,6 +1130,126 @@ ATEerror_t at_TDC_set(const char *param)
 ATEerror_t at_TDC_get(const char *param)
 { 
 	print_d(APP_TX_DUTYCYCLE);
+	return AT_OK;
+}
+
+ATEerror_t at_application_port_set(const char *param)
+{
+	 int8_t application_port;
+
+  if (tiny_sscanf(param, "%hhu", &application_port) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+  
+  lora_config_application_port_set(application_port) ;
+
+  return AT_OK;
+}
+
+ATEerror_t at_application_port_get(const char *param)
+{
+	print_d(lora_config_application_port_get());
+	return AT_OK;
+}
+
+ATEerror_t at_CHE_set(const char *param)
+{
+	uint8_t fre;
+	if (tiny_sscanf(param, "%d", &fre) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+	
+	#if defined ( REGION_CN470 )
+	if(fre>2)
+	{
+		fre=1;
+	}
+	#elif defined ( REGION_US915 )
+	if(fre>8)
+	{
+		fre=1;
+	}
+	#elif defined ( REGION_AU915 )
+	if(fre>9)
+	{
+		fre=1;
+	}
+	#else
+	fre=0;
+	#endif
+	
+	customize_set8channel_set(fre);
+	
+	return AT_OK;
+}
+
+ATEerror_t at_CHE_get(const char *param)
+{ 
+  print_d(customize_set8channel_get());
+	uint8_t i;
+	double fre1;
+	double j,k,l;
+	
+	i=customize_set8channel_get();
+	
+	#if defined ( REGION_CN470 )
+	  j=486.3;k=1.6;l=0.2;
+	#elif defined ( REGION_US915 )
+	if(i==9)
+	{
+    j=902.2;k=0.1;l=1.6;
+	}
+	else
+	{j=902.3;k=1.6;l=0.2;}
+	#else
+	if(i==10)
+	{
+    j=915.0;k=0.1;l=1.6;
+	}
+	else
+	{j=915.2;k=1.6;l=0.2;}
+	#endif
+	
+	if(i)
+	{
+	  fre1=j+(i-1)*k;
+	  for(int i=0;i<8;i++)
+	  {		
+		  PRINTF("%.1f ",fre1);
+		  fre1=fre1+l;
+	  }
+	  PRINTF("\n\r");
+  }
+	 else PRINTF("Use default channel");
+	
+	return AT_OK;
+}
+
+ATEerror_t at_CHS_set(const char *param)
+{
+	uint32_t fre;
+	if (tiny_sscanf(param, "%lu", &fre) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+	
+	if((100000000<fre&&fre<999999999)||fre==0)
+	{
+	  customize_freq1_set(fre);
+	}
+	else 
+	{
+		return AT_PARAM_ERROR;
+	}
+	
+	return AT_OK;
+}
+
+ATEerror_t at_CHS_get(const char *param)
+{ 
+	print_d(customize_freq1_get());
 	return AT_OK;
 }
 

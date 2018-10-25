@@ -61,7 +61,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
 #include "stm32l0xx_it.h"
-extern UART_HandleTypeDef UartHandle;
+#include "vcom.h"
+
 extern int exti_flag;
 /** @addtogroup STM32L1xx_HAL_Examples
   * @{
@@ -204,7 +205,12 @@ void SysTick_Handler(void)
 
 void USARTX_IRQHandler( void )
 {
-  vcom_IRQHandler(&UartHandle);
+  vcom_IRQHandler();
+}
+
+void USARTX_DMA_TX_IRQHandler(void)
+{
+  vcom_DMA_TX_IRQHandler();
 }
 
 void RTC_IRQHandler( void )

@@ -86,11 +86,11 @@ void GPIO_INPUT_IoInit(void)
 	GPIO_InitTypeDef GPIO_InitStruct={0};
 	GPIO_INPUT_CLK_ENABLE();
 	
-	GPIO_InitStruct.Pin = GPIO_INPUT_PIN1|GPIO_INPUT_PIN2|GPIO_INPUT_PIN3;
+	GPIO_InitStruct.Pin = GPIO_INPUT_PIN1;
 	GPIO_InitStruct.Mode =GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
 
-  HW_GPIO_Init( GPIO_INPUT_PORT, GPIO_INPUT_PIN1|GPIO_INPUT_PIN2|GPIO_INPUT_PIN3, &GPIO_InitStruct );
+  HW_GPIO_Init( GPIO_INPUT_PORT, GPIO_INPUT_PIN1, &GPIO_InitStruct );
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

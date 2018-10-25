@@ -2,7 +2,7 @@
  * @file    command.c
  * @author  MCD Application Team
  * @version V1.1.4
- * @date    08-January-2018
+ * @date    10-July-2018
  * @brief   main command driver dedicated to command AT
  ******************************************************************************
  * @attention
@@ -72,7 +72,7 @@ struct ATCommand_s {
 
 /* Private define ------------------------------------------------------------*/
 #define CMD_SIZE 128
-
+extern uint8_t parse_flag;
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
@@ -111,7 +111,7 @@ static const struct ATCommand_s ATCommand[] =
 	  .string = AT_FDR,
     .size_string = sizeof(AT_FDR) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_FDR ": Factory data reset\r\n",
+    .help_string = "AT"AT_FDR ": Reset Parameters to Factory Default, Keys Reserve\r\n",
 #endif
     .get = at_return_error,
     .set = at_return_error,
@@ -136,7 +136,7 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_DADDR,
     .size_string = sizeof(AT_DADDR) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_DADDR ": Get or Set the Device address\r\n",
+    .help_string = "AT"AT_DADDR ": Get or Set the Device Address\r\n",
 #endif
     .get = at_DevAddr_get,
     .set = at_DevAddr_set,
@@ -211,7 +211,7 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_TXP,
     .size_string = sizeof(AT_TXP) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_TXP ": Get or Set the Transmit Power (0-5)\r\n",
+    .help_string = "AT"AT_TXP ": Get or Set the Transmit Power (0-5, MAX:0, MIN:5, according to LoRaWAN Spec)\r\n",
 #endif
     .get = at_TransmitPower_get,
     .set = at_TransmitPower_set,
@@ -422,7 +422,7 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_RECVB,
     .size_string = sizeof(AT_RECVB) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_RECVB ": print last received data in binary format (with hexadecimal values)\r\n",
+    .help_string = "AT"AT_RECVB ": Print last received data in binary format (with hexadecimal values)\r\n",
 #endif
     .get = at_ReceiveBinary,
     .set = at_return_error,
@@ -433,7 +433,7 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_RECV,
     .size_string = sizeof(AT_RECV) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_RECV ": print last received data in raw format\r\n",
+    .help_string = "AT"AT_RECV ": Print last received data in raw format\r\n",
 #endif
     .get = at_Receive,
     .set = at_return_error,
@@ -444,7 +444,7 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_VER,
     .size_string = sizeof(AT_VER) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_VER ": Get the version of the AT_Slave FW\r\n",
+    .help_string = "AT"AT_VER ": Get current image version and Frequency Band\r\n",
 #endif
     .get = at_version_get,
     .set = at_return_error,
@@ -499,12 +499,47 @@ static const struct ATCommand_s ATCommand[] =
     .string = AT_TDC,
     .size_string = sizeof(AT_TDC) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_TDC ": Get or set the application data transmission duty cycle in ms\r\n",
+    .help_string = "AT"AT_TDC ": Get or set the application data transmission interval in ms\r\n",
 #endif
     .get = at_TDC_get,
     .set = at_TDC_set,
     .run = at_return_error,
   },
+	
+	{
+    .string = AT_PORT,
+    .size_string = sizeof(AT_PORT) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_PORT ": Get or set the application port\r\n",
+#endif
+    .get = at_application_port_get,
+    .set = at_application_port_set,
+    .run = at_return_error,
+  },
+ 
+	{
+	  .string = AT_CHS,
+    .size_string = sizeof(AT_CHS) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_CHS ": Get or Set Frequency (Unit: Hz) for Single Channel Mode\r\n",
+#endif
+    .get = at_CHS_get,
+    .set = at_CHS_set,
+    .run = at_return_error,
+	},
+	
+	#if defined( REGION_US915 ) || defined( REGION_US915_HYBRID ) || defined ( REGION_AU915 ) || defined ( REGION_CN470 )
+	{
+	  .string = AT_CHE,
+    .size_string = sizeof(AT_CHE) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_CHE ": Get or Set eight channels mode,Only for US915,AU915,CN470\r\n",
+#endif
+    .get = at_CHE_get,
+    .set = at_CHE_set,
+    .run = at_return_error,
+	},
+	#endif	
 };
 
 
@@ -525,45 +560,50 @@ static void com_error(ATEerror_t error_type);
 static void parse_cmd(const char *cmd);
 
 /* Exported functions ---------------------------------------------------------*/
+static void CMD_GetChar( uint8_t* rxChar);
+static char command[CMD_SIZE];
+static unsigned i = 0;  
+static FlagStatus IsCharReceived=RESET;  
 
 void CMD_Init(void)
 {
-  vcom_Init();
-  vcom_ReceiveInit();
+  vcom_ReceiveInit( CMD_GetChar );
+  IsCharReceived=RESET;
+}
+
+static void CMD_GetChar( uint8_t* rxChar)
+{
+  command[i] = *rxChar;
+  IsCharReceived=SET;
 }
 
 void CMD_Process(void)
 {
-  static char command[CMD_SIZE];
-  static unsigned i = 0;
-
-  /* Process all commands */
-  while (IsNewCharReceived() == SET)
+/* Process all commands */
+  if (IsCharReceived==SET)
   {
-    command[i] = GetNewChar();
-
+    //ENTER_CRITICAL
+    IsCharReceived=RESET;
+    //EXIT CRITICAL
 #if 0 /* echo On    */
-    PRINTF("%c", command[i]);
+  PRINTF("%c", command[i]);
 #endif
 
     if (command[i] == AT_ERROR_RX_CHAR)
     {
       i = 0;
       com_error(AT_RX_ERROR);
-      break;
     }
-    else
-    if ((command[i] == '\r') || (command[i] == '\n'))
+    else if ((command[i] == '\r') || (command[i] == '\n'))
     {
       if (i != 0)
       {
         command[i] = '\0';
+				i = 0;				
         parse_cmd(command);
-        i = 0;
       }
     }
-    else
-    if (i == (CMD_SIZE - 1))
+    else if (i == (CMD_SIZE - 1))
     {
       i = 0;
       com_error(AT_TEST_PARAM_OVERFLOW);
@@ -607,13 +647,13 @@ static void parse_cmd(const char *cmd)
   {
 #ifdef NO_HELP
 #else
-    AT_PRINTF("AT+<CMD>?        : Help on <CMD>\r\n"
+    PPRINTF("AT+<CMD>?        : Help on <CMD>\r\n"
               "AT+<CMD>         : Run <CMD>\r\n"
               "AT+<CMD>=<value> : Set the value\r\n"
               "AT+<CMD>=?       : Get the value\r\n");
     for (i = 0; i < (sizeof(ATCommand) / sizeof(struct ATCommand_s)); i++)
     {
-      AT_PRINTF(ATCommand[i].help_string);
+      PPRINTF(ATCommand[i].help_string);
     }
 #endif
   }
@@ -645,6 +685,7 @@ static void parse_cmd(const char *cmd)
             {
               status = Current_ATCommand->set(cmd + 1);
 							Store_Config();
+							Store_key();
             }
             break;
           case '?':

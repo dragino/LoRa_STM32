@@ -52,11 +52,18 @@
 #include "lora-test.h"
 #include "tiny_sscanf.h"
 #include "flash_eraseprogram.h"
+#include "version.h"
 
 static uint8_t config_count=0;
-static uint32_t s_config[32];//store config
+static uint8_t key_count=0;
+
+static uint32_t s_config[32]; //store config
+static uint32_t s_key[32];    //store key
+
 extern uint32_t APP_TX_DUTYCYCLE;
 
+#define HEX16(X)  X[0],X[1], X[2],X[3], X[4],X[5], X[6],X[7],X[8],X[9], X[10],X[11], X[12],X[13], X[14],X[15]
+#define HEX8(X)   X[0],X[1], X[2],X[3], X[4],X[5], X[6],X[7]
  /**
    * Lora Configuration
    */
@@ -78,7 +85,41 @@ extern uint32_t APP_TX_DUTYCYCLE;
    int8_t TxDatarate;
  } lora_configuration_t;
  
- 
+/**
+   * Lora customize Configuration
+   */
+typedef struct 
+{
+	uint32_t freq1;
+	uint8_t  set8channel;
+}customize_configuration_t;
+
+static customize_configuration_t customize_config=
+{
+	.freq1=0,
+  .set8channel=0
+};
+
+uint32_t customize_freq1_get(void)
+{
+	return customize_config.freq1;
+}
+
+void customize_freq1_set(uint32_t Freq)
+{
+	customize_config.freq1=Freq;
+}
+
+uint32_t customize_set8channel_get(void)
+{
+	return customize_config.set8channel;
+}
+
+void customize_set8channel_set(uint8_t Freq)
+{
+	customize_config.set8channel=Freq;
+}
+
 static lora_configuration_t lora_config = 
 {
   .otaa = ((OVER_THE_AIR_ACTIVATION == 0) ? LORA_DISABLE : LORA_ENABLE),
@@ -316,7 +357,25 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   // Choose a random device address
   DevAddr = randr( 0, 0x01FFFFFF );
 #endif
- 
+	
+	Read_Config();
+	
+	#if defined(LoRa_Sensor_Node) || defined(AT_Data_Send)
+	
+	#if defined(LoRa_Sensor_Node)
+	PRINTF("\n\rLSN50 Device\n\r");
+	#else
+	PRINTF("\n\rLoRa ST Module\n\r");
+	#endif
+	
+	PRINTF("Image Version: "AT_VERSION_STRING"\n\r");
+	PRINTF("Frequency Band: ");
+	region_printf();
+	key_printf();
+	#endif
+	
+	lora_config.otaa = LORA_ENABLE;
+			
   LoRaMacPrimitives.MacMcpsConfirm = McpsConfirm;
   LoRaMacPrimitives.MacMcpsIndication = McpsIndication;
   LoRaMacPrimitives.MacMlmeConfirm = MlmeConfirm;
@@ -358,7 +417,7 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   LoRaMacMibSetRequestConfirm( &mibReq );
 
 #if defined( REGION_EU868 )
-  LoRaMacTestSetDutyCycleOn( LORAWAN_DUTYCYCLE_ON );
+  LoRaMacTestSetDutyCycleOn( lora_config.duty_cycle );
 
 #if( USE_SEMTECH_DEFAULT_CHANNEL_LINEUP == 1 )
   LoRaMacChannelAdd( 3, ( ChannelParams_t )LC4 );
@@ -377,47 +436,66 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   mibReq.Param.Rx2Channel = ( Rx2ChannelParams_t ){ 869525000, DR_3 };
   LoRaMacMibSetRequestConfirm( &mibReq );
 #endif
-  lora_config.duty_cycle = LORA_DISABLE;
-#else
-  lora_config.duty_cycle = LORA_ENABLE;
 #endif
   lora_config.TxDatarate = LoRaParamInit->TxDatarate;
 	
 	  if(FLASH_read(0x8018F80)==0x00)	//page799
 			{
-				Store_Config();
-				FLASH_program_on_addr(0x8018F80,0x11);
+				lora_config.duty_cycle = LORA_DISABLE;
+	      lora_config.application_port=2;
+			
+				APP_TX_DUTYCYCLE=30000;
 				
-				PRINTF("If ABP enabled\n\r"); 
-        PRINTF("DevEui= %02X", lora_config.DevEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF(" %02X", lora_config.DevEui[i]); }; PRINTF("\n\r");
-        PRINTF("DevAdd=  %08X\n\r", lora_config.DevAddr) ;
-        PRINTF("NwkSKey= %02X", lora_config.NwkSKey[0]) ;for(int i=1; i<16 ; i++) {PRINTF(" %02X", lora_config.NwkSKey[i]); }; PRINTF("\n\r");
-        PRINTF("AppSKey= %02X", lora_config.AppSKey[0]) ;for(int i=1; i<16 ; i++) {PRINTF(" %02X", lora_config.AppSKey[i]); }; PRINTF("\n\n\r");
-	
-	      PRINTF("If OTAA enabled\n\r"); 
-        PRINTF("DevEui= %02X", lora_config.DevEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF(" %02X", lora_config.DevEui[i]); }; PRINTF("\n\r");
-        PRINTF("AppEui= %02X", lora_config.AppEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF(" %02X", lora_config.AppEui[i]); }; PRINTF("\n\r");
-        PRINTF("AppKey= %02X", lora_config.AppKey[0]) ;for(int i=1; i<16; i++) {PRINTF(" %02X", lora_config.AppKey[i]); }; PRINTF("\n\n\r");
+				Store_Config();
+				Read_Config();
+				FLASH_program_on_addr(0x8018F80,0x11);		
+        PRINTF("Please set the parameters or reset Device to apply change\n\r");				
 			}
       else 
 			{					
 				Read_Config();
-				
-				PRINTF("If ABP enabled\n\r"); 
-        PRINTF("DevEui= %02X", lora_config.DevEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF(" %02X", lora_config.DevEui[i]); }; PRINTF("\n\r");
-        PRINTF("DevAdd=  %08X\n\r", lora_config.DevAddr) ;
-        PRINTF("NwkSKey= %02X", lora_config.NwkSKey[0]) ;for(int i=1; i<16 ; i++) {PRINTF(" %02X", lora_config.NwkSKey[i]); }; PRINTF("\n\r");
-        PRINTF("AppSKey= %02X", lora_config.AppSKey[0]) ;for(int i=1; i<16 ; i++) {PRINTF(" %02X", lora_config.AppSKey[i]); }; PRINTF("\n\n\r");
-	
-	      PRINTF("If OTAA enabled\n\r"); 
-        PRINTF("DevEui= %02X", lora_config.DevEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF(" %02X", lora_config.DevEui[i]); }; PRINTF("\n\r");
-        PRINTF("AppEui= %02X", lora_config.AppEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF(" %02X", lora_config.AppEui[i]); }; PRINTF("\n\r");
-        PRINTF("AppKey= %02X", lora_config.AppKey[0]) ;for(int i=1; i<16; i++) {PRINTF(" %02X", lora_config.AppKey[i]); }; PRINTF("\n\n\r");
-				
 				LORA_Join();
 			}
 }
 
+void region_printf(void)
+{
+#if defined( REGION_AS923 )
+  PRINTF("AS923\n\r");
+#elif defined( REGION_AU915 )
+  PRINTF("AU915\n\r");
+#elif defined( REGION_CN470 )
+  PRINTF("CN470\n\r");
+#elif defined( REGION_CN779 )
+  PRINTF("CN779\n\r");
+#elif defined( REGION_EU433 )
+  PRINTF("EU433\n\r");
+#elif defined( REGION_IN865 )
+  PRINTF("IN865\n\r");
+#elif defined( REGION_EU868 )
+  PRINTF("EU868\n\r");
+#elif defined( REGION_KR920 )
+  PRINTF("KR920\n\r");
+#elif defined( REGION_US915 )
+  PRINTF("US915\n\r");
+#else
+    #error "Please define a region in the compiler options."
+#endif
+}
+
+void key_printf(void)
+{
+//  PPRINTF("If ABP enabled\n\r"); 
+  PPRINTF("DevEui= %02X %02X %02X %02X %02X %02X %02X %02X\n\r", HEX8(lora_config.DevEui));
+//  PPRINTF("DevAdd=  %08X\n\r", lora_config.DevAddr) ;
+//  PPRINTF("NwkSKey= %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n\r", HEX16(lora_config.NwkSKey));
+//  PPRINTF("AppSKey= %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n\r", HEX16(lora_config.AppSKey));
+//			
+//  PPRINTF("If OTAA enabled\n\r"); 
+//  PPRINTF("DevEui= %02X %02X %02X %02X %02X %02X %02X %02X\n\r", HEX8(lora_config.DevEui));
+//  PPRINTF("AppEui= %02X %02X %02X %02X %02X %02X %02X %02X\n\r", HEX8(lora_config.AppEui));
+//  PPRINTF("AppKey= %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n\r", HEX16(lora_config.AppKey));	
+}
 
 void LORA_Join( void)
 {
@@ -690,6 +768,16 @@ int8_t lora_config_snr_get(void)
   return lora_config.Snr;
 }
 
+void lora_config_application_port_set(int8_t application_port)
+{
+	lora_config.application_port=application_port;
+}
+
+int8_t lora_config_application_port_get(void )
+{
+	return lora_config.application_port;
+}
+
 int16_t lora_config_rssi_get(void)
 {
   return lora_config.Rssi;
@@ -722,44 +810,44 @@ void store_data(uint8_t size,uint8_t *data1,uint32_t data2)
 	uint32_t data_32=0;
 		switch(size)
 		{
-			case 1:s_config[config_count++]=data2;break;
+			case 1:s_key[key_count++]=data2;break;
 			case 8:
              data_32|=data1[0]<<24;
 	           data_32|=data1[1]<<16;
 	           data_32|=data1[2]<<8;
 	           data_32|=data1[3];
-	           s_config[config_count++]=data_32;
+	           s_key[key_count++]=data_32;
 	           data_32=0;
 	           data_32|=data1[4]<<24;
 	           data_32|=data1[5]<<16;
 	           data_32|=data1[6]<<8;
 	           data_32|=data1[7];
-	           s_config[config_count++]=data_32;
+	           s_key[key_count++]=data_32;
 	           data_32=0;break;
 			case 16:
 				     data_32|=data1[0]<<24;
 	           data_32|=data1[1]<<16;
 	           data_32|=data1[2]<<8;
 	           data_32|=data1[3];
-	           s_config[config_count++]=data_32;
+	           s_key[key_count++]=data_32;
 	           data_32=0;
 	           data_32|=data1[4]<<24;
 	           data_32|=data1[5]<<16;
 	           data_32|=data1[6]<<8;
 	           data_32|=data1[7];
-	           s_config[config_count++]=data_32;
+	           s_key[key_count++]=data_32;
 	           data_32=0;
 			       data_32|=data1[8]<<24;
 	           data_32|=data1[9]<<16;
 	           data_32|=data1[10]<<8;
 	           data_32|=data1[11];
-	           s_config[config_count++]=data_32;
+	           s_key[key_count++]=data_32;
 	           data_32=0;
 	           data_32|=data1[12]<<24;
 	           data_32|=data1[13]<<16;
 	           data_32|=data1[14]<<8;
 	           data_32|=data1[15];
-	           s_config[config_count++]=data_32;
+	           s_key[key_count++]=data_32;
 	           data_32=0;break;
 		  default:break;
 		}
@@ -798,11 +886,8 @@ void read_data(uint8_t size,uint8_t *data1,uint32_t data3,uint32_t data4,uint32_
 		default:break;					
 		}
 }
-
-void Store_Config(void)
+void Store_key(void)
 {
-	uint32_t combination_data1=0,combination_data2=0;
-	
 	store_data(8,lora_config.DevEui,0);
 	store_data(1,0,lora_config.DevAddr);
 	store_data(16,lora_config.AppKey,0);
@@ -810,9 +895,19 @@ void Store_Config(void)
 	store_data(16,lora_config.AppSKey,0);
 	store_data(8,lora_config.AppEui,0);
 	
+	FLASH_erase(FLASH_USER_START_ADDR_KEY);//Page802 
+	FLASH_program(FLASH_USER_START_ADDR_KEY,s_key,key_count);//store key
+	
+	key_count=0;
+}
+
+void Store_Config(void)
+{
+	uint32_t combination_data1=0,combination_data2=0;
+	
 	MibRequestConfirm_t mib;
   LoRaMacStatus_t status;
-	
+
   mib.Type = MIB_ADR;
   status = LoRaMacMibGetRequestConfirm(&mib);
 	if(status!=LORAMAC_STATUS_OK)
@@ -891,44 +986,58 @@ void Store_Config(void)
 	
 	s_config[config_count++]=APP_TX_DUTYCYCLE;
 	
-	FLASH_erase(0x8019000);//Page800
-  
-	FLASH_program(s_config);
-
+	s_config[config_count++]=lora_config.application_port;
+	
+	s_config[config_count++]=customize_config.freq1;
+	
+	s_config[config_count++]=customize_config.set8channel;
+	
+	FLASH_erase(FLASH_USER_START_ADDR_CONFIG);//Page800 
+	FLASH_program(FLASH_USER_START_ADDR_CONFIG,s_config,config_count);//store config
+	
 	config_count=0;
 }
 
 void Read_Config(void)
 {
-	uint32_t star_address=0,r_config[27];
+	uint32_t star_address=0,r_config[13],r_key[17];
 	
-	star_address=FLASH_USER_START_ADDR;
-	for(int i=0;i<27;i++)
+	star_address=FLASH_USER_START_ADDR_KEY;
+	/* read key*/
+	for(int i=0;i<17;i++)
+	{
+	  r_key[i]=FLASH_read(star_address);
+		star_address+=4;
+	}
+	
+	read_data(8 ,lora_config.DevEui,r_key[0],r_key[1],0,0);
+	lora_config.DevAddr=r_key[2];
+	read_data(16,lora_config.AppKey,r_key[3],r_key[4],r_key[5],r_key[6]);
+	read_data(16,lora_config.NwkSKey,r_key[7],r_key[8],r_key[9],r_key[10]);
+	read_data(16,lora_config.AppSKey,r_key[11],r_key[12],r_key[13],r_key[14]);
+	read_data(8 ,lora_config.AppEui,r_key[15],r_key[16],0,0);
+	
+	
+	star_address=FLASH_USER_START_ADDR_CONFIG;
+	for(int i=0;i<13;i++)
 	{
 	  r_config[i]=FLASH_read(star_address);
 		star_address+=4;
 	}
 	
-	read_data(8 ,lora_config.DevEui,r_config[0],r_config[1],0,0);
-	lora_config.DevAddr=r_config[2];
-	read_data(16,lora_config.AppKey,r_config[3],r_config[4],r_config[5],r_config[6]);
-	read_data(16,lora_config.NwkSKey,r_config[7],r_config[8],r_config[9],r_config[10]);
-	read_data(16,lora_config.AppSKey,r_config[11],r_config[12],r_config[13],r_config[14]);
-	read_data(8 ,lora_config.AppEui,r_config[15],r_config[16],0,0);
-	
 	MibRequestConfirm_t mib;
 	
   mib.Type = MIB_ADR;
-	mib.Param.AdrEnable=(r_config[17]>>24)&0xFF;
+	mib.Param.AdrEnable=(r_config[0]>>24)&0xFF;
 	LoRaMacMibSetRequestConfirm( &mib );
 	
 	mib.Type = MIB_CHANNELS_TX_POWER;
-	mib.Param.ChannelsTxPower=(r_config[17]>>16)&0xFF;
+	mib.Param.ChannelsTxPower=(r_config[0]>>16)&0xFF;
 	LoRaMacMibSetRequestConfirm( &mib );
 	
-	lora_config.TxDatarate=(r_config[17]>>8)&0xFF;
+	lora_config.TxDatarate=(r_config[0]>>8)&0xFF;
 	
-	if((r_config[17]&0xFF)==0x01)
+	if((r_config[0]&0xFF)==0x01)
 		lora_config.duty_cycle=LORA_ENABLE;
 	  else
 			lora_config.duty_cycle=LORA_DISABLE;
@@ -936,58 +1045,60 @@ void Read_Config(void)
 	LoRaMacTestSetDutyCycleOn((lora_config.duty_cycle == LORA_ENABLE) ? 1 : 0);
 	
 	mib.Type = MIB_PUBLIC_NETWORK;
-	mib.Param.EnablePublicNetwork=(r_config[18]>>24)&0xFF;
+	mib.Param.EnablePublicNetwork=(r_config[1]>>24)&0xFF;
 	LoRaMacMibSetRequestConfirm( &mib );
 	
-	if(((r_config[18]>>16)&0xFF)==0x01)
+	if(((r_config[1]>>16)&0xFF)==0x01)
 		lora_config.otaa=LORA_ENABLE;
 	  else
 			lora_config.otaa=LORA_DISABLE;
 		
 	mib.Type = MIB_DEVICE_CLASS;
-	mib.Param.Class=(DeviceClass_t)((r_config[18]>>8)&0xFF);
+	mib.Param.Class=(DeviceClass_t)((r_config[1]>>8)&0xFF);
 	LoRaMacMibSetRequestConfirm( &mib );
 		
-	if((r_config[18]&0xFF)==0x01)
+	if((r_config[1]&0xFF)==0x01)
 		lora_config.ReqAck=LORAWAN_CONFIRMED_MSG;
 	  else
 			lora_config.ReqAck=LORAWAN_UNCONFIRMED_MSG;
 	
 	mib.Type = MIB_RX2_CHANNEL;
-	mib.Param.Rx2Channel.Frequency=r_config[19];
+	mib.Param.Rx2Channel.Frequency=r_config[2];
 	LoRaMacMibSetRequestConfirm( &mib );
 	
 	mib.Type = MIB_RX2_CHANNEL;
-	mib.Param.Rx2Channel.Datarate=r_config[20];
+	mib.Param.Rx2Channel.Datarate=r_config[3];
 	LoRaMacMibSetRequestConfirm( &mib );
 	
 	mib.Type = MIB_RECEIVE_DELAY_1;
-	mib.Param.ReceiveDelay1=r_config[21];
+	mib.Param.ReceiveDelay1=r_config[4];
 	LoRaMacMibSetRequestConfirm( &mib );
 	
 	mib.Type = MIB_RECEIVE_DELAY_2;
-	mib.Param.ReceiveDelay2=r_config[22];
+	mib.Param.ReceiveDelay2=r_config[5];
 	LoRaMacMibSetRequestConfirm( &mib );
 	
 	mib.Type = MIB_JOIN_ACCEPT_DELAY_1;
-	mib.Param.JoinAcceptDelay1=r_config[23];
+	mib.Param.JoinAcceptDelay1=r_config[6];
 	LoRaMacMibSetRequestConfirm( &mib );
 	
 	mib.Type = MIB_JOIN_ACCEPT_DELAY_2;
-	mib.Param.JoinAcceptDelay2=r_config[24];
+	mib.Param.JoinAcceptDelay2=r_config[7];
 	LoRaMacMibSetRequestConfirm( &mib );
 	
 	mib.Type = MIB_NET_ID;
-	mib.Param.NetID=r_config[25];
+	mib.Param.NetID=r_config[8];
 	LoRaMacMibSetRequestConfirm( &mib );
 	
-	APP_TX_DUTYCYCLE=r_config[26];
+	APP_TX_DUTYCYCLE=r_config[9];
+	
+	lora_config.application_port=r_config[10];
+	
+	customize_config.freq1=r_config[11];
+	
+	customize_config.set8channel=r_config[12];
 }
 
-uint8_t configcount(void)
-{
-	return config_count;
-}
 /* Dummy data sent periodically to let the tester respond with start test command*/
 //static TimerEvent_t TxcertifTimer;
 

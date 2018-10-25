@@ -33,6 +33,7 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 #include "RegionEU868.h"
 #include "debug.h"
 
+#include "lora.h"
 // Definitions
 #define CHANNELS_MASK_SIZE              1
 
@@ -339,10 +340,16 @@ void RegionEU868SetBandTxDone( SetBandTxDoneParams_t* txDone )
 
 void RegionEU868InitDefaults( InitType_t type )
 {
+	uint32_t channel_single;
+	
+	channel_single=customize_freq1_get();
+	
     switch( type )
     {
         case INIT_TYPE_INIT:
         {
+					if(channel_single==0)
+					{
             // Channels
             Channels[0] = ( ChannelParams_t ) EU868_LC1;
             Channels[1] = ( ChannelParams_t ) EU868_LC2;
@@ -353,6 +360,16 @@ void RegionEU868InitDefaults( InitType_t type )
             // Update the channels mask
             RegionCommonChanMaskCopy( ChannelsMask, ChannelsDefaultMask, 1 );
             break;
+					}
+					else
+					{
+						Channels[0] = ( ChannelParams_t ) { channel_single, 0, { ( ( DR_5 << 4 ) | DR_0 ) }, 1 };
+						// Initialize the channels default mask
+            ChannelsDefaultMask[0] = 1;
+            // Update the channels mask
+            RegionCommonChanMaskCopy( ChannelsMask, ChannelsDefaultMask, 1 );
+            break;
+					}
         }
         case INIT_TYPE_RESTORE:
         {

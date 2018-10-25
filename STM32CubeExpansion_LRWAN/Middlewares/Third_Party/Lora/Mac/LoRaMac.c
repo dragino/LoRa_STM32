@@ -175,6 +175,8 @@ static uint32_t DownLinkCounter = 0;
  */
 static bool IsUpLinkCounterFixed = false;
 
+static void onNetworkJointimesout( void );
+
 /*!
  * Used for test purposes. Disables the opening of the reception windows.
  */
@@ -1256,6 +1258,7 @@ static void OnMacStateCheckTimerEvent( void )
                     {
                         if( JoinRequestTrials >= MaxJoinRequestTrials )
                         {
+													  NVIC_SystemReset();
                             LoRaMacState &= ~LORAMAC_TX_RUNNING;
                         }
                         else
@@ -1967,7 +1970,8 @@ static LoRaMacStatus_t ScheduleTx( void )
         RxWindow2Delay = LoRaMacParams.ReceiveDelay2 + RxWindow2Config.WindowOffset;
     }
 
-    // Schedule transmission of frame
+    /*
+		// Schedule transmission of frame
     if( dutyCycleTimeOff == 0 )
     {
         // Try to send now
@@ -1982,6 +1986,59 @@ static LoRaMacStatus_t ScheduleTx( void )
 
         return LORAMAC_STATUS_OK;
     }
+		*/
+		if( IsLoRaMacNetworkJoined == true )
+		{
+		  // Schedule transmission of frame
+      if( dutyCycleTimeOff == 0 )
+      {
+        // Try to send now
+        return SendFrameOnChannel( Channel );
+      }
+    else
+      {
+        // Send later - prepare timer
+        LoRaMacState |= LORAMAC_TX_DELAYED;
+        TimerSetValue( &TxDelayedTimer, dutyCycleTimeOff );
+        TimerStart( &TxDelayedTimer );
+
+        return LORAMAC_STATUS_OK;
+      }
+	  }
+		else
+		{
+			if(JoinRequestTrials>50)
+			{
+				TimerInit( &TxDelayedTimer, onNetworkJointimesout );
+        TimerSetValue( &TxDelayedTimer, 1800000 );
+        TimerStart( &TxDelayedTimer );
+
+        return LORAMAC_STATUS_OK;
+			}
+			else
+			{
+				// Schedule transmission of frame
+        if( dutyCycleTimeOff == 0 )
+        { 
+          // Try to send now
+          return SendFrameOnChannel( Channel );
+        }
+        else
+        {
+          // Send later - prepare timer
+          LoRaMacState |= LORAMAC_TX_DELAYED;
+          TimerSetValue( &TxDelayedTimer, dutyCycleTimeOff );
+          TimerStart( &TxDelayedTimer );
+
+          return LORAMAC_STATUS_OK;
+        }
+			}
+		}
+}
+
+static void onNetworkJointimesout( void )
+{
+	SendFrameOnChannel( Channel );
 }
 
 static void CalculateBackOff( uint8_t channel )

@@ -75,7 +75,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "hw_rtc.h"
 #include "hw_msp.h"
 #include "debug.h"
-
+#include "trace.h"
+	 
 	 typedef enum
 {
   HW_UNLOCKED = 0x00U,

@@ -76,7 +76,7 @@ typedef enum eATEerror
 /* External variables --------------------------------------------------------*/
 /* Exported macros -----------------------------------------------------------*/
 /* AT printf */
-#define AT_PRINTF(...)     vcom_Send(__VA_ARGS__)
+#define AT_PRINTF     PRINTF
 
 /* AT Command strings. Commands start with AT */
 #define AT_RESET      "Z"
@@ -115,6 +115,10 @@ typedef enum eATEerror
 #define AT_SNR        "+SNR"
 #define AT_RSSI       "+RSSI"
 #define AT_TDC        "+TDC"
+#define AT_PORT       "+PORT"
+#define AT_DISAT      "+DISAT"
+#define AT_CHS        "+CHS"
+#define AT_CHE        "+CHE"
 
 /* Exported functions ------------------------------------------------------- */
 
@@ -582,7 +586,29 @@ ATEerror_t at_TDC_get(const char *param);
  * @retval AT_OK
  */
 ATEerror_t at_TDC_set(const char *param);
-  
+
+/**
+ * @brief  
+ * @param  String parameter
+ * @retval AT_OK
+ */
+ATEerror_t at_application_port_get(const char *param);
+
+/**
+ * @brief  
+ * @param  String parameter
+ * @retval AT_OK
+ */
+ATEerror_t at_application_port_set(const char *param);
+
+ATEerror_t at_CHS_get(const char *param);
+
+ATEerror_t at_CHS_set(const char *param);
+
+ATEerror_t at_CHE_get(const char *param);
+
+ATEerror_t at_CHE_set(const char *param);
+
 #ifdef __cplusplus
 }
 #endif

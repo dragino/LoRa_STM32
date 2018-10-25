@@ -90,7 +90,7 @@ uint32_t APP_TX_DUTYCYCLE=30000;
 /*!
  * Number of trials for the join request.
  */
-#define JOINREQ_NBTRIALS                            3
+#define JOINREQ_NBTRIALS                            200
 /*!
  * LoRaWAN default endNode class port
  */
@@ -131,11 +131,15 @@ static void LORA_ConfirmClass ( DeviceClass_t Class );
 /* LoRa endNode send request*/
 static void Send( void );
 
+#if defined(LoRa_Sensor_Node)
 /* start the tx process*/
 static void LoraStartTx(TxEventType_t EventType);
 
+static TimerEvent_t TxTimer;
+
 /* tx timer callback function*/
 static void OnTxTimerEvent( void );
+#endif
 
 /* Private variables ---------------------------------------------------------*/
 /* load Main call backs structure*/
@@ -147,19 +151,6 @@ static LoRaMainCallback_t LoRaMainCallbacks ={ HW_GetBatteryLevel,
                                                LORA_HasJoined,
                                                LORA_ConfirmClass};
 
-/*!
- * Specifies the state of the application LED
- */
-                                               
-static TimerEvent_t TxTimer;
-
-#ifdef USE_B_L072Z_LRWAN1
-/*!
- * Timer to handle the application Tx Led to toggle
- */
-static TimerEvent_t TxLedTimer;
-static void OnTimerLedEvent( void );
-#endif
 /* !
  *Initialises the Lora Parameters
  */
@@ -203,18 +194,20 @@ int main( void )
   {
 		/* Handle UART commands */
     CMD_Process();
+		
+		#if defined(LoRa_Sensor_Node)
 		send_exti();
+		#endif
+		
     DISABLE_IRQ( );
-    /* if an interrupt has occurred after DISABLE_IRQ, it is kept pending 
-     * and cortex will not enter low power anyway  */
-
-    if ( (IsNewCharReceived() == RESET))
-    {
+    /*
+     * if an interrupt has occurred after DISABLE_IRQ, it is kept pending
+     * and cortex will not enter low power anyway
+     * don't go in low power mode if we just received a char
+     */
 #ifndef LOW_POWER_DISABLE
-      LPM_EnterLowPower();
+    LPM_EnterLowPower();
 #endif
-    }
-
     ENABLE_IRQ();
     
     /* USER CODE BEGIN 2 */
@@ -225,13 +218,14 @@ int main( void )
 static void LORA_HasJoined( void )
 {
   AT_PRINTF("JOINED\n\r");
+	Read_Config();
   LORA_RequestClass( LORAWAN_DEFAULT_CLASS );
 	
-	#if defined(LoRa_Sensor_Node)
-	LoraStartTx( TX_ON_TIMER);
+	#if defined(LoRa_Sensor_Node) /*LSN50 Preprocessor compile swicth:hw_conf.h*/
+	LoraStartTx( TX_ON_TIMER);    
 	#endif
 	
-	#if defined(AT_Data_Send)
+	#if defined(AT_Data_Send)     /*LoRa ST Module*/
 	AT_PRINTF("Please using AT+SEND or AT+SENDB to send you data!\n\r");
 	#endif
 }
@@ -252,7 +246,7 @@ static void Send( void )
 	
 	uint32_t i = 0;
 
-  AppData.Port = LORAWAN_APP_PORT;
+  AppData.Port = lora_config_application_port_get();
 	
 	HW_GetBatteryLevel( );
 	
@@ -332,6 +326,10 @@ static void Send( void )
 		AppData.Buff[i++]=0x00;
 	}
 	
+	#if defined( REGION_US915 ) || defined( REGION_US915_HYBRID ) || defined ( REGION_AU915 ) || defined ( REGION_AS923 )
+  /* The maximum payload size does not allow to send more data for lowest DRs */
+#else
+	
 	#ifdef USE_SHT20
 	
 	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      //SHT20
@@ -339,6 +337,7 @@ static void Send( void )
 	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10)>>8; 
 	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10);
 	
+	#endif
 	#endif
 	#endif
 	AppData.BuffSize = i;
@@ -360,13 +359,12 @@ static void LORA_RxData( lora_AppData_t *AppData )
 	AT_PRINTF("\n\r");
 }
 
+#if defined(LoRa_Sensor_Node)
 static void OnTxTimerEvent( void )
 {
   Send( );
 	
-	#if defined(LoRa_Sensor_Node)
 	TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE-750);
-	#endif
 	
   /*Wait for next tx slot*/
   TimerStart( &TxTimer);
@@ -382,6 +380,7 @@ static void LoraStartTx(TxEventType_t EventType)
     OnTxTimerEvent();
   }
 }
+#endif
 
 static void LORA_ConfirmClass ( DeviceClass_t Class )
 {

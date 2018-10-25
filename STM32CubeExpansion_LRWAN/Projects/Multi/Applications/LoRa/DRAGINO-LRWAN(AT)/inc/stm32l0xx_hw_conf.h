@@ -136,6 +136,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define USARTX_CLK_ENABLE()              __LPUART1_CLK_ENABLE()
 #define USARTX_RX_GPIO_CLK_ENABLE()      __GPIOA_CLK_ENABLE()
 #define USARTX_TX_GPIO_CLK_ENABLE()      __GPIOA_CLK_ENABLE() 
+#define DMAX_CLK_ENABLE()                __HAL_RCC_DMA1_CLK_ENABLE()
 
 #define USARTX_FORCE_RESET()             __LPUART1_FORCE_RESET()
 #define USARTX_RELEASE_RESET()           __LPUART1_RELEASE_RESET()
@@ -150,8 +151,21 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define USARTX_RX_AF                   GPIO_AF6_LPUART1
 
 /* Definition for USARTx's NVIC */
-#define USARTX_IRQn                      LPUART1_IRQn
-#define USARTX_IRQHandler                LPUART1_IRQHandler
+#define USARTX_IRQn                      RNG_LPUART1_IRQn
+#define USARTX_IRQHandler                RNG_LPUART1_IRQHandler
+/* Definition for USARTx's DMA */
+#define USARTX_TX_DMA_CHANNEL             DMA1_Channel7
+
+/* Definition for USARTx's DMA Request */
+#define USARTX_TX_DMA_REQUEST             DMA_REQUEST_5
+
+/* Definition for USARTx's NVIC */
+#define USARTX_DMA_TX_IRQn                DMA1_Channel4_5_6_7_IRQn
+#define USARTX_DMA_TX_IRQHandler          DMA1_Channel4_5_6_7_IRQHandler
+
+#define USARTX_Priority 1
+#define USARTX_DMA_Priority 1
+
 
 /* --------------------------- I2C HW definition -------------------------------*/
 #define I2Cx                            I2C1
@@ -201,14 +215,15 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define GPIO_INPUT_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()
 #define GPIO_INPUT_PORT           GPIOA	 
 #define GPIO_INPUT_PIN1           GPIO_PIN_12
-#define GPIO_INPUT_PIN2           GPIO_PIN_11
-#define GPIO_INPUT_PIN3           GPIO_PIN_14
 
 /* ---------------------------  ADC_IN1 definition -------------------------------*/
 #define ADC_IN1_LEVEL_PORT        GPIOA
 #define ADC_IN1_LEVEL_PIN         GPIO_PIN_1
 #define ADC_Channel_IN1           ADC_CHANNEL_1
 
+/* ---------------------------  +5v PWR OUT definition -------------------------------*/
+#define PWR_OUT_PORT              GPIOB
+#define PWR_OUT_PIN               GPIO_PIN_5
 #ifdef __cplusplus
 }
 #endif

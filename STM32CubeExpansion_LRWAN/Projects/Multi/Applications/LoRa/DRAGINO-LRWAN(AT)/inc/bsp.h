@@ -69,6 +69,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Exported types ------------------------------------------------------------*/
 
 typedef struct{
+	
   int   in1;/*GPIO Digital Input 0 or 1*/
 	
 	float temp1;//DS18B20
@@ -77,7 +78,6 @@ typedef struct{
 	
 	uint8_t PA1_mv;//PA1
 
-	
 	float temp_sht;
 	float hum_sht;
 

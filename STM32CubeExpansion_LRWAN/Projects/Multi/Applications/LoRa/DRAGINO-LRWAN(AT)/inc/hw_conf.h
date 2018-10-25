@@ -125,9 +125,9 @@ Maintainer: Miguel Luis and Gregory Cristian
 #endif
 
 /* --------Preprocessor compile swicth------------ */
+#define LoRa_Sensor_Node   /*LSN50 Device*/
+//#define AT_Data_Send         /*LoRa ST Module*/
 
-#define LoRa_Sensor_Node   /*LSN50*/
-//#define AT_Data_Send     /*AT+SEND or AT+SENDB*/
    
 /* uncomment below line to never enter lowpower modes in main.c*/
 //#define LOW_POWER_DISABLE

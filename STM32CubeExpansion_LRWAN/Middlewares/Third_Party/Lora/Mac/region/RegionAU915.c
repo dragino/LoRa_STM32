@@ -33,6 +33,7 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 #include "RegionAU915.h"
 #include "debug.h"
 
+#include "lora.h"
 // Definitions
 #define CHANNELS_MASK_SIZE              6
 
@@ -293,6 +294,10 @@ void RegionAU915SetBandTxDone( SetBandTxDoneParams_t* txDone )
 
 void RegionAU915InitDefaults( InitType_t type )
 {
+	uint32_t channel_single;
+	
+	channel_single=customize_freq1_get();
+	
     switch( type )
     {
         case INIT_TYPE_INIT:
@@ -301,7 +306,14 @@ void RegionAU915InitDefaults( InitType_t type )
             // 125 kHz channels
             for( uint8_t i = 0; i < AU915_MAX_NB_CHANNELS - 8; i++ )
             {
+							if(channel_single==0)
+				    	{
                 Channels[i].Frequency = 915200000 + i * 200000;
+							}
+							else
+							{
+								Channels[i].Frequency =channel_single;
+							}
                 Channels[i].DrRange.Value = ( DR_5 << 4 ) | DR_0;
                 Channels[i].Band = 0;
             }
@@ -313,13 +325,50 @@ void RegionAU915InitDefaults( InitType_t type )
                 Channels[i].Band = 0;
             }
 
-            // Initialize channels default mask
-            ChannelsDefaultMask[0] = 0xFFFF;
-            ChannelsDefaultMask[1] = 0xFFFF;
-            ChannelsDefaultMask[2] = 0xFFFF;
-            ChannelsDefaultMask[3] = 0xFFFF;
-            ChannelsDefaultMask[4] = 0x00FF;
+//            // Initialize channels default mask
+//            ChannelsDefaultMask[0] = 0xFFFF;
+//            ChannelsDefaultMask[1] = 0xFFFF;
+//            ChannelsDefaultMask[2] = 0xFFFF;
+//            ChannelsDefaultMask[3] = 0xFFFF;
+//            ChannelsDefaultMask[4] = 0x00FF;
+//            ChannelsDefaultMask[5] = 0x0000;
+						
+						// ChannelsMask
+            ChannelsDefaultMask[0] = 0x0000;
+            ChannelsDefaultMask[1] = 0x0000;
+            ChannelsDefaultMask[2] = 0x0000;
+            ChannelsDefaultMask[3] = 0x0000;
+            ChannelsDefaultMask[4] = 0x0000;
             ChannelsDefaultMask[5] = 0x0000;
+
+						uint8_t num,channel_num,k;
+						
+						channel_num=customize_set8channel_get();
+						
+						num=(customize_set8channel_get()%2==1)? 0:8;
+						
+						if(channel_num>=1&&channel_num<=2)
+							k=0;
+						else if(channel_num>=3&&channel_num<=4)
+							k=1;
+						else if(channel_num>=5&&channel_num<=6)
+							k=2;
+						else if(channel_num>=7&&channel_num<=8)
+							k=3;
+						else 
+							k=5;
+						
+						ChannelsDefaultMask[k]=0x00FF<<num;						
+						
+						if(k==5)
+						{
+						  ChannelsDefaultMask[0] = 0xFFFF;
+              ChannelsDefaultMask[1] = 0xFFFF;
+              ChannelsDefaultMask[2] = 0xFFFF;
+              ChannelsDefaultMask[3] = 0xFFFF;
+              ChannelsDefaultMask[4] = 0x00FF;
+              ChannelsDefaultMask[5] = 0x0000;
+						}
 
             // Copy channels default mask
             RegionCommonChanMaskCopy( ChannelsMask, ChannelsDefaultMask, 6 );
