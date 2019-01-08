@@ -243,7 +243,20 @@ float DS18B20_GetTemp_SkipRom ( void )
         tplsb = DS18B20_ReadByte();                 
         tpmsb = DS18B20_ReadByte(); 
         
+        if((tpmsb==5)&&(tplsb==80))     //1360= 00000101 01010000,tpmsb=00000101=5,tplsb=01010000=80;  
+        {
+		    DS18B20_SkipRom();
+        DS18B20_WriteByte(0X44);                                
         
+        HAL_Delay(750);
+	
+        DS18B20_SkipRom ();
+        DS18B20_WriteByte(0XBE); 
+					
+        tplsb = DS18B20_ReadByte();                 
+        tpmsb = DS18B20_ReadByte();
+				}
+				
         s_tem = tpmsb<<8;
         s_tem = s_tem | tplsb;
         

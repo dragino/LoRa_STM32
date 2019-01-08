@@ -76,7 +76,7 @@ typedef enum eATEerror
 /* External variables --------------------------------------------------------*/
 /* Exported macros -----------------------------------------------------------*/
 /* AT printf */
-#define AT_PRINTF     PRINTF
+#define AT_PRINTF     PPRINTF
 
 /* AT Command strings. Commands start with AT */
 #define AT_RESET      "Z"
@@ -119,6 +119,9 @@ typedef enum eATEerror
 #define AT_DISAT      "+DISAT"
 #define AT_CHS        "+CHS"
 #define AT_CHE        "+CHE"
+#define AT_CFG        "+CFG"
+#define AT_RX1WTO     "+RX1WTO"
+#define AT_RX2WTO     "+RX2WTO"
 
 /* Exported functions ------------------------------------------------------- */
 
@@ -608,6 +611,14 @@ ATEerror_t at_CHS_set(const char *param);
 ATEerror_t at_CHE_get(const char *param);
 
 ATEerror_t at_CHE_set(const char *param);
+
+ATEerror_t at_symbtimeout1LSB_get(const char *param);
+
+ATEerror_t at_symbtimeout1LSB_set(const char *param);
+
+ATEerror_t at_symbtimeout2LSB_get(const char *param);
+
+ATEerror_t at_symbtimeout2LSB_set(const char *param);
 
 #ifdef __cplusplus
 }

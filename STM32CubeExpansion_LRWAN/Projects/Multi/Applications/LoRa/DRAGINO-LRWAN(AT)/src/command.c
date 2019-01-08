@@ -516,7 +516,29 @@ static const struct ATCommand_s ATCommand[] =
     .set = at_application_port_set,
     .run = at_return_error,
   },
- 
+	
+  {
+	  .string = AT_RX1WTO,
+    .size_string = sizeof(AT_RX1WTO) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_RX1WTO ": Get or Set the number of symbols to detect and timeout from RXwindow1(0 to 255)\r\n",
+#endif
+    .get = at_symbtimeout1LSB_get,
+    .set = at_symbtimeout1LSB_set,
+    .run = at_return_error,
+	},
+	
+	{
+	  .string = AT_RX2WTO,
+    .size_string = sizeof(AT_RX2WTO) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_RX2WTO ": Get or Set the number of symbols to detect and timeout from RXwindow2(0 to 255)\r\n",
+#endif
+    .get = at_symbtimeout2LSB_get,
+    .set = at_symbtimeout2LSB_set,
+    .run = at_return_error,
+	 },
+		
 	{
 	  .string = AT_CHS,
     .size_string = sizeof(AT_CHS) - 1,
@@ -540,6 +562,18 @@ static const struct ATCommand_s ATCommand[] =
     .run = at_return_error,
 	},
 	#endif	
+	
+	{
+	  .string = AT_CFG,
+    .size_string = sizeof(AT_CFG) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_CFG ": Print all configurations\r\n",
+#endif
+    .get = at_return_error,
+    .set = at_return_error,
+    .run = at_return_error,
+	},
+	
 };
 
 
@@ -666,6 +700,21 @@ static void parse_cmd(const char *cmd)
     {
       if (strncmp(cmd, ATCommand[i].string, ATCommand[i].size_string) == 0)
       {
+				if(strcmp(cmd,AT_CFG) == 0)
+			  {
+				  for (int j = 0; j< (sizeof(ATCommand) / sizeof(struct ATCommand_s)); j++)
+          {
+				    if((ATCommand[j].get)!=at_return_error)
+				    {
+              PPRINTF("AT%s=",ATCommand[j].string);
+			        ATCommand[j].get(( char *)cmd);						 
+				    }
+			    }
+			 status = AT_OK;
+			 break;
+			}
+      else
+			{
         Current_ATCommand = &(ATCommand[i]);
         /* point to the string after the command to parse it */
         cmd += Current_ATCommand->size_string;
@@ -702,6 +751,7 @@ static void parse_cmd(const char *cmd)
         /* we end the loop as the command was found */
         break;
       }
+		 }
     }
   }
 

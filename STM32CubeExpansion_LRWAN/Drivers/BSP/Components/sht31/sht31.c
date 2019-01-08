@@ -1,13 +1,13 @@
  /******************************************************************************
-  * @file    sht20.c
+  * @file    sht31.c
   * @author  MCD Application Team
   * @version V1.1.2
-  * @date    01-June-2017
+  * @date    30-Novermber-2018
   * @brief   manages the sensors on the application
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -46,7 +46,7 @@
   
   /* Includes ------------------------------------------------------------------*/
 
-#include "sht20.h"
+#include "sht31.h"
 
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,9 +59,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* I2C handler declaration */
-#ifdef  USE_SHT20
+#ifdef  USE_SHT31
 I2C_HandleTypeDef I2cHandle;
-
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
 //#define I2C_TIMING    0x10A13E56 /* 100 kHz with analog Filter ON, Rise Time 400ns, Fall Time 100ns */ 
@@ -75,8 +74,9 @@ I2C_HandleTypeDef I2cHandle;
 /* Exported functions ---------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-void  BSP_sht20_Init( void )
+void  BSP_sht31_Init( void )
 {
+	uint8_t SHT3X_Modecommand_Buffer[2]={0x20,0x32}; 
   /*##-1- Configure the I2C peripheral ######################################*/
   I2cHandle.Instance              = I2Cx;
   I2cHandle.Init.Timing           = I2C_TIMING;
@@ -97,6 +97,8 @@ void  BSP_sht20_Init( void )
   /* Enable the Analog I2C Filter */
   HAL_I2CEx_ConfigAnalogFilter(&I2cHandle,I2C_ANALOGFILTER_ENABLE);
   /* Infinite loop */
+	
+			HAL_I2C_Master_Transmit(&I2cHandle,0x88,SHT3X_Modecommand_Buffer,2,1000); //work mode
 }
 /**
   * @brief I2C MSP Initialization 
@@ -108,7 +110,7 @@ void  BSP_sht20_Init( void )
   * @param hi2c: I2C handle pointer
   * @retval None
   */
-void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
+ void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
   RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
@@ -163,102 +165,98 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
   /* Configure I2C Rx as alternate function  */
   HAL_GPIO_DeInit(I2Cx_SDA_GPIO_PORT, I2Cx_SDA_PIN);
 }
-float SHT20_RH(void)
+float SHT31_RH(void)
 {
-	  uint8_t txdata[1]={0xf5};//Humidity measurement
-		uint8_t rxdata[2];
-		uint16_t AD_code;
-		uint16_t sum1=0;    
-		uint16_t sum2=0;
-		uint8_t flags=0;   //flag
-		float hum;
-
-		while(HAL_I2C_Master_Transmit(&I2cHandle,0x80,txdata,1,1000) != HAL_OK)
-    {
-		  sum1++;
-			if(sum1>=500)
-			{ 
-				flags=1;
-				break;
-			}
-        if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
-        {}
-    }
-		
-		while(HAL_I2C_Master_Receive(&I2cHandle,0x81,rxdata,2,1000) != HAL_OK)
-    {
-			sum2++;
-			if(sum2>=600)   //The minimum time required for humidity conversion, the timeout jumps out of the loop
-			{
-				flags=1;
-				break;
-			}
-        if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
-        {}
-    }
-		
-  if(flags==0)
-	{
-	AD_code=(rxdata[0]<<8)+rxdata[1];
-	AD_code &=~0x0003;
-
-	hum=AD_code*125.0/65536-6;
-  PPRINTF("Humidity =%f\r\n",hum);
-	}
-	else
-	{
-	 hum=6553.5;     // 65535=0XFF, 6553.5=65535/10; 
-	 PPRINTF("Please connect the SHT20\r\n");   
-	}
-	
-	return hum;
-}
-
-float SHT20_RT(void)
-{
-	  uint8_t txdata[1]={0xf3};//Temperature measurement
-		uint8_t rxdata[2];
+	  uint8_t txdata[2]={0xE0,0x00}; //Humidity measurement
+		uint8_t rxdata[6];
 		uint16_t AD_code;
 		uint16_t sum1=0;
 		uint16_t sum2=0;
-		uint8_t flags=0;    //flag
-		float tem;
-	
-		while(HAL_I2C_Master_Transmit(&I2cHandle,0x80,txdata,1,1000) != HAL_OK)
+		uint8_t flags=0;
+		float hum;
+			while(HAL_I2C_Master_Transmit(&I2cHandle,0x88,txdata,2,1000) != HAL_OK)   
     {
-		   sum1++;
-			 if(sum1>=500)
-			{ 
-				flags=1;
-				break;
-			}
+		    sum1++;
+				if(sum1>=500)
+				{
+				  flags=1;
+					break;
+				}
+        if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
+        {}
+    }
+		while(HAL_I2C_Master_Receive(&I2cHandle,0x89,rxdata,6,1000) != HAL_OK)  
+    {
+		    sum2++;
+				if(sum2>=55000)     //The minimum time required for humidity conversion, the timeout jumps out of the loop
+				{
+				  flags=1;
+					break;
+				}
         if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
         {}
     }
 		
-		while(HAL_I2C_Master_Receive(&I2cHandle,0x81,rxdata,2,1000) != HAL_OK)
+		if(flags==0)
+		{
+	AD_code=(rxdata[3]<<8)+rxdata[4];
+	AD_code &=~0x0003;    //stay 14bit
+
+	hum=AD_code*100.0/(65536-1);
+  PPRINTF("Humidity =%f\r\n",hum);
+    }
+		else
+		{
+		 hum=6553.5;        // 65535=0XFF, 6553.5=65535/10;  
+		 PPRINTF("Please connect the SHT31\r\n");
+		}
+	return hum;
+}
+
+float SHT31_RT(void)
+{
+	  uint8_t txdata[2]={0xE0,0x00};//Temperature measurement
+		uint8_t rxdata[6];
+		uint16_t AD_code;
+		float tem;
+   	uint16_t sum1=0;
+		uint16_t sum2=0;
+		uint8_t flags=0;
+	while(HAL_I2C_Master_Transmit(&I2cHandle,0x88,txdata,2,1000) != HAL_OK)   
     {
-		  sum2++;
-			if(sum2>=1600)    //The minimum time required for temperature conversion, the timeout jumps out of the loop
-			{
-				flags=1;
-				break;
-			}
+			  sum1++;
+				if(sum1>=500)
+				{
+				  flags=1;
+					break;
+				}
+        if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
+        {}
+    }
+		
+		while(HAL_I2C_Master_Receive(&I2cHandle,0x89,rxdata,6,1000) != HAL_OK)  
+    {
+			  sum2++;
+				if(sum2>=500)       // The minimum time required for temperature conversion, the timeout jumps out of the loop
+				{
+				  flags=1;
+					break;
+				}
         if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
         {}
     }
 		
 	if(flags==0)
-	{
+		{
 	AD_code=(rxdata[0]<<8)+rxdata[1];
-	AD_code &=~0x0003;
-	tem=AD_code*175.72/65536-46.85;
+	AD_code &=~0x0003;         //stay 14bit
+	tem=AD_code*175.0/(65536-1)-45.0;
 	PPRINTF("Temperature =%f\r\n",tem);
-	}
-  else
-  {
+    }
+	else
+	{
 	 tem=6553.5;   // 65535=0XFF, 6553.5=65535/10; 
-	}		
+	}
   return tem;
 }
 #endif

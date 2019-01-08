@@ -59,16 +59,6 @@
 /* Private define ------------------------------------------------------------*/
 
 /*!
- * CAYENNE_LPP is myDevices Application server.
- */
-//#define CAYENNE_LPP
-#define LPP_DATATYPE_DIGITAL_INPUT  0x0
-#define LPP_DATATYPE_ANOLOG_INPUT   0x02
-#define LPP_DATATYPE_HUMIDITY       0x68
-#define LPP_DATATYPE_TEMPERATURE    0x67
-
-#define LPP_APP_PORT 99
-/*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
 uint32_t APP_TX_DUTYCYCLE=30000;
@@ -83,8 +73,8 @@ uint32_t APP_TX_DUTYCYCLE=30000;
  */
 #define LORAWAN_DEFAULT_DATA_RATE DR_0
 /*!
- * LoRaWAN application port
- * @note do not use 224. It is reserved for certification
+ * LoRaWAN application port is 0 to 255
+ * @note do not use 256. It is reserved for certification
  */
 #define LORAWAN_APP_PORT                            2
 /*!
@@ -250,95 +240,32 @@ static void Send( void )
 	
 	HW_GetBatteryLevel( );
 	
-	#ifdef CAYENNE_LPP
-	
-	AppData.Buff[i++] = 0x01;
-  AppData.Buff[i++] = LPP_DATATYPE_ANOLOG_INPUT;   //level of battery
-	AppData.Buff[i++] =(int)(batteryLevel_mV*0.1)>>8;       
-	AppData.Buff[i++] =(int)(batteryLevel_mV*0.1);
-	
-  AppData.Buff[i++] = 0x02;
-	AppData.Buff[i++] =LPP_DATATYPE_TEMPERATURE;     //DS18B20
-	AppData.Buff[i++] =(int)(sensor_data.temp1*10)>>8;       
-	AppData.Buff[i++] =(int)(sensor_data.temp1*10);
-	
-	AppData.Buff[i++] = 0x03;
-	AppData.Buff[i++] =LPP_DATATYPE_DIGITAL_INPUT;   //GPIO Digital Input 0 or 1
-	AppData.Buff[i++] =sensor_data.in1;      
-	
-	#if defined( REGION_US915 ) || defined( REGION_US915_HYBRID ) || defined ( REGION_AU915 ) || defined ( REGION_AS923 )
-  /* The maximum payload size does not allow to send more data for lowest DRs */
-#else
-
-  AppData.Buff[i++] =0x04;
-	AppData.Buff[i++] = LPP_DATATYPE_ANOLOG_INPUT;
-	AppData.Buff[i++] =(int)(sensor_data.oil*0.1)>>8;          //oil float
-	AppData.Buff[i++] =(int)(sensor_data.oil*0.1);
-	
-	AppData.Buff[i++] =0x05;
-	AppData.Buff[i++] = LPP_DATATYPE_DIGITAL_INPUT;
-	
-	if(exti_flag==1)
-	{
-	  AppData.Buff[i++]=0x01;
-		exti_flag=0;
-	}
-	else
-	{
-		AppData.Buff[i++]=0x00;
-	}
-	
-	#ifdef USE_SHT20
-	
-	AppData.Buff[i++] =0x06;
-	AppData.Buff[i++] = LPP_DATATYPE_TEMPERATURE;
-	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      //SHT20
-	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10);
-	
-	AppData.Buff[i++] =0x07;
-	AppData.Buff[i++] = LPP_DATATYPE_HUMIDITY;
-	AppData.Buff[i++] =(int)(sensor_data.hum_sht*2);
-	
-	#endif
-	
-	#endif
-	
-	#else  /* not CAYENNE_LPP */
-	
 	AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 	AppData.Buff[i++] =batteryLevel_mV & 0xFF;
 	
 	AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
   AppData.Buff[i++]=(int)(sensor_data.temp1*10);
 	
-	AppData.Buff[i++] =sensor_data.in1;           //GPIO Digital Input 0 or 1
-	
   AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
 	AppData.Buff[i++] =(int)sensor_data.oil;
 	
 	if(exti_flag==1)
 	{
-	  AppData.Buff[i++]=0x01;
+	  AppData.Buff[i++]=(sensor_data.in1<<1)|0x01;    //Digital Input and EXTI Trigger status
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=0x00;
+		AppData.Buff[i++]=(sensor_data.in1<<1)|0x00;
 	}
 	
-	#if defined( REGION_US915 ) || defined( REGION_US915_HYBRID ) || defined ( REGION_AU915 ) || defined ( REGION_AS923 )
-  /* The maximum payload size does not allow to send more data for lowest DRs */
-#else
-	
-	#ifdef USE_SHT20
+	#if defined (USE_SHT20)||(USE_SHT31)
 	
 	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      //SHT20
 	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10);
 	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10)>>8; 
 	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10);
 	
-	#endif
-	#endif
 	#endif
 	AppData.BuffSize = i;
   LORA_send( &AppData, lora_config_reqack_get());

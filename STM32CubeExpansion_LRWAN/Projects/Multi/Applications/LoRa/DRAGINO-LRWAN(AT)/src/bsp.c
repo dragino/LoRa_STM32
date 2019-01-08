@@ -58,6 +58,7 @@
 #include "oil_float.h"
 #include "gpio_exti.h"
 #include "sht20.h"
+#include "sht31.h"
 #include "pwr_out.h"
 #endif
 /* Private macro -------------------------------------------------------------*/
@@ -98,6 +99,15 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 
 	 #endif
 	 
+   #ifdef USE_SHT31
+	float temp2,hum1;
+	temp2=SHT31_RT();//get temperature
+	hum1=SHT31_RH(); //get humidity
+	sensor_data->temp_sht=temp2;
+	sensor_data->hum_sht=hum1;
+
+	 #endif
+	 
 	 HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
 	 
 	#endif
@@ -113,6 +123,10 @@ void  BSP_sensor_Init( void  )
 	
 	 #ifdef USE_SHT20
 	 BSP_sht20_Init();
+	 #endif
+	
+	 #ifdef USE_SHT31
+	 BSP_sht31_Init();
 	 #endif
 	
 	pwr_control_IoInit();

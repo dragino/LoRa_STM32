@@ -78,6 +78,9 @@ Maintainer: Miguel Luis and Gregory Cristian
  * @note
  * @retval None
  */
+ 
+#include "hw.h"
+ 
 void  BSP_sht20_Init( void );
 float SHT20_RH(void);
 float SHT20_RT(void);

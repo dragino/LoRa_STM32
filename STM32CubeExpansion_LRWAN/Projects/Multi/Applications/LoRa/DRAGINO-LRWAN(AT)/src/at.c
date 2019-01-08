@@ -60,6 +60,12 @@
 #include "flash_eraseprogram.h"
 #include "timeServer.h"
 
+uint8_t symbtime1_value=0;  //RX1windowtimeout 
+uint8_t flag1=0;
+
+uint8_t symbtime2_value=0;  //RX2windowtimeout 
+uint8_t flag2=0;
+
 /* External variables --------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -1217,12 +1223,12 @@ ATEerror_t at_CHE_get(const char *param)
 	  fre1=j+(i-1)*k;
 	  for(int i=0;i<8;i++)
 	  {		
-		  PRINTF("%.1f ",fre1);
+		  AT_PRINTF("%.1f ",fre1);
 		  fre1=fre1+l;
 	  }
-	  PRINTF("\n\r");
+	  AT_PRINTF("\n\r");
   }
-	 else PRINTF("Use default channel");
+	 else AT_PRINTF("Use default channel");
 	
 	return AT_OK;
 }
@@ -1250,6 +1256,58 @@ ATEerror_t at_CHS_set(const char *param)
 ATEerror_t at_CHS_get(const char *param)
 { 
 	print_d(customize_freq1_get());
+	return AT_OK;
+}
+
+ATEerror_t at_symbtimeout1LSB_get(const char *param)
+{ 
+   print_d(symbtime1_value);
+	 return AT_OK;
+}
+
+ATEerror_t at_symbtimeout1LSB_set(const char *param)
+{ 
+	int symbtime1;
+	if (tiny_sscanf(param, "%d", &symbtime1) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+	if ((symbtime1>=0)&&(symbtime1<=255))
+  { 
+		 flag1=1;
+		 symbtime1_value=symbtime1;
+  }
+	else
+	{
+    return AT_PARAM_ERROR;
+	}
+	
+	return AT_OK;
+}
+
+ATEerror_t at_symbtimeout2LSB_get(const char *param)
+{ 
+   print_d(symbtime2_value);
+	 return AT_OK;
+}
+
+ATEerror_t at_symbtimeout2LSB_set(const char *param)
+{ 
+	int symbtime2;
+	if (tiny_sscanf(param, "%d", &symbtime2) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+	if ((symbtime2>=0)&&(symbtime2<=255))
+  { 
+		 flag2=1;
+		 symbtime2_value=symbtime2;
+  }
+	else
+	{
+    return AT_PARAM_ERROR;
+	}
+	
 	return AT_OK;
 }
 

@@ -31,7 +31,11 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 #include "debug.h"
 #include "LoRaMacTest.h"
 
+extern uint8_t symbtime1_value;
+extern uint8_t flag1;
 
+extern uint8_t symbtime2_value;
+extern uint8_t flag2;
 
 /*!
  * Maximum PHY layer payload size
@@ -1456,6 +1460,15 @@ static void OnRxWindow1TimerEvent( void )
     RxWindow1Config.RxContinuous = false;
     RxWindow1Config.Window = RxSlot;
 
+	  if(flag1==0)                                       //configure the RX1windowtimeout
+    {
+			symbtime1_value=RxWindow1Config.WindowTimeout;
+		}
+    else
+		{
+			RxWindow1Config.WindowTimeout=symbtime1_value;
+		}	
+		
     if( LoRaMacDeviceClass == CLASS_C )
     {
         Radio.Standby( );
@@ -1475,6 +1488,15 @@ static void OnRxWindow2TimerEvent( void )
     RxWindow2Config.RepeaterSupport = RepeaterSupport;
     RxWindow2Config.Window = 1;
 
+		 if(flag2==0)                                     //configure the RX2windowtimeout
+    {
+			symbtime2_value=RxWindow2Config.WindowTimeout;
+		}
+    else
+		{
+			RxWindow2Config.WindowTimeout=symbtime2_value;
+		}	
+		
     if( LoRaMacDeviceClass != CLASS_C )
     {
         RxWindow2Config.RxContinuous = false;

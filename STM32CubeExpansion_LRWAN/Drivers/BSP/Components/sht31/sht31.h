@@ -1,13 +1,13 @@
- /******************************************************************************
-  * @file    ogpio_exti.c
+/******************************************************************************
+  * @file    sht31.h
   * @author  MCD Application Team
   * @version V1.1.2
-  * @date    01-June-2017
-  * @brief   manages the sensors on the application
+  * @date    30-Novermber-2018
+  * @brief   contains all hardware driver
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -43,41 +43,36 @@
   *
   ******************************************************************************
   */
-  
-  /* Includes ------------------------------------------------------------------*/
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __SHT31_H__
+#define __SHT31_H__
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
+/* Includes ------------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
+
+/* Exported constants --------------------------------------------------------*/
+/* External variables --------------------------------------------------------*/
+/* Exported macros -----------------------------------------------------------*/
+/* Exported functions ------------------------------------------------------- */ 
+/**
+ * @brief  initialises the 
+ *
+ * @note
+ * @retval None
+ */
+ 
 #include "hw.h"
-#include "pwr_out.h"
 
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Exported functions ---------------------------------------------------------*/
-
-/* Private variables ---------------------------------------------------------*/
-
-void pwr_control_IoInit(void)
-{
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	GPIO_InitStruct.Pin = PWR_OUT_PIN;
-  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(PWR_OUT_PORT, &GPIO_InitStruct);
+void  BSP_sht31_Init( void );
+float SHT31_RH(void);
+float SHT31_RT(void);
+#ifdef __cplusplus
 }
+#endif
 
-void pwr_control_IoDeInit(void)
-{
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-
-  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;
-
-  HAL_GPIO_Init(PWR_OUT_PORT, &GPIO_InitStruct);
-	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);
-}
+#endif /* __BSP_H__ */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

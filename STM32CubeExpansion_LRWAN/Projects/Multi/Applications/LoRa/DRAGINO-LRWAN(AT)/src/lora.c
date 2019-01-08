@@ -54,6 +54,12 @@
 #include "flash_eraseprogram.h"
 #include "version.h"
 
+extern uint8_t symbtime1_value;
+extern uint8_t flag1;
+
+extern uint8_t symbtime2_value;
+extern uint8_t flag2;
+
 static uint8_t config_count=0;
 static uint8_t key_count=0;
 
@@ -461,23 +467,23 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
 void region_printf(void)
 {
 #if defined( REGION_AS923 )
-  PRINTF("AS923\n\r");
+  PPRINTF("AS923\n\r");
 #elif defined( REGION_AU915 )
-  PRINTF("AU915\n\r");
+  PPRINTF("AU915\n\r");
 #elif defined( REGION_CN470 )
-  PRINTF("CN470\n\r");
+  PPRINTF("CN470\n\r");
 #elif defined( REGION_CN779 )
-  PRINTF("CN779\n\r");
+  PPRINTF("CN779\n\r");
 #elif defined( REGION_EU433 )
-  PRINTF("EU433\n\r");
+  PPRINTF("EU433\n\r");
 #elif defined( REGION_IN865 )
-  PRINTF("IN865\n\r");
+  PPRINTF("IN865\n\r");
 #elif defined( REGION_EU868 )
-  PRINTF("EU868\n\r");
+  PPRINTF("EU868\n\r");
 #elif defined( REGION_KR920 )
-  PRINTF("KR920\n\r");
+  PPRINTF("KR920\n\r");
 #elif defined( REGION_US915 )
-  PRINTF("US915\n\r");
+  PPRINTF("US915\n\r");
 #else
     #error "Please define a region in the compiler options."
 #endif
@@ -992,6 +998,14 @@ void Store_Config(void)
 	
 	s_config[config_count++]=customize_config.set8channel;
 	
+	s_config[config_count++]=symbtime1_value;
+	
+	s_config[config_count++]=flag1;
+	
+	s_config[config_count++]=symbtime2_value;
+	
+	s_config[config_count++]=flag2;
+	
 	FLASH_erase(FLASH_USER_START_ADDR_CONFIG);//Page800 
 	FLASH_program(FLASH_USER_START_ADDR_CONFIG,s_config,config_count);//store config
 	
@@ -1000,7 +1014,7 @@ void Store_Config(void)
 
 void Read_Config(void)
 {
-	uint32_t star_address=0,r_config[13],r_key[17];
+	uint32_t star_address=0,r_config[17],r_key[17];
 	
 	star_address=FLASH_USER_START_ADDR_KEY;
 	/* read key*/
@@ -1019,7 +1033,7 @@ void Read_Config(void)
 	
 	
 	star_address=FLASH_USER_START_ADDR_CONFIG;
-	for(int i=0;i<13;i++)
+	for(int i=0;i<17;i++)
 	{
 	  r_config[i]=FLASH_read(star_address);
 		star_address+=4;
@@ -1097,6 +1111,14 @@ void Read_Config(void)
 	customize_config.freq1=r_config[11];
 	
 	customize_config.set8channel=r_config[12];
+	
+	symbtime1_value=r_config[13];
+	
+	flag1=r_config[14];
+	
+	symbtime2_value=r_config[15];
+	
+	flag2=r_config[16];
 }
 
 /* Dummy data sent periodically to let the tester respond with start test command*/
