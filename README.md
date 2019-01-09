@@ -11,6 +11,8 @@ In file Projects/Multi/Applications/LoRa/DRAGINO-LRWAN(AT)/inc/hw_conf.h
 
     #define LoRa_Sensor_Node /*LSN50*/      --- For LSN50
     //#define AT_Data_Send /*AT+SEND or AT+SENDB*/    --- For LoRa ST
+	
+	
 
 
 
