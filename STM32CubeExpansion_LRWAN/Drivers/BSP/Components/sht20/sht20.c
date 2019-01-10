@@ -188,7 +188,7 @@ float SHT20_RH(void)
 		while(HAL_I2C_Master_Receive(&I2cHandle,0x81,rxdata,2,1000) != HAL_OK)
     {
 			sum2++;
-			if(sum2>=600)   //The minimum time required for humidity conversion, the timeout jumps out of the loop
+			if(sum2>=2600)   //The minimum time required for humidity conversion, the timeout jumps out of the loop
 			{
 				flags=1;
 				break;
@@ -239,7 +239,7 @@ float SHT20_RT(void)
 		while(HAL_I2C_Master_Receive(&I2cHandle,0x81,rxdata,2,1000) != HAL_OK)
     {
 		  sum2++;
-			if(sum2>=1600)    //The minimum time required for temperature conversion, the timeout jumps out of the loop
+			if(sum2>=2600)    //The minimum time required for temperature conversion, the timeout jumps out of the loop
 			{
 				flags=1;
 				break;
