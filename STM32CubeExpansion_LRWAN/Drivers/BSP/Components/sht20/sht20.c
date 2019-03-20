@@ -59,8 +59,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* I2C handler declaration */
-#ifdef  USE_SHT20
-I2C_HandleTypeDef I2cHandle;
+#ifdef USE_SHT
+static int i=0,j=0;
+I2C_HandleTypeDef I2cHandle1;
 
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
@@ -78,24 +79,24 @@ I2C_HandleTypeDef I2cHandle;
 void  BSP_sht20_Init( void )
 {
   /*##-1- Configure the I2C peripheral ######################################*/
-  I2cHandle.Instance              = I2Cx;
-  I2cHandle.Init.Timing           = I2C_TIMING;
-  I2cHandle.Init.AddressingMode   = I2C_ADDRESSINGMODE_7BIT;
-  I2cHandle.Init.DualAddressMode  = I2C_DUALADDRESS_DISABLE;
-  I2cHandle.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  I2cHandle.Init.GeneralCallMode  = I2C_GENERALCALL_DISABLE;
-  I2cHandle.Init.NoStretchMode    = I2C_NOSTRETCH_DISABLE;  
-  I2cHandle.Init.OwnAddress1      = 0xF0;
-  I2cHandle.Init.OwnAddress2      = 0xFE;
+  I2cHandle1.Instance              = I2Cx;
+  I2cHandle1.Init.Timing           = I2C_TIMING;
+  I2cHandle1.Init.AddressingMode   = I2C_ADDRESSINGMODE_7BIT;
+  I2cHandle1.Init.DualAddressMode  = I2C_DUALADDRESS_DISABLE;
+  I2cHandle1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  I2cHandle1.Init.GeneralCallMode  = I2C_GENERALCALL_DISABLE;
+  I2cHandle1.Init.NoStretchMode    = I2C_NOSTRETCH_DISABLE;  
+  I2cHandle1.Init.OwnAddress1      = 0xF0;
+  I2cHandle1.Init.OwnAddress2      = 0xFE;
   
-  if(HAL_I2C_Init(&I2cHandle) != HAL_OK)
+  if(HAL_I2C_Init(&I2cHandle1) != HAL_OK)
   {
     /* Initialization Error */
     Error_Handler();
   }
 
   /* Enable the Analog I2C Filter */
-  HAL_I2CEx_ConfigAnalogFilter(&I2cHandle,I2C_ANALOGFILTER_ENABLE);
+  HAL_I2CEx_ConfigAnalogFilter(&I2cHandle1,I2C_ANALOGFILTER_ENABLE);
   /* Infinite loop */
 }
 /**
@@ -108,109 +109,59 @@ void  BSP_sht20_Init( void )
   * @param hi2c: I2C handle pointer
   * @retval None
   */
-void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
-{
-  GPIO_InitTypeDef  GPIO_InitStruct;
-  RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
-  
-  /*##-1- Configure the I2C clock source. The clock is derived from the SYSCLK #*/
-  RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2Cx;
-  RCC_PeriphCLKInitStruct.I2c1ClockSelection = RCC_I2CxCLKSOURCE_SYSCLK;
-  HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
 
-  /*##-2- Enable peripherals and GPIO Clocks #################################*/
-  /* Enable GPIO TX/RX clock */
-  I2Cx_SCL_GPIO_CLK_ENABLE();
-  I2Cx_SDA_GPIO_CLK_ENABLE();
-  /* Enable I2Cx clock */
-  I2Cx_CLK_ENABLE();
-  
-  /*##-3- Configure peripheral GPIO ##########################################*/  
-  /* I2C TX GPIO pin configuration  */
-  GPIO_InitStruct.Pin       = I2Cx_SCL_PIN;
-  GPIO_InitStruct.Mode      = GPIO_MODE_AF_OD;
-  GPIO_InitStruct.Pull      = GPIO_NOPULL;
-  GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = I2Cx_SCL_SDA_AF;
-  HAL_GPIO_Init(I2Cx_SCL_GPIO_PORT, &GPIO_InitStruct);
-    
-  /* I2C RX GPIO pin configuration  */
-  GPIO_InitStruct.Pin       = I2Cx_SDA_PIN;
-  GPIO_InitStruct.Alternate = I2Cx_SCL_SDA_AF;
-  HAL_GPIO_Init(I2Cx_SDA_GPIO_PORT, &GPIO_InitStruct);
-	
-  /* NVIC for I2Cx */
-  HAL_NVIC_SetPriority(I2Cx_IRQn, 0, 1);
-  HAL_NVIC_EnableIRQ(I2Cx_IRQn);
-}
-/**
-  * @brief I2C MSP De-Initialization 
-  *        This function frees the hardware resources used in this example:
-  *          - Disable the Peripheral's clock
-  *          - Revert GPIO, DMA and NVIC configuration to their default state
-  * @param hi2c: I2C handle pointer
-  * @retval None
-  */
-void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
-{
-  /*##-1- Reset peripherals ##################################################*/
-  I2Cx_FORCE_RESET();
-  I2Cx_RELEASE_RESET();
-
-  /*##-2- Disable peripherals and GPIO Clocks #################################*/
-  /* Configure I2C Tx as alternate function  */
-  HAL_GPIO_DeInit(I2Cx_SCL_GPIO_PORT, I2Cx_SCL_PIN);
-  /* Configure I2C Rx as alternate function  */
-  HAL_GPIO_DeInit(I2Cx_SDA_GPIO_PORT, I2Cx_SDA_PIN);
-}
 float SHT20_RH(void)
 {
 	  uint8_t txdata[1]={0xf5};//Humidity measurement
 		uint8_t rxdata[2];
 		uint16_t AD_code;
-		uint16_t sum1=0;    
+		uint16_t sum1=0;
 		uint16_t sum2=0;
-		uint8_t flags=0;   //flag
 		float hum;
 
-		while(HAL_I2C_Master_Transmit(&I2cHandle,0x80,txdata,1,1000) != HAL_OK)
+		while(HAL_I2C_Master_Transmit(&I2cHandle1,0x80,txdata,1,1000) != HAL_OK)
     {
-		  sum1++;
-			if(sum1>=500)
-			{ 
-				flags=1;
-				break;
-			}
-        if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
+		    sum1++;
+				if(sum1>=500)
+				{
+					break;
+				}
+        if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
         {}
     }
-		
-		while(HAL_I2C_Master_Receive(&I2cHandle,0x81,rxdata,2,1000) != HAL_OK)
+
+		while(HAL_I2C_Master_Receive(&I2cHandle1,0x81,rxdata,2,1000) != HAL_OK)
     {
-			sum2++;
-			if(sum2>=2600)   //The minimum time required for humidity conversion, the timeout jumps out of the loop
-			{
-				flags=1;
-				break;
-			}
-        if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
+		    sum2++;
+				if(sum2>=3000)     //The minimum time required for humidity conversion, the timeout jumps out of the loop
+				{
+					break;
+				}
+        if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
         {}
     }
-		
-  if(flags==0)
-	{
+
 	AD_code=(rxdata[0]<<8)+rxdata[1];
-	AD_code &=~0x0003;
+	AD_code &=~0x000f;   //12bit
 
 	hum=AD_code*125.0/65536-6;
-  PPRINTF("Humidity =%f\r\n",hum);
-	}
-	else
+	if((hum<0.0)||(hum>100.0))
 	{
-	 hum=6553.5;     // 65535=0XFF, 6553.5=65535/10; 
-	 PPRINTF("Please connect the SHT20\r\n");   
+		i++;
+	if(i==2)
+	{
+	BSP_sht20_Init();
+  }
+	if(i==3)
+	{
+	NVIC_SystemReset();
 	}
-	
+	}
+  else
+	{
+		i=0;
+	}
+  PPRINTF("Humidity =%f\r\n",hum);
 	return hum;
 }
 
@@ -221,44 +172,50 @@ float SHT20_RT(void)
 		uint16_t AD_code;
 		uint16_t sum1=0;
 		uint16_t sum2=0;
-		uint8_t flags=0;    //flag
 		float tem;
 	
-		while(HAL_I2C_Master_Transmit(&I2cHandle,0x80,txdata,1,1000) != HAL_OK)
+		while(HAL_I2C_Master_Transmit(&I2cHandle1,0x80,txdata,1,1000) != HAL_OK)
     {
-		   sum1++;
-			 if(sum1>=500)
-			{ 
-				flags=1;
-				break;
-			}
-        if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
+			  sum1++;
+				if(sum1>=500)
+				{
+					break;
+				}
+        if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
         {}
     }
 		
-		while(HAL_I2C_Master_Receive(&I2cHandle,0x81,rxdata,2,1000) != HAL_OK)
+		while(HAL_I2C_Master_Receive(&I2cHandle1,0x81,rxdata,2,1000) != HAL_OK)
     {
-		  sum2++;
-			if(sum2>=2600)    //The minimum time required for temperature conversion, the timeout jumps out of the loop
-			{
-				flags=1;
-				break;
-			}
-        if(HAL_I2C_GetError(&I2cHandle) != HAL_I2C_ERROR_AF)
+			  sum2++;
+				if(sum2>=3000)       // The minimum time required for temperature conversion, the timeout jumps out of the loop
+				{
+					break;
+				}
+        if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
         {}
     }
 		
-	if(flags==0)
-	{
 	AD_code=(rxdata[0]<<8)+rxdata[1];
-	AD_code &=~0x0003;
+	AD_code &=~0x0003;   //14bit
 	tem=AD_code*175.72/65536-46.85;
-	PPRINTF("Temperature =%f\r\n",tem);
+	if((tem<-40.0)||(tem>125.0))
+	{
+		j++;
+	if(j==2)
+	{
+	BSP_sht20_Init();		
 	}
-  else
-  {
-	 tem=6553.5;   // 65535=0XFF, 6553.5=65535/10; 
-	}		
+	if(j==3)
+	{
+	NVIC_SystemReset();
+	}
+	}
+	else
+	{
+		j=0;
+	}
+	PPRINTF("Temperature =%f\r\n",tem);
   return tem;
 }
 #endif

@@ -259,7 +259,7 @@ static void Send( void )
 		AppData.Buff[i++]=(sensor_data.in1<<1)|0x00;
 	}
 	
-	#if defined (USE_SHT20)||(USE_SHT31)
+	#if defined USE_SHT
 	
 	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      //SHT20
 	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10);
