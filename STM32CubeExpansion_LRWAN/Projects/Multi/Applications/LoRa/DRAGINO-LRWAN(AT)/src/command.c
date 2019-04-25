@@ -573,7 +573,18 @@ static const struct ATCommand_s ATCommand[] =
     .set = at_return_error,
     .run = at_return_error,
 	},
-	
+
+		{
+	  .string = AT_MOD,
+    .size_string = sizeof(AT_MOD) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_MOD ": Set the work mode(1:IIC mode,2:ultrasonic mode)\r\n",
+#endif
+    .get = at_MOD_get,
+    .set = at_MOD_set,
+    .run = at_return_error,
+	},
+		
 };
 
 

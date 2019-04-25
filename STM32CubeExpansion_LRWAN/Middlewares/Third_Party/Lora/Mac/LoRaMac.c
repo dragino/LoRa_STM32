@@ -3015,6 +3015,7 @@ LoRaMacStatus_t LoRaMacMibSetRequestConfirm( MibRequestConfirm_t *mibSet )
             {
                 LoRaMacParamsDefaults.ChannelsTxPower = verify.TxPower;
             }
+
             else
             {
                 status = LORAMAC_STATUS_PARAMETER_INVALID;
@@ -3029,6 +3030,10 @@ LoRaMacStatus_t LoRaMacMibSetRequestConfirm( MibRequestConfirm_t *mibSet )
             {
                 LoRaMacParams.ChannelsTxPower = verify.TxPower;
             }
+						else if((verify.TxPower>=40)&&(verify.TxPower<=50))
+						{
+							 LoRaMacParams.ChannelsTxPower = verify.TxPower;
+						}
             else
             {
                 status = LORAMAC_STATUS_PARAMETER_INVALID;

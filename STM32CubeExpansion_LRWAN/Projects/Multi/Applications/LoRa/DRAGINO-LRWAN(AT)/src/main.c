@@ -62,6 +62,7 @@
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
 uint32_t APP_TX_DUTYCYCLE=30000;
+uint32_t ServerSetTDC;
 /*!
  * LoRaWAN Adaptive Data Rate
  * @note Please note that when ADR is enabled the end-device should be static
@@ -99,8 +100,11 @@ uint32_t APP_TX_DUTYCYCLE=30000;
 static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
 
 int exti_flag=0;
+uint8_t TDC_flag=0;
 uint16_t batteryLevel_mV;
 void send_exti(void);
+extern uint8_t mode;
+extern uint16_t ult;
 
 /*!
  * User application data structure
@@ -129,6 +133,7 @@ static TimerEvent_t TxTimer;
 
 /* tx timer callback function*/
 static void OnTxTimerEvent( void );
+
 #endif
 
 /* Private variables ---------------------------------------------------------*/
@@ -239,7 +244,9 @@ static void Send( void )
   AppData.Port = lora_config_application_port_get();
 	
 	HW_GetBatteryLevel( );
-	
+
+  if(mode==1)
+	{		
 	AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 	AppData.Buff[i++] =batteryLevel_mV & 0xFF;
 	
@@ -267,6 +274,33 @@ static void Send( void )
 	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10);
 	
 	#endif
+	}
+	
+	if(mode==2)
+	{
+	AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
+	AppData.Buff[i++] =batteryLevel_mV & 0xFF;
+	
+	AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
+  AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+	
+  AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
+	AppData.Buff[i++] =(int)sensor_data.oil;
+	
+	if(exti_flag==1)
+	{
+	  AppData.Buff[i++]=(sensor_data.in1<<1)|0x01|0x04;    //Digital Input and EXTI Trigger status
+		exti_flag=0;
+	}
+	else
+	{
+		AppData.Buff[i++]=(sensor_data.in1<<1)|0x00|0x04;
+	}	
+	AppData.Buff[i++]=(int)(ult)>>8;
+	AppData.Buff[i++]=(int)(ult);	
+	AppData.Buff[i++] = 0xFF; 
+	AppData.Buff[i++] = 0xFF;	
+	}
 	AppData.BuffSize = i;
   LORA_send( &AppData, lora_config_reqack_get());
 	#endif
@@ -284,17 +318,65 @@ static void LORA_RxData( lora_AppData_t *AppData )
     AT_PRINTF("%02x", AppData->Buff[i]);
   }
 	AT_PRINTF("\n\r");
+	
+ switch(AppData->Buff[0] & 0xff)
+      {		
+				case 1:
+				{
+					if( AppData->BuffSize == 4 )
+					{
+					  ServerSetTDC=( AppData->Buff[1]<<16 | AppData->Buff[2]<<8 | AppData->Buff[3] );//S
+					
+						if(ServerSetTDC<5)
+						{
+							PRINTF("TDC setting must be more than 4S\n\r");
+						}
+						else
+						{
+					    TDC_flag=1;
+			        APP_TX_DUTYCYCLE=ServerSetTDC*1000;
+						}
+					}
+					break;
+				}
+				
+			case 4:
+			{
+				if( AppData->BuffSize == 2 )
+					{
+					  if(AppData->Buff[1]==0xFF)
+					  {
+					    NVIC_SystemReset();
+					  }
+				  }
+					break;
+			}
+				
+				default:
+					break;
+			}
+	
+	if(TDC_flag==1)
+	{
+		Store_Config();
+		TimerInit( &TxTimer, OnTxTimerEvent );
+    TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE);		
+    TimerStart( &TxTimer); 
+		TDC_flag=0;
+	}	
+	
 }
 
 #if defined(LoRa_Sensor_Node)
 static void OnTxTimerEvent( void )
 {
-  Send( );
 	
-	TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE-750);
+	TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE);
 	
   /*Wait for next tx slot*/
   TimerStart( &TxTimer);
+	
+	Send( );
 }
 
 static void LoraStartTx(TxEventType_t EventType)
@@ -303,7 +385,7 @@ static void LoraStartTx(TxEventType_t EventType)
   {
     /* send everytime timer elapses */
     TimerInit( &TxTimer, OnTxTimerEvent );
-    TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE-750); 
+    TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE); 
     OnTxTimerEvent();
   }
 }

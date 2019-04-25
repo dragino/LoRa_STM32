@@ -54,6 +54,8 @@
 #include "flash_eraseprogram.h"
 #include "version.h"
 
+uint8_t mode;
+
 extern uint8_t symbtime1_value;
 extern uint8_t flag1;
 
@@ -449,7 +451,8 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
 			{
 				lora_config.duty_cycle = LORA_DISABLE;
 	      lora_config.application_port=2;
-			
+	
+				mode=1;				
 				APP_TX_DUTYCYCLE=30000;
 				
 				Store_Config();
@@ -1005,6 +1008,8 @@ void Store_Config(void)
 	s_config[config_count++]=symbtime2_value;
 	
 	s_config[config_count++]=flag2;
+
+	s_config[config_count++]=mode;
 	
 	FLASH_erase(FLASH_USER_START_ADDR_CONFIG);//Page800 
 	FLASH_program(FLASH_USER_START_ADDR_CONFIG,s_config,config_count);//store config
@@ -1014,7 +1019,7 @@ void Store_Config(void)
 
 void Read_Config(void)
 {
-	uint32_t star_address=0,r_config[17],r_key[17];
+	uint32_t star_address=0,r_config[18],r_key[17];
 	
 	star_address=FLASH_USER_START_ADDR_KEY;
 	/* read key*/
@@ -1033,7 +1038,7 @@ void Read_Config(void)
 	
 	
 	star_address=FLASH_USER_START_ADDR_CONFIG;
-	for(int i=0;i<17;i++)
+	for(int i=0;i<18;i++)
 	{
 	  r_config[i]=FLASH_read(star_address);
 		star_address+=4;
@@ -1119,6 +1124,8 @@ void Read_Config(void)
 	symbtime2_value=r_config[15];
 	
 	flag2=r_config[16];
+	
+	mode=r_config[17];
 }
 
 /* Dummy data sent periodically to let the tester respond with start test command*/

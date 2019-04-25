@@ -221,6 +221,19 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define ADC_IN1_LEVEL_PIN         GPIO_PIN_1
 #define ADC_Channel_IN1           ADC_CHANNEL_1
 
+/* ---------------------------  ADC_IN1 definition -------------------------------*/
+#define ADC_IN4_LEVEL_PORT        GPIOA
+#define ADC_IN4_LEVEL_PIN         GPIO_PIN_4
+#define ADC_Channel_IN4           ADC_CHANNEL_4
+
+/* ---------------------------  ULT definition -------------------------------*/
+#define ULT_TRIG_CLK_ENABLE()     __HAL_RCC_GPIOA_CLK_ENABLE()
+#define ULT_TRIG_PORT             GPIOA
+#define ULT_TRIG_PIN              GPIO_PIN_9
+#define ULT_Echo_CLK_ENABLE()     __HAL_RCC_GPIOA_CLK_ENABLE()
+#define ULT_Echo_PORT             GPIOA
+#define ULT_Echo_PIN              GPIO_PIN_10
+
 /* ---------------------------  +5v PWR OUT definition -------------------------------*/
 #define PWR_OUT_PORT              GPIOB
 #define PWR_OUT_PIN               GPIO_PIN_5

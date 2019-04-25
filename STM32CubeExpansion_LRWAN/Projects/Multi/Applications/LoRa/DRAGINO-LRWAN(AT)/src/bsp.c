@@ -60,6 +60,7 @@
 #include "sht20.h"
 #include "sht31.h"
 #include "pwr_out.h"
+#include "ult.h"
 #endif
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -67,6 +68,7 @@
 /* Exported functions ---------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+uint16_t ult;
 static __IO uint16_t AD_code1=0;
 static __IO uint16_t AD_code2=0;
 
@@ -82,6 +84,9 @@ extern I2C_HandleTypeDef I2cHandle1;
 extern I2C_HandleTypeDef I2cHandle2;
 #endif
 
+extern void Read_Config(void);
+extern uint8_t mode;
+
 void BSP_sensor_Read( sensor_t *sensor_data)
 {
  	#if defined(LoRa_Sensor_Node)
@@ -93,13 +98,14 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);
 	AD_code1=HW_AdcReadChannel( ADC_Channel_Oil );
 	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_SET);
-
+	
 	HW_GetBatteryLevel( );
 	sensor_data->oil=AD_code1*batteryLevel_mV/4095;
 	
 	sensor_data->in1=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN1);
 	
-	
+	 if(mode==1)
+	 {		
    #ifdef USE_SHT
 	 if(flags==0)
 	 {
@@ -123,6 +129,12 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	sensor_data->hum_sht=hum1;
 	}
 	 #endif
+		}
+	 
+		if(mode==2)
+	 {
+		 ult=ULT_test();
+	 }
 	 
 	 HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
 	 
@@ -187,12 +199,16 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
 
 void  BSP_sensor_Init( void  )
 {
-  	#if defined(LoRa_Sensor_Node)
+  #if defined(LoRa_Sensor_Node)
 //	 while(DS18B20_Init()==1);
-   BSP_oil_float_Init();
+	 Read_Config();
+	
 	 GPIO_EXTI_IoInit();
 	 GPIO_INPUT_IoInit();
-
+	 BSP_oil_float_Init();
+	
+	 if(mode==1)
+	 {	 
 	 #ifdef USE_SHT
 	 int sum1=0,sum2=0;
 	 uint8_t txdata1[1]={0xE7},txdata2[2]={0xF3,0x2D};
@@ -240,7 +256,13 @@ void  BSP_sensor_Init( void  )
 		 PRINTF("  IIC is not connect\n\r");
 	 }	
 	 #endif
-	
+  }
+	if(mode==2)
+	{ 
+		GPIO_ULT_INPUT_Init();
+		GPIO_ULT_OUTPUT_Init();
+		TIM2_Init();
+	}
 	pwr_control_IoInit();
 	#endif
 }

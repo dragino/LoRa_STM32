@@ -1,4 +1,4 @@
- /*
+/*
  / _____)             _              | |
 ( (____  _____ ____ _| |_ _____  ____| |__
  \____ \| ___ |    (_   _) ___ |/ ___)  _ \
@@ -6,18 +6,18 @@
 (______/|_____)_|_|_| \__)_____)\____)_| |_|
     (C)2013 Semtech
 
-Description: LoRaMac classA device implementation
+Description: contains all hardware driver
 
 License: Revised BSD License, see LICENSE.TXT file include in the project
 
-Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
+Maintainer: Miguel Luis and Gregory Cristian
 */
-/******************************************************************************
-  * @file    version.h
+ /******************************************************************************
+  * @file    ult.h
   * @author  MCD Application Team
-  * @version V1.1.4
-  * @date    08-January-2018
-  * @brief   defines the lora mac version
+  * @version V1.1.0
+  * @date    17-April-2018
+  * @brief   contains all hardware driver
   ******************************************************************************
   * @attention
   *
@@ -57,32 +57,37 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
   *
   ******************************************************************************
   */
-/* Define to prevent recursive inclusion -------------------------------------*/
 
-#ifndef __VERSION_H__
-#define __VERSION_H__
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __ULT_H__
+#define __ULT_H__
+
+#include "stm32l0xx_hal.h"
+
+void GPIO_ULT_INPUT_Init(void);
+void GPIO_ULT_OUTPUT_Init(void);
+void TIM2_Init(void);
+uint16_t ULT_test(void);
 
 #ifdef __cplusplus
  extern "C" {
 #endif
-   
 /* Includes ------------------------------------------------------------------*/
-#include "lora_mac_version.h"
-/* Exported constants --------------------------------------------------------*/
-#define TEST_VERSION (uint32_t) 0x00000000  /*1 lsb is always 0 in releases   */
-#define LRWAN_VERSION  (uint32_t) 0x00001140  /*3 next hex is i_cube release*/
-#define VERSION   (uint32_t) ( LORA_MAC_VERSION | LRWAN_VERSION | TEST_VERSION )
-#define AT_VERSION_STRING	"v1.5"
-	 
 /* Exported types ------------------------------------------------------------*/
+
+/* Exported constants --------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/
 /* Exported macros -----------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */ 
+/**
+ * @brief  
+ *
+ * @note
+ * @retval None
+ */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__VERSION_H__*/
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+#endif

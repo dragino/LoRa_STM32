@@ -74,6 +74,7 @@ uint8_t flag2=0;
  */
 #define MAX_RECEIVED_DATA 255
 extern uint32_t APP_TX_DUTYCYCLE;
+extern uint8_t mode;
 
 /* Private macro -------------------------------------------------------------*/
 /**
@@ -1308,6 +1309,31 @@ ATEerror_t at_symbtimeout2LSB_set(const char *param)
     return AT_PARAM_ERROR;
 	}
 	
+	return AT_OK;
+}
+
+ATEerror_t at_MOD_set(const char *param)
+{ 
+	int workmode;
+	if (tiny_sscanf(param, "%d", &workmode) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+	if ((workmode==1)||(workmode==2))
+  {
+    mode=workmode;		
+	}
+	else
+	{
+    return AT_PARAM_ERROR;
+	}
+	
+	return AT_OK;
+}
+
+ATEerror_t at_MOD_get(const char *param)
+{ 
+	print_d(mode);
 	return AT_OK;
 }
 
