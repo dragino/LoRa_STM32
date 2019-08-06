@@ -37,6 +37,10 @@ extern uint8_t flag1;
 extern uint8_t symbtime2_value;
 extern uint8_t flag2;
 
+//extern uint16_t  daysss;
+//extern uint16_t  hours,minutes,sceonds;
+//extern void LSN50runtime( void );
+
 /*!
  * Maximum PHY layer payload size
  */
@@ -2307,9 +2311,11 @@ LoRaMacStatus_t SendFrameOnChannel( uint8_t channel )
     txConfig.MaxEirp = LoRaMacParams.MaxEirp;
     txConfig.AntennaGain = LoRaMacParams.AntennaGain;
     txConfig.PktLen = LoRaMacBufferPktLen;
-
-    PRINTF( "\n\r***** UpLinkCounter= %d *****\n\r", UpLinkCounter );
-
+	
+//	  LSN50runtime();
+    PRINTF("\n\r***** UpLinkCounter= %d *****\n\r", UpLinkCounter );
+//	  PRINTF("[day:%d,hour:%d,minute:%d,second:%d]\r\n",daysss,hours,minutes,sceonds);	
+	
     RegionTxConfig( LoRaMacRegion, &txConfig, &txPower, &TxTimeOnAir );
 
     MlmeConfirm.Status = LORAMAC_EVENT_INFO_STATUS_ERROR;

@@ -64,6 +64,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "vcom.h"
 
 extern int exti_flag;
+extern uint8_t inmode;
+
 /** @addtogroup STM32L1xx_HAL_Examples
   * @{
   */
@@ -258,9 +260,15 @@ void EXTI4_15_IRQHandler( void )
 //  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_14) != RESET) 
   { 
-	 exti_flag=1;
 	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);
-   HAL_GPIO_EXTI_Callback(GPIO_PIN_14);
+		HAL_NVIC_DisableIRQ(EXTI4_15_IRQn);		
+	 if(inmode!=0)
+	 {
+	 exti_flag=1;
+	 }
+	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);
+   HAL_GPIO_EXTI_Callback(GPIO_PIN_14);		
+	 HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
   }
 
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_15 );

@@ -59,6 +59,7 @@
 #include "hw_msp.h"
 #include "flash_eraseprogram.h"
 #include "timeServer.h"
+#include "gpio_exti.h"
 
 uint8_t symbtime1_value=0;  //RX1windowtimeout 
 uint8_t flag1=0;
@@ -75,6 +76,7 @@ uint8_t flag2=0;
 #define MAX_RECEIVED_DATA 255
 extern uint32_t APP_TX_DUTYCYCLE;
 extern uint8_t mode;
+extern uint8_t inmode;
 
 /* Private macro -------------------------------------------------------------*/
 /**
@@ -500,12 +502,59 @@ ATEerror_t at_DataRate_get(const char *param)
 ATEerror_t at_DataRate_set(const char *param)
 {
   int8_t datarate;
-
+	
   if (tiny_sscanf(param, "%hhu", &datarate) != 1)
   {
     return AT_PARAM_ERROR;
   }
-  
+
+#if defined( REGION_AS923 )
+	  if(datarate>=8)
+		{
+    return AT_PARAM_ERROR;			
+		}
+#elif defined( REGION_AU915 )
+	  if((datarate==7)||(datarate>=14))
+		{
+    return AT_PARAM_ERROR;			
+		}
+#elif defined( REGION_CN470 )
+	  if(datarate>=6)	
+		{
+    return AT_PARAM_ERROR;			
+		}
+#elif defined( REGION_CN779 )
+	  if(datarate>=8)
+		{
+    return AT_PARAM_ERROR;			
+		}
+#elif defined( REGION_EU433 )
+	  if(datarate>=8)
+		{
+    return AT_PARAM_ERROR;			
+		}
+#elif defined( REGION_IN865 )
+	  if(datarate>=8)
+		{
+    return AT_PARAM_ERROR;			
+		}
+#elif defined( REGION_EU868 )
+	  if(datarate>=8)
+		{
+    return AT_PARAM_ERROR;			
+		};
+#elif defined( REGION_KR920 )
+	  if(datarate>=6)
+		{
+    return AT_PARAM_ERROR;			
+		}
+#elif defined( REGION_US915 )
+	  if(((datarate>=5)&&(datarate<=7))||(datarate>=14))
+		{
+    return AT_PARAM_ERROR;			
+		}
+#endif
+	
   lora_config_tx_datarate_set(datarate) ;
 
   return AT_OK;
@@ -1229,7 +1278,7 @@ ATEerror_t at_CHE_get(const char *param)
 	  }
 	  AT_PRINTF("\n\r");
   }
-	 else AT_PRINTF("Use default channel");
+	 else AT_PRINTF("Use default channel\r\n");
 	
 	return AT_OK;
 }
@@ -1319,7 +1368,7 @@ ATEerror_t at_MOD_set(const char *param)
   {
     return AT_PARAM_ERROR;
   }
-	if ((workmode==1)||(workmode==2))
+	if ((workmode==1)||(workmode==2)||(workmode==3))
   {
     mode=workmode;		
 	}
@@ -1334,6 +1383,47 @@ ATEerror_t at_MOD_set(const char *param)
 ATEerror_t at_MOD_get(const char *param)
 { 
 	print_d(mode);
+	return AT_OK;
+}
+
+ATEerror_t at_INTMOD_set(const char *param)
+{ 
+	uint8_t interrputmode;
+	if (tiny_sscanf(param, "%d", &interrputmode) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+	if ((interrputmode==0)||(interrputmode==1)||(interrputmode==2)||(interrputmode==3))
+  {
+    inmode=interrputmode;		
+	}
+	else
+	{
+    return AT_PARAM_ERROR;
+	}
+	switch(inmode)
+	{
+		case 0:
+			GPIO_EXTI_IoDeInit();
+	  break;
+		case 1:
+			GPIO_EXTI_RISING_FALLINGInit();
+	  break;
+		case 2:
+			GPIO_EXTI_FALLINGInit();
+	  break;
+		case 3:
+			GPIO_EXTI_RISINGInit();
+	  break;
+		default:
+		return AT_PARAM_ERROR;
+	}
+	return AT_OK;
+}
+
+ATEerror_t at_INTMOD_get(const char *param)
+{ 
+	print_d(inmode);
 	return AT_OK;
 }
 

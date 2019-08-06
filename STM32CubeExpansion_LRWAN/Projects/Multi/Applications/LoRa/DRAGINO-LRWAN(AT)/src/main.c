@@ -54,6 +54,7 @@
 #include "version.h"
 #include "command.h"
 #include "at.h"
+#include "gpio_exti.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -98,6 +99,7 @@ uint32_t ServerSetTDC;
  * User application data
  */
 static uint8_t AppDataBuff[LORAWAN_APP_DATA_BUFF_SIZE];
+static uint8_t switch_status=0;
 
 int exti_flag=0;
 uint8_t TDC_flag=0;
@@ -105,7 +107,9 @@ uint16_t batteryLevel_mV;
 void send_exti(void);
 extern uint8_t mode;
 extern uint16_t ult;
-
+extern __IO uint16_t AD_code2;
+extern __IO uint16_t AD_code3;
+extern uint8_t inmode;
 /*!
  * User application data structure
  */
@@ -217,7 +221,7 @@ static void LORA_HasJoined( void )
   LORA_RequestClass( LORAWAN_DEFAULT_CLASS );
 	
 	#if defined(LoRa_Sensor_Node) /*LSN50 Preprocessor compile swicth:hw_conf.h*/
-	LoraStartTx( TX_ON_TIMER);    
+	LoraStartTx( TX_ON_TIMER);		
 	#endif
 	
 	#if defined(AT_Data_Send)     /*LoRa ST Module*/
@@ -227,8 +231,7 @@ static void LORA_HasJoined( void )
 
 static void Send( void )
 {
-  sensor_t sensor_data;
-  
+  sensor_t sensor_data; 
   if ( LORA_JoinStatus () != LORA_SET)
   {
     /*Not joined, try again later*/
@@ -256,27 +259,30 @@ static void Send( void )
   AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
 	AppData.Buff[i++] =(int)sensor_data.oil;
 	
+	switch_status=HAL_GPIO_ReadPin(GPIO_EXTI_PORT,GPIO_EXTI_PIN);
+		
 	if(exti_flag==1)
 	{
-	  AppData.Buff[i++]=(sensor_data.in1<<1)|0x01;    //Digital Input and EXTI Trigger status
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(sensor_data.in1<<1)|0x00;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1);
 	}
 	
 	#if defined USE_SHT
 	
-	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      //SHT20
+	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      
 	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10);
-	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10)>>8; 
+	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10)>>8;   
 	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10);
 	
 	#endif
+	
 	}
 	
-	if(mode==2)
+	else if(mode==2)
 	{
 	AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 	AppData.Buff[i++] =batteryLevel_mV & 0xFF;
@@ -287,19 +293,57 @@ static void Send( void )
   AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
 	AppData.Buff[i++] =(int)sensor_data.oil;
 	
+	switch_status=HAL_GPIO_ReadPin(GPIO_EXTI_PORT,GPIO_EXTI_PIN);
+		
 	if(exti_flag==1)
 	{
-	  AppData.Buff[i++]=(sensor_data.in1<<1)|0x01|0x04;    //Digital Input and EXTI Trigger status
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x04;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(sensor_data.in1<<1)|0x00|0x04;
-	}	
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x04;
+	}
+
 	AppData.Buff[i++]=(int)(ult)>>8;
 	AppData.Buff[i++]=(int)(ult);	
 	AppData.Buff[i++] = 0xFF; 
-	AppData.Buff[i++] = 0xFF;	
+	AppData.Buff[i++] = 0xFF;		
+	}
+	
+	else if(mode==3)
+	{
+
+  AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
+	AppData.Buff[i++] =(int)sensor_data.oil;
+	
+	AppData.Buff[i++] =(int)(sensor_data.ADC_1)>>8;     
+	AppData.Buff[i++] =(int)(sensor_data.ADC_1);
+	AppData.Buff[i++] =(int)(sensor_data.ADC_2)>>8; 
+	AppData.Buff[i++] =(int)(sensor_data.ADC_2);
+
+	switch_status=HAL_GPIO_ReadPin(GPIO_EXTI_PORT,GPIO_EXTI_PIN);
+		
+	if(exti_flag==1)
+	{
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x08;
+		exti_flag=0;
+	}
+	else
+	{
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x08;
+	}
+	
+	#if defined USE_SHT
+	
+	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      
+	AppData.Buff[i++] =(int)(sensor_data.temp_sht*10);
+	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10)>>8;   
+	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10);
+	
+	#endif
+	
+	AppData.Buff[i++] =(int)(batteryLevel_mV/100);	
 	}
 	AppData.BuffSize = i;
   LORA_send( &AppData, lora_config_reqack_get());
@@ -351,11 +395,57 @@ static void LORA_RxData( lora_AppData_t *AppData )
 				  }
 					break;
 			}
-				
+			case 5:
+			{
+				if( AppData->BuffSize == 4 )
+					{
+					  if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x01))
+					  {
+							lora_config_reqack_set(LORAWAN_CONFIRMED_MSG);
+							Store_Config();
+					  }
+						else if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x00))
+						{
+							lora_config_reqack_set(LORAWAN_UNCONFIRMED_MSG);
+							Store_Config();
+						}
+				  }
+					break;
+			}	
+      case 6:
+      {
+				if( AppData->BuffSize == 4 )
+					{
+					  if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x00))
+					  {
+						 GPIO_EXTI_IoDeInit();
+						 inmode=0;
+						 Store_Config();
+					  }
+						else if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x01))
+						{
+						GPIO_EXTI_RISING_FALLINGInit();
+					  inmode=1;
+						Store_Config();
+						}
+						else if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x02))
+						{
+						GPIO_EXTI_FALLINGInit();
+					  inmode=2;
+						Store_Config();
+						}
+						else if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x03))
+						{
+						GPIO_EXTI_RISINGInit();
+					  inmode=3;
+						Store_Config();
+						}						
+				  }
+					break;	
+			}				
 				default:
 					break;
-			}
-	
+			}	
 	if(TDC_flag==1)
 	{
 		Store_Config();
@@ -375,7 +465,7 @@ static void OnTxTimerEvent( void )
 	
   /*Wait for next tx slot*/
   TimerStart( &TxTimer);
-	
+
 	Send( );
 }
 

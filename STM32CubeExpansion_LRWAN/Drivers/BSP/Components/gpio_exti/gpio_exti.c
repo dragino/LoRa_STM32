@@ -58,12 +58,28 @@
 /* Exported functions ---------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-void  GPIO_EXTI_IoInit( void  )
+void  GPIO_EXTI_FALLINGInit( void  )
 {
 	GPIO_InitTypeDef GPIO_InitStruct={0};
 	GPIO_EXTI_CLK_ENABLE();
-	
+  	
 	GPIO_InitStruct.Mode =GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Pin = GPIO_EXTI_PIN;
+
+  HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
+	
+	/* Enable and set EXTI lines 4 to 15 Interrupt to the lowest priority */
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+}
+
+void  GPIO_EXTI_RISINGInit( void  )
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+	GPIO_EXTI_CLK_ENABLE();
+  	
+	GPIO_InitStruct.Mode =GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 	GPIO_InitStruct.Pin = GPIO_EXTI_PIN;
 
@@ -73,14 +89,30 @@ void  GPIO_EXTI_IoInit( void  )
   HAL_NVIC_SetPriority(EXTI4_15_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 }
+
+void  GPIO_EXTI_RISING_FALLINGInit( void  )
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+	GPIO_EXTI_CLK_ENABLE();
+  	
+	GPIO_InitStruct.Mode =GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Pin = GPIO_EXTI_PIN;
+
+  HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
+	
+	/* Enable and set EXTI lines 4 to 15 Interrupt to the lowest priority */
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+}
+
 void  GPIO_EXTI_IoDeInit( void  )
 {
 	GPIO_InitTypeDef GPIO_InitStruct={0};
-	GPIO_InitStruct.Mode =GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-
+	
   HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
 }
+
 void GPIO_INPUT_IoInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct={0};

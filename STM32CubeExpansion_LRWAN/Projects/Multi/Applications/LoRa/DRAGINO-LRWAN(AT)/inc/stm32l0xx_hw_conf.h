@@ -142,7 +142,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define USARTX_RELEASE_RESET()           __LPUART1_RELEASE_RESET()
 
 
-/* Definition for USARTx Pins */
+/* Definition for LPUSART1 Pins */
 #define USARTX_TX_PIN                  GPIO_PIN_2
 #define USARTX_TX_GPIO_PORT            GPIOA  
 #define USARTX_TX_AF                   GPIO_AF6_LPUART1
@@ -221,18 +221,18 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define ADC_IN1_LEVEL_PIN         GPIO_PIN_1
 #define ADC_Channel_IN1           ADC_CHANNEL_1
 
-/* ---------------------------  ADC_IN1 definition -------------------------------*/
+/* ---------------------------  ADC_IN4 definition -------------------------------*/
 #define ADC_IN4_LEVEL_PORT        GPIOA
 #define ADC_IN4_LEVEL_PIN         GPIO_PIN_4
 #define ADC_Channel_IN4           ADC_CHANNEL_4
 
 /* ---------------------------  ULT definition -------------------------------*/
 #define ULT_TRIG_CLK_ENABLE()     __HAL_RCC_GPIOA_CLK_ENABLE()
-#define ULT_TRIG_PORT             GPIOA
-#define ULT_TRIG_PIN              GPIO_PIN_9
-#define ULT_Echo_CLK_ENABLE()     __HAL_RCC_GPIOA_CLK_ENABLE()
+#define ULT_TRIG_PORT             GPIOB
+#define ULT_TRIG_PIN              GPIO_PIN_12
+#define ULT_Echo_CLK_ENABLE()     __HAL_RCC_GPIOB_CLK_ENABLE()
 #define ULT_Echo_PORT             GPIOA
-#define ULT_Echo_PIN              GPIO_PIN_10
+#define ULT_Echo_PIN              GPIO_PIN_11
 
 /* ---------------------------  +5v PWR OUT definition -------------------------------*/
 #define PWR_OUT_PORT              GPIOB

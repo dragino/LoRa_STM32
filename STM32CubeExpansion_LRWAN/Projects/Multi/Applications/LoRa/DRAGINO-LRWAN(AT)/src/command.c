@@ -538,6 +538,28 @@ static const struct ATCommand_s ATCommand[] =
     .set = at_symbtimeout2LSB_set,
     .run = at_return_error,
 	 },
+	
+		{
+	  .string = AT_MOD,
+    .size_string = sizeof(AT_MOD) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_MOD ": Set the work mode(1:IIC mode,2:ultrasonic mode)\r\n",
+#endif
+    .get = at_MOD_get,
+    .set = at_MOD_set,
+    .run = at_return_error,
+	},
+
+		{
+	  .string = AT_INTMOD,
+    .size_string = sizeof(AT_INTMOD) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_INTMOD ":Get or Set the trigger interrupt mode(0:Disable,1:falling or rising,2:falling,3:rising)\r\n",
+#endif
+    .get = at_INTMOD_get,
+    .set = at_INTMOD_set,
+    .run = at_return_error,
+	},
 		
 	{
 	  .string = AT_CHS,
@@ -574,16 +596,6 @@ static const struct ATCommand_s ATCommand[] =
     .run = at_return_error,
 	},
 
-		{
-	  .string = AT_MOD,
-    .size_string = sizeof(AT_MOD) - 1,
-#ifndef NO_HELP
-    .help_string = "AT"AT_MOD ": Set the work mode(1:IIC mode,2:ultrasonic mode)\r\n",
-#endif
-    .get = at_MOD_get,
-    .set = at_MOD_set,
-    .run = at_return_error,
-	},
 		
 };
 

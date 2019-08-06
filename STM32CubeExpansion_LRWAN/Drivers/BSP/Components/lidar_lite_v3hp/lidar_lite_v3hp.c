@@ -1,13 +1,13 @@
  /******************************************************************************
-  * @file    sht20.c
+  * @file    LIDAR_Lite_v3HP.c
   * @author  MCD Application Team
   * @version V1.1.2
-  * @date    01-June-2017
+  * @date    30-Novermber-2018
   * @brief   manages the sensors on the application
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +46,7 @@
   
   /* Includes ------------------------------------------------------------------*/
 
-#include "sht20.h"
-
+#include "lidar_lite_v3hp.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -59,10 +58,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* I2C handler declaration */
-#ifdef USE_SHT
-static int i=0,j=0;
-I2C_HandleTypeDef I2cHandle1;
-
+I2C_HandleTypeDef I2cHandle3;
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
 #define I2C_TIMING    0x10A13E56 /* 100 kHz with analog Filter ON, Rise Time 400ns, Fall Time 100ns */ 
@@ -76,152 +72,96 @@ I2C_HandleTypeDef I2cHandle1;
 /* Exported functions ---------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-void  BSP_sht20_Init( void )
+void IIC_init(void)
 {
   /*##-1- Configure the I2C peripheral ######################################*/
-  I2cHandle1.Instance              = I2Cx;
-  I2cHandle1.Init.Timing           = I2C_TIMING;
-  I2cHandle1.Init.AddressingMode   = I2C_ADDRESSINGMODE_7BIT;
-  I2cHandle1.Init.DualAddressMode  = I2C_DUALADDRESS_DISABLE;
-  I2cHandle1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  I2cHandle1.Init.GeneralCallMode  = I2C_GENERALCALL_DISABLE;
-  I2cHandle1.Init.NoStretchMode    = I2C_NOSTRETCH_DISABLE;  
-  I2cHandle1.Init.OwnAddress1      = 0xF0;
-  I2cHandle1.Init.OwnAddress2      = 0xFE;
+  I2cHandle3.Instance              = I2Cx;
+  I2cHandle3.Init.Timing           = I2C_TIMING;
+  I2cHandle3.Init.AddressingMode   = I2C_ADDRESSINGMODE_7BIT;
+  I2cHandle3.Init.DualAddressMode  = I2C_DUALADDRESS_DISABLE;
+  I2cHandle3.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  I2cHandle3.Init.GeneralCallMode  = I2C_GENERALCALL_DISABLE;
+  I2cHandle3.Init.NoStretchMode    = I2C_NOSTRETCH_DISABLE;  
+  I2cHandle3.Init.OwnAddress1      = 0xF0;
+  I2cHandle3.Init.OwnAddress2      = 0xFE;
   
-  if(HAL_I2C_Init(&I2cHandle1) != HAL_OK)
+  if(HAL_I2C_Init(&I2cHandle3) != HAL_OK)
   {
     /* Initialization Error */
     Error_Handler();
   }
 
   /* Enable the Analog I2C Filter */
-  HAL_I2CEx_ConfigAnalogFilter(&I2cHandle1,I2C_ANALOGFILTER_ENABLE);
+  HAL_I2CEx_ConfigAnalogFilter(&I2cHandle3,I2C_ANALOGFILTER_ENABLE);
   /* Infinite loop */
 }
-/**
-  * @brief I2C MSP Initialization 
-  *        This function configures the hardware resources used in this example: 
-  *           - Peripheral's clock enable
-  *           - Peripheral's GPIO Configuration  
-  *           - DMA configuration for transmission request by peripheral 
-  *           - NVIC configuration for DMA interrupt request enable
-  * @param hi2c: I2C handle pointer
-  * @retval None
-  */
 
-float SHT20_RH(void)
+void LidarLite_init(void)
 {
-	  uint8_t txdata[1]={0xf5};//Humidity measurement
-		uint8_t rxdata[2];
-		uint16_t AD_code;
-		uint16_t sum1=0;
-		uint16_t sum2=0;
-		float hum;
-
-		while(HAL_I2C_Master_Transmit(&I2cHandle1,0x80,txdata,1,1000) != HAL_OK)
-    {
-		    sum1++;
-				if(sum1>=500)
-				{
-					break;
-				}
-        if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
-        {}
-    }
-
-		while(HAL_I2C_Master_Receive(&I2cHandle1,0x81,rxdata,2,1000) != HAL_OK)
-    {
-		    sum2++;
-				if(sum2>=3000)     //The minimum time required for humidity conversion, the timeout jumps out of the loop
-				{
-					break;
-				}
-        if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
-        {}
-    }
-
-	AD_code=(rxdata[0]<<8)+rxdata[1];
-	AD_code &=~0x0003;   //14bit
-
-	hum=AD_code*125.0/65536-6;
-	if(hum>100.0)
-	{
-		hum=100.0;
-	}
-  if(hum<0.0)
-	{
-		i++;
-	if(i==2)
-	{
-	BSP_sht20_Init();
-  }
-	if(i==3)
-	{
-	NVIC_SystemReset();
-	}
-	}
-  else
-	{
-		i=0;
-	}
-  PPRINTF("Humidity =%f\r\n",hum);
-	return hum;
+    uint8_t sigCountMax[1]={0x80};
+    uint8_t acqConfigReg[1]={0x08};
+    uint8_t refCountMax[1]={0x05};
+    uint8_t thresholdBypass[1]={0x00};	
+    waitbusy(); 
+    HAL_I2C_Mem_Write(&I2cHandle3,0xc4,0x02,1,sigCountMax,1,1000);
+    waitbusy(); 
+    HAL_I2C_Mem_Write(&I2cHandle3,0xc4,0x04,1,acqConfigReg,1,1000);
+    waitbusy(); 
+    HAL_I2C_Mem_Write(&I2cHandle3,0xc4,0x12,1,refCountMax,1,1000);	
+    waitbusy(); 
+    HAL_I2C_Mem_Write(&I2cHandle3,0xc4,0x1c,1,thresholdBypass,1,1000);
+    waitbusy(); 
 }
 
-float SHT20_RT(void)
+uint16_t LidarLite(void)
 {
-	  uint8_t txdata[1]={0xf3};//Temperature measurement
-		uint8_t rxdata[2];
-		uint16_t AD_code;
-		uint16_t sum1=0;
-		uint16_t sum2=0;
-		float tem;
-	
-		while(HAL_I2C_Master_Transmit(&I2cHandle1,0x80,txdata,1,1000) != HAL_OK)
-    {
-			  sum1++;
-				if(sum1>=500)
-				{
-					break;
-				}
-        if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
-        {}
-    }
-		
-		while(HAL_I2C_Master_Receive(&I2cHandle1,0x81,rxdata,2,1000) != HAL_OK)
-    {
-			  sum2++;
-				if(sum2>=3000)       // The minimum time required for temperature conversion, the timeout jumps out of the loop
-				{
-					break;
-				}
-        if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
-        {}
-    }
-		
-	AD_code=(rxdata[0]<<8)+rxdata[1];
-	AD_code &=~0x0003;   //14bit
-	tem=AD_code*175.72/65536-46.85;
-	if((tem<-40.0)||(tem>125.0))
-	{
-		j++;
-	if(j==2)
-	{
-	BSP_sht20_Init();		
-	}
-	if(j==3)
-	{
-	NVIC_SystemReset();
-	}
-	}
-	else
-	{
-		j=0;
-	}
-	PPRINTF("Temperature =%f\r\n",tem);
-  return tem;
+	  uint8_t dataByte[1]={0x04};
+		uint8_t rxdata1[1];
+		uint8_t rxdata2[1];
+		uint16_t distance;
+    waitbusy(); 		
+    HAL_I2C_Mem_Write(&I2cHandle3,0xc4,0x00,1,dataByte,1,1000);	
+		if(waitbusy()<9999)
+		{		
+    HAL_I2C_Mem_Read(&I2cHandle3,0xc5,0x0f,1,rxdata1,1,1000);
+    HAL_I2C_Mem_Read(&I2cHandle3,0xc5,0x10,1,rxdata2,1,1000);
+	  distance=(rxdata1[0]<<8)+rxdata2[0];
+		if(distance>4000)
+		{
+	  PRINTF("Distance is out of range\r\n",distance);
+	  distance=65535;			
+	  return distance;			
+		}
+		else
+		{
+    PRINTF("Distance =%dcm\r\n",distance);
+	  return distance;	
+		}			
+		}
+		else
+		{
+	   PRINTF("lidar_lite is not connect\r\n");
+	   distance=4095;
+	   return distance;			
+		}
 }
-#endif
+
+uint16_t waitbusy(void)
+{
+  uint16_t busyCounter = 0;
+	uint8_t busy[1]={0x01};
+  while (busy[0])      
+  {
+   if (busyCounter > 9999)
+   {
+	return busyCounter;			 
+   }
+	HAL_I2C_Mem_Read(&I2cHandle3,0xc5,0x01,1,busy,1,1000);
+	busy[0] &=0x01;
+	busyCounter++;
+ }
+	return busyCounter;
+}
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

@@ -138,6 +138,8 @@ void HW_Init( void )
     HW_RTC_Init( );
     
     TraceInit( );
+		
+ 		vcom_init_uart1();
     
     BSP_sensor_Init( );
 

@@ -64,8 +64,8 @@ static int i=0,j=0;
 I2C_HandleTypeDef I2cHandle2;
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
-//#define I2C_TIMING    0x10A13E56 /* 100 kHz with analog Filter ON, Rise Time 400ns, Fall Time 100ns */ 
-#define I2C_TIMING      0x00B1112E /* 400 kHz with analog Filter ON, Rise Time 250ns, Fall Time 100ns */
+#define I2C_TIMING    0x10A13E56 /* 100 kHz with analog Filter ON, Rise Time 400ns, Fall Time 100ns */ 
+//#define I2C_TIMING      0x00B1112E /* 400 kHz with analog Filter ON, Rise Time 250ns, Fall Time 100ns */
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
@@ -131,9 +131,13 @@ float SHT31_RH(void)
         {}
     }
 	AD_code=(rxdata[3]<<8)+rxdata[4];
-	AD_code &=~0x000f;   //12bit
+	AD_code &=~0x0003;   //14bit
 	hum=AD_code*100.0/(65536-1);
-  if((hum<0.0)||(hum>100.0))
+	if(hum>100.0)
+	{
+		hum=100.0;
+	}
+  if(hum<0.0)
 	{
 		i++;
 	if(i==2)

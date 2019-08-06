@@ -75,12 +75,15 @@ typedef struct{
 	float temp1;//DS18B20
 	
 	float oil;  //oil float
+
+	float ADC_1; //ADC1
 	
-	uint8_t PA1_mv;//PA1
+	float ADC_2;  //ADC2	
+//	uint8_t PA1_mv;//PA1
 
 	float temp_sht;
 	float hum_sht;
-
+	
   /**more may be added*/
 } sensor_t;
 

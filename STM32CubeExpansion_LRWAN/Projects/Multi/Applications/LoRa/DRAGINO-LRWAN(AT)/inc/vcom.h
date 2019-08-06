@@ -119,6 +119,9 @@ void vcom_IRQHandler(void);
 */
 void vcom_DMA_TX_IRQHandler(void);
 
+void vcom_init_uart1(void);
+void ULT_uart_IRQHandler(void);
+
 #if 1
 #define PPRINTF(...)     do{ } while( 0!= TraceSend(__VA_ARGS__) ) //Polling Mode
 

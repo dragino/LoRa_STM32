@@ -61,6 +61,7 @@
 #include "sht31.h"
 #include "pwr_out.h"
 #include "ult.h"
+#include "lidar_lite_v3hp.h"
 #endif
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -68,12 +69,14 @@
 /* Exported functions ---------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+uint8_t mode2_flag=0;
 uint16_t ult;
 static __IO uint16_t AD_code1=0;
-static __IO uint16_t AD_code2=0;
+__IO uint16_t AD_code2=0;
+__IO uint16_t AD_code3=0;
 
 #ifdef USE_SHT
-static int flags=0;
+uint8_t flags=0;
 #endif
 
 //static GPIO_InitTypeDef  GPIO_InitStruct;
@@ -82,29 +85,31 @@ extern uint16_t batteryLevel_mV;
 #ifdef USE_SHT
 extern I2C_HandleTypeDef I2cHandle1;
 extern I2C_HandleTypeDef I2cHandle2;
+extern I2C_HandleTypeDef I2cHandle3;
 #endif
 
 extern void Read_Config(void);
 extern uint8_t mode;
+extern uint8_t inmode;
 
 void BSP_sensor_Read( sensor_t *sensor_data)
 {
  	#if defined(LoRa_Sensor_Node)
 	
 	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_RESET);//Enable 5v power supply
-	
 	sensor_data->temp1=DS18B20_GetTemp_SkipRom();
 	
 	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);
-	AD_code1=HW_AdcReadChannel( ADC_Channel_Oil );
+	HW_GetBatteryLevel( );	
+	AD_code1=HW_AdcReadChannel( ADC_Channel_Oil );  //PA0
+	
 	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_SET);
 	
-	HW_GetBatteryLevel( );
 	sensor_data->oil=AD_code1*batteryLevel_mV/4095;
 	
 	sensor_data->in1=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN1);
 	
-	 if(mode==1)
+	 if((mode==1)||(mode==3))
 	 {		
    #ifdef USE_SHT
 	 if(flags==0)
@@ -112,31 +117,48 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 		 sensor_data->temp_sht=6553.5;
 		 sensor_data->hum_sht=6553.5;
 	 } 
-	 if(flags==1)
+	 else if(flags==1)
 	 {
-	float temp2,hum1;
-	temp2=SHT20_RT();//get temperature
-	hum1=SHT20_RH(); //get humidity
-	sensor_data->temp_sht=temp2;
-	sensor_data->hum_sht=hum1;
+	   float temp2,hum1;
+	   temp2=SHT20_RT();//get temperature
+	   hum1=SHT20_RH(); //get humidity
+	   sensor_data->temp_sht=temp2;
+	   sensor_data->hum_sht=hum1;
    }
-	if(flags==2)
-	{
-	float temp2,hum1;
-	temp2=SHT31_RT();//get temperature
-	hum1=SHT31_RH(); //get humidity
-	sensor_data->temp_sht=temp2;
-	sensor_data->hum_sht=hum1;
-	}
+	 else if(flags==2)
+	 {
+	   float temp2,hum1;
+	   temp2=SHT31_RT();//get temperature
+	   hum1=SHT31_RH(); //get humidity
+	   sensor_data->temp_sht=temp2;
+	   sensor_data->hum_sht=hum1;
+	 }
+	
 	 #endif
 		}
 	 
-		if(mode==2)
+		else if(mode==2)
 	 {
+		 if(mode2_flag==1)
+		 {
+		 ult=LidarLite()*10;				 
+		 }
+		 else
+		 {
 		 ult=ULT_test();
+		 }
 	 }
 	 
-	 HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
+	  if(mode==3)
+	 {	
+	   AD_code2=HW_AdcReadChannel( ADC_Channel_IN1 );  //PA1
+	   sensor_data->ADC_1=AD_code2*batteryLevel_mV/4095;
+		 
+	   AD_code3=HW_AdcReadChannel( ADC_Channel_IN4 );	//PA4
+	   sensor_data->ADC_2=AD_code3*batteryLevel_mV/4095;  			
+	 }	 
+	
+	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
 	 
 	#endif
 }
@@ -200,17 +222,17 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
 void  BSP_sensor_Init( void  )
 {
   #if defined(LoRa_Sensor_Node)
-//	 while(DS18B20_Init()==1);
+	 pwr_control_IoInit();		
+//	 while(DS18B20_Init()==1);	
 	 Read_Config();
 	
-	 GPIO_EXTI_IoInit();
 	 GPIO_INPUT_IoInit();
 	 BSP_oil_float_Init();
 	
-	 if(mode==1)
-	 {	 
+	if((mode==1)||(mode==3))
+	{	 
 	 #ifdef USE_SHT
-	 int sum1=0,sum2=0;
+	 uint16_t sum1=0,sum2=0;
 	 uint8_t txdata1[1]={0xE7},txdata2[2]={0xF3,0x2D};
 	 
 	 BSP_sht20_Init();
@@ -256,14 +278,48 @@ void  BSP_sensor_Init( void  )
 		 PRINTF("  IIC is not connect\n\r");
 	 }	
 	 #endif
-  }
-	if(mode==2)
-	{ 
-		GPIO_ULT_INPUT_Init();
-		GPIO_ULT_OUTPUT_Init();
-		TIM2_Init();
+   }
+	 
+	else if(mode==2)
+	{	
+	  uint8_t dataByte[1]={0x00};		
+	  HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_RESET);//Enable 5v power supply	
+    IIC_init();
+    waitbusy(); 	
+    HAL_I2C_Mem_Write(&I2cHandle3,0xc4,0x00,1,dataByte,1,1000);	
+	  if(waitbusy()<9999)
+	 {
+     mode2_flag=1;		
+	   LidarLite_init();
+     HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply				
+		 PRINTF("  Use Sensor is LIDAR_Lite_v3HP\n\r");
+	 }
+	  else
+	 {
+		 GPIO_ULT_INPUT_Init();
+		 GPIO_ULT_OUTPUT_Init();
+		 TIM2_Init();
+		 PRINTF("  Use Sensor is ultrasonic distance measurement\n\r");	
+	 }
 	}
-	pwr_control_IoInit();
+	
+	switch(inmode)
+	{
+		case 0:
+			GPIO_EXTI_IoDeInit();
+	  break;
+		case 1:
+			GPIO_EXTI_RISING_FALLINGInit();
+	  break;
+		case 2:
+			GPIO_EXTI_FALLINGInit();
+	  break;
+		case 3:
+			GPIO_EXTI_RISINGInit();
+	  break;
+		default:
+	  break;
+	}
 	#endif
 }
 

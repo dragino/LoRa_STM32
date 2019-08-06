@@ -62,6 +62,10 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "hw.h"
 #include "low_power_manager.h"
 
+//uint8_t flagss=0,flagsss=0;
+//uint16_t  daysss=0;
+//uint16_t  hours=0,minutes=0,sceonds=0;
+
 /* Private typedef -----------------------------------------------------------*/
 typedef struct
 {
@@ -622,6 +626,61 @@ static TimerTime_t HW_RTC_GetCalendarValue( RTC_DateTypeDef* RTC_DateStruct, RTC
   return( calendarValue );
 }
 
+//void LSN50runtime( void )
+//{
+//	uint32_t value;
+//  uint16_t Valuess;
+//	uint16_t sceonds1=0,minutes1=0;
+//	uint16_t sceonds2=0,minutes2=0;
+//	
+//  Valuess=HW_RTC_GetTimerValue();
+//	
+//	if(Valuess>=40000)
+//	{
+//		flagss=1;
+//	}
+//	if((flagss==1)&&(Valuess<40000))
+//	{
+//		flagsss++;
+//		flagss=0;
+//	}
+//	value=Valuess/1000;
+//	sceonds2=value%60;
+//	if(value>=60)
+//	{
+//		minutes2=value/60;
+//		if(minutes2>=60)
+//		{
+//		 hours=minutes2/60;
+//		 minutes2=value%60;
+//			if(hours>=24)
+//			{
+//		   daysss=hours/24;
+//			 hours=minutes2%60;
+//			}
+//		}
+//	}
+
+//	sceonds1=flagsss*5;
+//	minutes1=flagsss*1;
+//	sceonds=sceonds1+sceonds2;
+//	minutes=minutes1+minutes2;
+//	if(sceonds>=60)
+//	{
+//		minutes=sceonds/60+minutes;
+//		sceonds=sceonds%60;
+//	}
+//	if(minutes>=60)
+//	{
+//		hours=minutes/60+hours;
+//		minutes=minutes%60;		
+//	}
+//	if(hours>=24)
+//	{
+//		daysss=hours/24+daysss;
+//    hours=hours%60;	
+//	}	
+//}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

@@ -46,15 +46,21 @@
   
 #include "hw.h"
 #include "vcom.h"
+#include "timeServer.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Uart Handle */
-static UART_HandleTypeDef UartHandle;
+UART_HandleTypeDef UartHandle;
+UART_HandleTypeDef UartHandle1;
 
 uint8_t charRx;
+uint8_t aRxBuffer[1];
+
+__IO ITStatus ischarreceive_uart1=RESET;
+
 //uint8_t uartprintf_flag=0;
 
 static void (*TxCpltCallback) (void);
@@ -127,11 +133,19 @@ void vcom_ReceiveInit(  void (*RxCb)(uint8_t *rxChar) )
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
+	if(UartHandle->Instance==LPUART1)
+	{
    if ((NULL != RxCpltCallback) && (HAL_UART_ERROR_NONE ==UartHandle->ErrorCode))
    {
      RxCpltCallback(&charRx);
    }
    HAL_UART_Receive_IT(UartHandle, &charRx,1);
+  }
+	 else	if(UartHandle->Instance==USART1)
+	{
+  	ischarreceive_uart1 = SET;
+		HAL_UART_Receive_IT(&UartHandle1, (uint8_t *)aRxBuffer,1);
+	}
 }
 
 void vcom_DMA_TX_IRQHandler(void)
@@ -144,6 +158,11 @@ void vcom_IRQHandler(void)
   HAL_UART_IRQHandler(&UartHandle);
 }
 
+void ULT_uart_IRQHandler(void)
+{
+	HAL_UART_IRQHandler(&UartHandle1);
+}
+
 void vcom_DeInit(void)
 {
   HAL_UART_DeInit(&UartHandle);
@@ -151,6 +170,8 @@ void vcom_DeInit(void)
 
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
+	if(huart->Instance==LPUART1)
+	{
   static DMA_HandleTypeDef hdma_tx;
   
   
@@ -200,6 +221,47 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   /* NVIC for USART, to catch the TX complete */
   HAL_NVIC_SetPriority(USARTX_IRQn, USARTX_DMA_Priority, 1);
   HAL_NVIC_EnableIRQ(USARTX_IRQn);
+ }
+	else if(huart->Instance==USART1)
+	{
+		GPIO_InitTypeDef  GPIO_InitStruct={0};
+	__HAL_RCC_GPIOA_CLK_ENABLE();	
+	__HAL_RCC_USART1_CLK_ENABLE();
+	
+	GPIO_InitStruct.Pin       = GPIO_PIN_9;
+  GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull      = GPIO_NOPULL;
+  GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF4_USART1;
+
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* UART RX GPIO pin configuration  */
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  GPIO_InitStruct.Alternate = GPIO_AF4_USART1;
+
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	HAL_NVIC_SetPriority(USART1_IRQn, 2, 1);
+  HAL_NVIC_EnableIRQ(USART1_IRQn);
+ }
+}
+
+void vcom_init_uart1(void)
+{
+	UartHandle1.Instance        = USART1;
+
+  UartHandle1.Init.BaudRate   = 9600;
+  UartHandle1.Init.WordLength = UART_WORDLENGTH_8B;
+  UartHandle1.Init.StopBits   = UART_STOPBITS_1;
+  UartHandle1.Init.Parity     = UART_PARITY_NONE;
+  UartHandle1.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
+  UartHandle1.Init.Mode       = UART_MODE_TX_RX;
+	
+	if(HAL_UART_Init(&UartHandle1) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
@@ -245,6 +307,27 @@ void vcom_IoInit(void)
   GPIO_InitStruct.Alternate = USARTX_RX_AF;
 
   HAL_GPIO_Init(USARTX_RX_GPIO_PORT, &GPIO_InitStruct);
+}
+
+void uart1_IoInit(void)
+{
+  GPIO_InitTypeDef  GPIO_InitStruct={0};
+    /* Enable GPIO TX/RX clock */
+  __GPIOA_CLK_ENABLE();
+    /* UART TX GPIO pin configuration  */
+  GPIO_InitStruct.Pin       = GPIO_PIN_9;
+  GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull      = GPIO_NOPULL;
+  GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
+  GPIO_InitStruct.Alternate = USARTX_TX_AF;
+
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* UART RX GPIO pin configuration  */
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  GPIO_InitStruct.Alternate = USARTX_RX_AF;
+
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
 
 void vcom_IoDeInit(void)

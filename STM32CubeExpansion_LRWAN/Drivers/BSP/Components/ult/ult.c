@@ -67,7 +67,7 @@ void GPIO_ULT_INPUT_Init(void)
 	
 	GPIO_InitStruct.Pin = ULT_Echo_PIN;
 	GPIO_InitStruct.Mode =GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
 
   HW_GPIO_Init( ULT_Echo_PORT, ULT_Echo_PIN, &GPIO_InitStruct );
@@ -131,8 +131,6 @@ uint16_t ULT_test(void)
 
 //	PPRINTF("TIME=%d\r\n",time);
 	distance=(170*(time*5/(float)1000)+5);
-		
-	HAL_Delay(50);	
 
 	if((distance<240)||(distance>6000))
 	{

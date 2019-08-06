@@ -1,27 +1,13 @@
-/*
- / _____)             _              | |
-( (____  _____ ____ _| |_ _____  ____| |__
- \____ \| ___ |    (_   _) ___ |/ ___)  _ \
- _____) ) ____| | | || |_| ____( (___| | | |
-(______/|_____)_|_|_| \__)_____)\____)_| |_|
-    (C)2013 Semtech
-
-Description: contains all hardware driver
-
-License: Revised BSD License, see LICENSE.TXT file include in the project
-
-Maintainer: Miguel Luis and Gregory Cristian
-*/
- /******************************************************************************
-  * @file    gpio_exti.h
+/******************************************************************************
+  * @file    LIDAR_Lite_v3HP.h
   * @author  MCD Application Team
-  * @version V1.1.1
-  * @date    01-June-2017
+  * @version V1.1.2
+  * @date    30-Novermber-2018
   * @brief   contains all hardware driver
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -59,8 +45,8 @@ Maintainer: Miguel Luis and Gregory Cristian
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __GPIO_EXTI_H__
-#define __GPIO_EXTI_H__
+#ifndef __LIDAR_Lite_v3HP_H__
+#define __LIDAR_Lite_v3HP_H__
 
 #ifdef __cplusplus
  extern "C" {
@@ -73,19 +59,21 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Exported macros -----------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */ 
 /**
- * @brief  
+ * @brief  initialises the 
  *
  * @note
  * @retval None
  */
-void  GPIO_EXTI_FALLINGInit( void  );
-void  GPIO_EXTI_RISINGInit( void  );
-void  GPIO_EXTI_RISING_FALLINGInit( void  );
-void  GPIO_EXTI_IoDeInit( void  );
-void  GPIO_INPUT_IoInit(void);
+ 
+#include "hw.h"
+
+void IIC_init(void);
+void LidarLite_init(void);
+uint16_t LidarLite(void);
+uint16_t waitbusy(void);
 #ifdef __cplusplus
 }
 #endif
 
-#endif 
+#endif /* __BSP_H__ */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
