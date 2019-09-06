@@ -185,10 +185,6 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define I2Cx_SDA_GPIO_PORT              GPIOB
 #define I2Cx_SCL_SDA_AF                 GPIO_AF1_I2C1
 
-/* Definition for I2Cx's NVIC */
-#define I2Cx_IRQn                       I2C1_IRQn
-#define I2Cx_IRQHandler                 I2C1_IRQHandler
-
 /*Definition LoRa Sensor Pins*/
 /* ---------------------------  DS18B20 HW definition -------------------------------*/
 #define DOUT_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()

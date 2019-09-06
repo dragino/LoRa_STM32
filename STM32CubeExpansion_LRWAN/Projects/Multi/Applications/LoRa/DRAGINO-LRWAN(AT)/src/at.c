@@ -269,33 +269,6 @@ ATEerror_t at_DevAddr_get(const char *param)
   return AT_OK;
 }
 
-//ATEerror_t at_DevAddr_set(const char *param)
-//{
-//  MibRequestConfirm_t mib;
-//  LoRaMacStatus_t status;
-
-//  mib.Type = MIB_DEV_ADDR;
-//  if (sscanf_uint32_as_hhx(param, &mib.Param.DevAddr) != 4)
-//  {
-//    return AT_PARAM_ERROR;
-//  }
-//  status = LoRaMacMibSetRequestConfirm(&mib);
-//  CHECK_STATUS(status);
-//  return AT_OK;
-//}
-
-//ATEerror_t at_DevAddr_get(const char *param)
-//{
-//  MibRequestConfirm_t mib;
-//  LoRaMacStatus_t status;
-
-//  mib.Type = MIB_DEV_ADDR;
-//  status = LoRaMacMibGetRequestConfirm(&mib);
-//  CHECK_STATUS(status);
-//  print_uint32_as_02x(mib.Param.DevAddr);
-//  return AT_OK;
-//}
-
 ATEerror_t at_AppKey_get(const char *param)
 {
   print_16_02x(lora_config_appkey_get());
@@ -349,76 +322,6 @@ ATEerror_t at_AppSKey_set(const char *param)
   lora_config_appskey_set(AppSKey);
   return AT_OK;
 }
-
-//ATEerror_t at_NwkSKey_get(const char *param)
-//{
-//  MibRequestConfirm_t mib;
-//  LoRaMacStatus_t status;
-
-//  mib.Type = MIB_NWK_SKEY;
-//  status = LoRaMacMibGetRequestConfirm(&mib);
-//  CHECK_STATUS(status);
-//  print_16_02x(mib.Param.NwkSKey);
-
-//  return AT_OK;
-//}
-
-//ATEerror_t at_NwkSKey_set(const char *param)
-//{
-//  MibRequestConfirm_t mib;
-//  LoRaMacStatus_t status;
-//  uint8_t NwkSKey[16];
-
-//  mib.Type = MIB_NWK_SKEY;
-
-//  if (sscanf_16_hhx(param, NwkSKey) != 16)
-//  {
-//    return AT_PARAM_ERROR;
-//  }
-
-//  mib.Param.NwkSKey = NwkSKey;
-//  status = LoRaMacMibSetRequestConfirm(&mib);
-//  CHECK_STATUS(status);
-
-//  return AT_OK;
-//}
-
-//ATEerror_t at_AppSKey_get(const char *param)
-//{
-//  MibRequestConfirm_t mib;
-//  LoRaMacStatus_t status;
-
-//  mib.Type = MIB_APP_SKEY;
-//  status = LoRaMacMibGetRequestConfirm(&mib);
-//  CHECK_STATUS(status);
-//  print_16_02x(mib.Param.AppSKey);
-
-//  return AT_OK;
-//}
-
-//ATEerror_t at_AppSKey_set(const char *param)
-//{
-//  MibRequestConfirm_t mib;
-//  LoRaMacStatus_t status;
-//  uint8_t AppSKey[16];
-
-//  mib.Type = MIB_APP_SKEY;
-//  if (sscanf_16_hhx(param, AppSKey) != 16)
-//  {
-//    return AT_PARAM_ERROR;
-//  }
-//  mib.Param.AppSKey = AppSKey;
-//  status = LoRaMacMibSetRequestConfirm(&mib);
-//  CHECK_STATUS(status);
-
-//  return AT_OK;
-//}
-
-//ATEerror_t at_Certif( const char *param )
-//{
-//  lora_wan_certif( );
-//  return AT_OK;
-//}
 
 ATEerror_t at_ADR_get(const char *param)
 {
@@ -1177,12 +1080,25 @@ ATEerror_t at_rssi_get(const char *param)
 
 ATEerror_t at_TDC_set(const char *param)
 { 
-	if (tiny_sscanf(param, "%lu", &APP_TX_DUTYCYCLE) != 1)
+	uint32_t txtimeout;
+	
+	if (tiny_sscanf(param, "%lu", &txtimeout) != 1)
   {
     return AT_PARAM_ERROR;
   }
+	
+	if(txtimeout<6000)
+	{
+		PRINTF("TDC setting must be more than 6S\n\r");
+		APP_TX_DUTYCYCLE=6000;
+		return AT_PARAM_ERROR;
+	}
+	
+	APP_TX_DUTYCYCLE=txtimeout;
+	
 	return AT_OK;
 }
+
 ATEerror_t at_TDC_get(const char *param)
 { 
 	print_d(APP_TX_DUTYCYCLE);

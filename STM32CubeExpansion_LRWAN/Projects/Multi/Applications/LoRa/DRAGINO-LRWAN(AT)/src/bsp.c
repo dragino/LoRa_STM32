@@ -97,7 +97,6 @@ void BSP_sensor_Read( sensor_t *sensor_data)
  	#if defined(LoRa_Sensor_Node)
 	
 	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_RESET);//Enable 5v power supply
-	sensor_data->temp1=DS18B20_GetTemp_SkipRom();
 	
 	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);
 	HW_GetBatteryLevel( );	
@@ -108,6 +107,8 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	sensor_data->oil=AD_code1*batteryLevel_mV/4095;
 	
 	sensor_data->in1=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN1);
+
+	sensor_data->temp1=DS18B20_GetTemp_SkipRom();
 	
 	 if((mode==1)||(mode==3))
 	 {		
@@ -194,9 +195,6 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
   GPIO_InitStruct.Alternate = I2Cx_SCL_SDA_AF;
   HAL_GPIO_Init(I2Cx_SDA_GPIO_PORT, &GPIO_InitStruct);
 	
-  /* NVIC for I2Cx */
-  HAL_NVIC_SetPriority(I2Cx_IRQn, 0, 1);
-  HAL_NVIC_EnableIRQ(I2Cx_IRQn);
 }
 /**
   * @brief I2C MSP De-Initialization 
@@ -222,12 +220,10 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
 void  BSP_sensor_Init( void  )
 {
   #if defined(LoRa_Sensor_Node)
-	 pwr_control_IoInit();		
-//	 while(DS18B20_Init()==1);	
-	 Read_Config();
 	
-	 GPIO_INPUT_IoInit();
-	 BSP_oil_float_Init();
+	 pwr_control_IoInit();		
+
+	 Read_Config();
 	
 	if((mode==1)||(mode==3))
 	{	 
@@ -255,6 +251,8 @@ void  BSP_sensor_Init( void  )
 	 if(flags==0)
 	 {
 		 
+		 HAL_I2C_MspDeInit(&I2cHandle1);
+		 
 		 BSP_sht31_Init();
 		 
 	 	 while(HAL_I2C_Master_Transmit(&I2cHandle2,0x88,txdata2,2,1000) != HAL_OK) 
@@ -275,6 +273,8 @@ void  BSP_sensor_Init( void  )
 	 
 	 if(flags==0)
 	 {
+		 HAL_I2C_MspDeInit(&I2cHandle2);
+		 
 		 PRINTF("  IIC is not connect\n\r");
 	 }	
 	 #endif
@@ -296,6 +296,7 @@ void  BSP_sensor_Init( void  )
 	 }
 	  else
 	 {
+		 HAL_I2C_MspDeInit(&I2cHandle3);
 		 GPIO_ULT_INPUT_Init();
 		 GPIO_ULT_OUTPUT_Init();
 		 TIM2_Init();
@@ -320,6 +321,10 @@ void  BSP_sensor_Init( void  )
 		default:
 	  break;
 	}
+	
+	 GPIO_INPUT_IoInit();
+	 BSP_oil_float_Init();
+	
 	#endif
 }
 

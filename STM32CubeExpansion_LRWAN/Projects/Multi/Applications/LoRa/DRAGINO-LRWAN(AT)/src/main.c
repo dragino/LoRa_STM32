@@ -181,7 +181,7 @@ int main( void )
  
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
-   CMD_Init();
+  CMD_Init();
 	
   /*Disbale Stand-by mode*/
   LPM_SetOffMode(LPM_APPLI_Id , LPM_Disable );
@@ -217,7 +217,7 @@ int main( void )
 static void LORA_HasJoined( void )
 {
   AT_PRINTF("JOINED\n\r");
-	Read_Config();
+
   LORA_RequestClass( LORAWAN_DEFAULT_CLASS );
 	
 	#if defined(LoRa_Sensor_Node) /*LSN50 Preprocessor compile swicth:hw_conf.h*/
@@ -371,9 +371,10 @@ static void LORA_RxData( lora_AppData_t *AppData )
 					{
 					  ServerSetTDC=( AppData->Buff[1]<<16 | AppData->Buff[2]<<8 | AppData->Buff[3] );//S
 					
-						if(ServerSetTDC<5)
+						if(ServerSetTDC<6)
 						{
-							PRINTF("TDC setting must be more than 4S\n\r");
+							PRINTF("TDC setting must be more than 6S\n\r");
+		          APP_TX_DUTYCYCLE=6000;							
 						}
 						else
 						{
