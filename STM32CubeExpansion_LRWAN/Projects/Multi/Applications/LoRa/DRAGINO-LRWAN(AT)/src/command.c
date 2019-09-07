@@ -543,7 +543,7 @@ static const struct ATCommand_s ATCommand[] =
 	  .string = AT_MOD,
     .size_string = sizeof(AT_MOD) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_MOD ": Set the work mode(1:IIC mode,2:distance mode,3:3ADCS mode)\r\n",
+    .help_string = "AT"AT_MOD ":Get or Set the work mode(1:IIC mode,2:distance mode,3:3ADCS mode)\r\n",
 #endif
     .get = at_MOD_get,
     .set = at_MOD_set,
