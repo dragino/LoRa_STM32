@@ -463,4 +463,6 @@ uint8_t RegionEU433ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t d
 
 /*! \} defgroup REGIONEU433 */
 
+//void RegionEU433RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr );
+
 #endif // __REGION_EU433_H__

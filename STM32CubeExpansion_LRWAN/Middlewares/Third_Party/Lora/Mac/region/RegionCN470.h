@@ -438,4 +438,6 @@ uint8_t RegionCN470ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t d
 
 /*! \} defgroup REGIONCN470 */
 
+//void RegionCN470RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr );
+
 #endif // __REGION_CN470_H__

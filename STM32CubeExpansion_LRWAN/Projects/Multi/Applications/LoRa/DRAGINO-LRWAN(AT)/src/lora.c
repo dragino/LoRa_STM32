@@ -167,9 +167,9 @@ static lora_configuration_t lora_config =
  */
 #define LORAWAN_DUTYCYCLE_ON                        true
 
-#define USE_SEMTECH_DEFAULT_CHANNEL_LINEUP          0
+//#define USE_SEMTECH_DEFAULT_CHANNEL_LINEUP          0
 
-#if( USE_SEMTECH_DEFAULT_CHANNEL_LINEUP == 1 ) 
+//#if( USE_SEMTECH_DEFAULT_CHANNEL_LINEUP == 1 ) 
 
 #define LC4                { 867100000, 0, { ( ( DR_5 << 4 ) | DR_0 ) }, 0 }
 #define LC5                { 867300000, 0, { ( ( DR_5 << 4 ) | DR_0 ) }, 0 }
@@ -179,7 +179,7 @@ static lora_configuration_t lora_config =
 #define LC9                { 868800000, 0, { ( ( DR_7 << 4 ) | DR_7 ) }, 2 }
 #define LC10               { 868300000, 0, { ( ( DR_6 << 4 ) | DR_6 ) }, 1 }
 
-#endif
+//#endif
 
 #endif
 
@@ -378,6 +378,7 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
 	#endif
 	
 	PRINTF("Image Version: "AT_VERSION_STRING"\n\r");
+	PRINTF("LoRaWan Stack: "AT_LoRaWan_VERSION_STRING"\n\r");	
 	PRINTF("Frequency Band: ");
 	region_printf();
 	key_printf();
@@ -407,8 +408,8 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_KR920 );
 #elif defined( REGION_US915 )
   LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_US915 );
-#elif defined( REGION_US915_HYBRID )
-  LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_US915_HYBRID );
+#elif defined( REGION_RU864 )
+  LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_RU864 );
 #else
     #error "Please define a region in the compiler options."
 #endif
@@ -425,27 +426,29 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   mibReq.Param.Class= CLASS_A;
   LoRaMacMibSetRequestConfirm( &mibReq );
 
-#if defined( REGION_EU868 )
-  LoRaMacTestSetDutyCycleOn( lora_config.duty_cycle );
+	#if defined( REGION_EU868 )
+	if(customize_config.freq1==0)
+	{
+//	#if( USE_SEMTECH_DEFAULT_CHANNEL_LINEUP == 1 )
+		LoRaMacChannelAdd( 3, ( ChannelParams_t )LC4 );
+		LoRaMacChannelAdd( 4, ( ChannelParams_t )LC5 );
+		LoRaMacChannelAdd( 5, ( ChannelParams_t )LC6 );
+		LoRaMacChannelAdd( 6, ( ChannelParams_t )LC7 );
+		LoRaMacChannelAdd( 7, ( ChannelParams_t )LC8 );
+		LoRaMacChannelAdd( 8, ( ChannelParams_t )LC9 );
+		LoRaMacChannelAdd( 9, ( ChannelParams_t )LC10 );
+   }
+				
+		mibReq.Type = MIB_RX2_DEFAULT_CHANNEL;
+		mibReq.Param.Rx2DefaultChannel = ( Rx2ChannelParams_t ){ 869525000, DR_3 };
+		LoRaMacMibSetRequestConfirm( &mibReq );
 
-#if( USE_SEMTECH_DEFAULT_CHANNEL_LINEUP == 1 )
-  LoRaMacChannelAdd( 3, ( ChannelParams_t )LC4 );
-  LoRaMacChannelAdd( 4, ( ChannelParams_t )LC5 );
-  LoRaMacChannelAdd( 5, ( ChannelParams_t )LC6 );
-  LoRaMacChannelAdd( 6, ( ChannelParams_t )LC7 );
-  LoRaMacChannelAdd( 7, ( ChannelParams_t )LC8 );
-  LoRaMacChannelAdd( 8, ( ChannelParams_t )LC9 );
-  LoRaMacChannelAdd( 9, ( ChannelParams_t )LC10 );
-
-  mibReq.Type = MIB_RX2_DEFAULT_CHANNEL;
-  mibReq.Param.Rx2DefaultChannel = ( Rx2ChannelParams_t ){ 869525000, DR_3 };
-  LoRaMacMibSetRequestConfirm( &mibReq );
-
-  mibReq.Type = MIB_RX2_CHANNEL;
-  mibReq.Param.Rx2Channel = ( Rx2ChannelParams_t ){ 869525000, DR_3 };
-  LoRaMacMibSetRequestConfirm( &mibReq );
-#endif
-#endif
+		mibReq.Type = MIB_RX2_CHANNEL;
+	  mibReq.Param.Rx2Channel = ( Rx2ChannelParams_t ){ 869525000, DR_3 };
+		LoRaMacMibSetRequestConfirm( &mibReq );
+//#endif
+	#endif	
+	
   lora_config.TxDatarate = LoRaParamInit->TxDatarate;
 	
 	  if(FLASH_read(0x8018F80)==0x00)	//page799
@@ -489,6 +492,8 @@ void region_printf(void)
   PPRINTF("KR920\n\r");
 #elif defined( REGION_US915 )
   PPRINTF("US915\n\r");
+#elif defined( REGION_RU864 )
+  PPRINTF("RU864\n\r");
 #else
     #error "Please define a region in the compiler options."
 #endif

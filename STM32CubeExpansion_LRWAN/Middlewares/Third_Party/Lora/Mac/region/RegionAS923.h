@@ -500,4 +500,6 @@ uint8_t RegionAS923ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t d
 
 /*! \} defgroup REGIONAS923 */
 
+//void RegionAS923RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr );
+
 #endif // __REGION_AS923_H__

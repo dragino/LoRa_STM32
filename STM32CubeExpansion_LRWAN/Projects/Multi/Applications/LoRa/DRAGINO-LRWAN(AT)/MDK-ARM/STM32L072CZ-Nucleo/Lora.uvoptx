@@ -982,8 +982,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac\region\RegionUS915-Hybrid.c</PathWithFileName>
-      <FilenameWithoutPath>RegionUS915-Hybrid.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac\region\RegionRU864.c</PathWithFileName>
+      <FilenameWithoutPath>RegionRU864.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

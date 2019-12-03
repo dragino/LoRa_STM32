@@ -37,6 +37,13 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 // Definitions
 #define CHANNELS_MASK_SIZE              6
 
+// A mask to select only valid 500KHz channels
+#define CHANNELS_MASK_500KHZ_MASK       0x00FF
+
+static uint8_t TXpower=0;
+static uint8_t TXdr=0;
+extern LoRaMacParams_t LoRaMacParams;
+
 // Global attributes
 /*!
  * LoRaMAC channels
@@ -345,7 +352,7 @@ void RegionUS915InitDefaults( InitType_t type )
             ChannelsDefaultMask[1] = 0x0000;
             ChannelsDefaultMask[2] = 0x0000;
             ChannelsDefaultMask[3] = 0x0000;
-            ChannelsDefaultMask[4] = 0x0000;
+            ChannelsDefaultMask[4] = 0x0002;
             ChannelsDefaultMask[5] = 0x0000;
 
 						uint8_t num,channel_num,k;
@@ -596,7 +603,11 @@ bool RegionUS915RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
         maxPayload = MaxPayloadOfDatarateUS915[dr];
     }
     Radio.SetMaxPayloadLength( MODEM_LORA, maxPayload + LORA_MAC_FRMPAYLOAD_OVERHEAD );
-//    PRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
+
+		TimerTime_t ts = TimerGetCurrentTime(); 
+		PPRINTF("[%lu]", ts); 
+		PPRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
+		
 
     *datarate = (uint8_t) dr;
     return true;
@@ -612,11 +623,16 @@ bool RegionUS915TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
     // Calculate physical TX power
     phyTxPower = RegionCommonComputeTxPower( txPowerLimited, US915_DEFAULT_MAX_ERP, 0 );
 
+		TXpower=txConfig->TxPower;
+	  TXdr=txConfig->Datarate;
+	
     // Setup the radio frequency
     Radio.SetChannel( Channels[txConfig->Channel].Frequency );
 
     Radio.SetTxConfig( MODEM_LORA, phyTxPower, 0, bandwidth, phyDr, 1, 8, false, true, 0, 0, false, 3000 );
-    PRINTF( "TX on freq %d Hz at DR %d\n\r", Channels[txConfig->Channel].Frequency, txConfig->Datarate );
+		TimerTime_t ts = TimerGetCurrentTime(); 
+		PPRINTF("[%lu]", ts); 		
+    PPRINTF( "TX on freq %d Hz at DR %d\n\r", Channels[txConfig->Channel].Frequency, txConfig->Datarate );
 
     // Setup maximum payload lenght of the radio driver
     Radio.SetMaxPayloadLength( MODEM_LORA, txConfig->PktLen );
@@ -637,7 +653,8 @@ uint8_t RegionUS915LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     RegionCommonLinkAdrReqVerifyParams_t linkAdrVerifyParams;
-
+    uint8_t nbreq=LoRaMacParams.ChannelsNbRep;
+		
     // Initialize local copy of channels mask
     RegionCommonChanMaskCopy( channelsMask, ChannelsMask, 6 );
 
@@ -662,7 +679,7 @@ uint8_t RegionUS915LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
             channelsMask[2] = 0xFFFF;
             channelsMask[3] = 0xFFFF;
             // Apply chMask to channels 64 to 71
-            channelsMask[4] = linkAdrParams.ChMask;
+            channelsMask[4] = linkAdrParams.ChMask & CHANNELS_MASK_500KHZ_MASK;
         }
         else if( linkAdrParams.ChMaskCtrl == 7 )
         {
@@ -672,12 +689,61 @@ uint8_t RegionUS915LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
             channelsMask[2] = 0x0000;
             channelsMask[3] = 0x0000;
             // Apply chMask to channels 64 to 71
-            channelsMask[4] = linkAdrParams.ChMask;
+            channelsMask[4] = linkAdrParams.ChMask & CHANNELS_MASK_500KHZ_MASK;
         }
         else if( linkAdrParams.ChMaskCtrl == 5 )
         {
-            // RFU
-            status &= 0xFE; // Channel mask KO
+            // Start value for comparision
+            uint8_t bitMask = 1;
+
+            // cntChannelMask for channelsMask[0] until channelsMask[3]
+            uint8_t cntChannelMask = 0;
+
+            // i will be 1, 2, 3, ..., 7
+            for( uint8_t i = 0; i <= 7; i++ )
+            {
+                // 8 MSBs of ChMask are RFU
+                // Checking if the ChMask is set, then true
+                if( ( ( linkAdrParams.ChMask & 0x00FF ) & ( bitMask << i ) ) != 0 )
+                {
+                    if( ( i % 2 ) == 0 )
+                    {
+                        // Enable a bank of 8 125kHz channels, 8 LSBs
+                        channelsMask[cntChannelMask] |= 0x00FF;
+                        // Enable the corresponding 500kHz channel
+                        channelsMask[4] |= ( bitMask << i );
+                    }
+                    else
+                    {
+                        // Enable a bank of 8 125kHz channels, 8 MSBs
+                        channelsMask[cntChannelMask] |= 0xFF00;
+                        // Enable the corresponding 500kHz channel
+                        channelsMask[4] |= ( bitMask << i );
+                        // cntChannelMask increment for uneven i
+                        cntChannelMask++;
+                    }
+                }
+                // ChMask is not set
+                else
+                {
+                    if( ( i % 2 ) == 0 )
+                    {
+                        // Disable a bank of 8 125kHz channels, 8 LSBs
+                        channelsMask[cntChannelMask] &= 0xFF00;
+                        // Disable the corresponding 500kHz channel
+                        channelsMask[4] &= ~( bitMask << i );
+                    }
+                    else
+                    {
+                        // Enable a bank of 8 125kHz channels, 8 MSBs
+                        channelsMask[cntChannelMask] &= 0x00FF;
+                        // Disable the corresponding 500kHz channel
+                        channelsMask[4] &= ~( bitMask << i );
+                        // cntChannelMask increment for uneven i
+                        cntChannelMask++;
+                    }
+                }
+            }
         }
         else
         {
@@ -734,7 +800,14 @@ uint8_t RegionUS915LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     *txPowOut = linkAdrParams.TxPower;
     *nbRepOut = linkAdrParams.NbRep;
     *nbBytesParsed = bytesProcessed;
-
+		
+		PPRINTF("\r\n");
+		PPRINTF("ADR Message:\r\n");
+		PPRINTF("Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
+		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
+		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
+		PPRINTF("\r\n");
+		
     return status;
 }
 
@@ -918,3 +991,21 @@ uint8_t RegionUS915ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t d
     }
     return datarate;
 }
+
+//void RegionUS915RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr )
+//{
+//    RegionCommonRxBeaconSetupParams_t regionCommonRxBeaconSetup;
+
+//    regionCommonRxBeaconSetup.Datarates = DataratesUS915;
+//    regionCommonRxBeaconSetup.Frequency = rxBeaconSetup->Frequency;
+//    regionCommonRxBeaconSetup.BeaconSize = US915_BEACON_SIZE;
+//    regionCommonRxBeaconSetup.BeaconDatarate = US915_BEACON_CHANNEL_DR;
+//    regionCommonRxBeaconSetup.BeaconChannelBW = US915_BEACON_CHANNEL_BW;
+//    regionCommonRxBeaconSetup.RxTime = rxBeaconSetup->RxTime;
+//    regionCommonRxBeaconSetup.SymbolTimeout = rxBeaconSetup->SymbolTimeout;
+
+//    RegionCommonRxBeaconSetup( &regionCommonRxBeaconSetup );
+
+//    // Store downlink datarate
+//    *outDr = US915_BEACON_CHANNEL_DR;
+//}

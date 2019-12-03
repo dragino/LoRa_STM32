@@ -37,6 +37,10 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 // Definitions
 #define CHANNELS_MASK_SIZE              6
 
+static uint8_t TXpower=0;
+static uint8_t TXdr=0;
+extern LoRaMacParams_t LoRaMacParams;
+
 // Global attributes
 /*!
  * LoRaMAC channels
@@ -531,7 +535,11 @@ bool RegionCN470RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
         maxPayload = MaxPayloadOfDatarateCN470[dr];
     }
     Radio.SetMaxPayloadLength( MODEM_LORA, maxPayload + LORA_MAC_FRMPAYLOAD_OVERHEAD );
-//    PRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
+
+		TimerTime_t ts = TimerGetCurrentTime(); 
+		PPRINTF("[%lu]", ts); 
+		PPRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
+		
 
     *datarate = (uint8_t) dr;
     return true;
@@ -546,11 +554,16 @@ bool RegionCN470TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
     // Calculate physical TX power
     phyTxPower = RegionCommonComputeTxPower( txPowerLimited, txConfig->MaxEirp, txConfig->AntennaGain );
 
+		TXpower=txConfig->TxPower;
+	  TXdr=txConfig->Datarate;
+	
     // Setup the radio frequency
     Radio.SetChannel( Channels[txConfig->Channel].Frequency );
 
     Radio.SetTxConfig( MODEM_LORA, phyTxPower, 0, 0, phyDr, 1, 8, false, true, 0, 0, false, 3000 );
-    PRINTF( "TX on freq %d Hz at DR %d\n\r", Channels[txConfig->Channel].Frequency, txConfig->Datarate );
+		TimerTime_t ts = TimerGetCurrentTime(); 
+		PPRINTF("[%lu]", ts); 		
+    PPRINTF( "TX on freq %d Hz at DR %d\n\r", Channels[txConfig->Channel].Frequency, txConfig->Datarate );
 
     // Setup maximum payload lenght of the radio driver
     Radio.SetMaxPayloadLength( MODEM_LORA, txConfig->PktLen );
@@ -571,7 +584,8 @@ uint8_t RegionCN470LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     RegionCommonLinkAdrReqVerifyParams_t linkAdrVerifyParams;
-
+    uint8_t nbreq=LoRaMacParams.ChannelsNbRep;
+	
     // Initialize local copy of channels mask
     RegionCommonChanMaskCopy( channelsMask, ChannelsMask, 6 );
 
@@ -653,7 +667,14 @@ uint8_t RegionCN470LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     *txPowOut = linkAdrParams.TxPower;
     *nbRepOut = linkAdrParams.NbRep;
     *nbBytesParsed = bytesProcessed;
-
+		
+		PPRINTF("\r\n");
+		PPRINTF("ADR Message:\r\n");
+		PPRINTF("Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
+		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
+		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
+		PPRINTF("\r\n");
+		
     return status;
 }
 
@@ -840,3 +861,21 @@ uint8_t RegionCN470ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t d
     }
     return datarate;
 }
+
+//void RegionCN470RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr )
+//{
+//    RegionCommonRxBeaconSetupParams_t regionCommonRxBeaconSetup;
+
+//    regionCommonRxBeaconSetup.Datarates = DataratesCN470;
+//    regionCommonRxBeaconSetup.Frequency = rxBeaconSetup->Frequency;
+//    regionCommonRxBeaconSetup.BeaconSize = CN470_BEACON_SIZE;
+//    regionCommonRxBeaconSetup.BeaconDatarate = CN470_BEACON_CHANNEL_DR;
+//    regionCommonRxBeaconSetup.BeaconChannelBW = CN470_BEACON_CHANNEL_BW;
+//    regionCommonRxBeaconSetup.RxTime = rxBeaconSetup->RxTime;
+//    regionCommonRxBeaconSetup.SymbolTimeout = rxBeaconSetup->SymbolTimeout;
+
+//    RegionCommonRxBeaconSetup( &regionCommonRxBeaconSetup );
+
+//    // Store downlink datarate
+//    *outDr = CN470_BEACON_CHANNEL_DR;
+//}

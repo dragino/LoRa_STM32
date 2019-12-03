@@ -1633,7 +1633,10 @@ void SX1276OnDio0Irq( void )
                     if( ( RadioEvents != NULL ) && ( RadioEvents->RxDone != NULL ) )
                     {
                         RadioEvents->RxDone( RxTxBuffer, SX1276.Settings.LoRaPacketHandler.Size, SX1276.Settings.LoRaPacketHandler.RssiValue, SX1276.Settings.LoRaPacketHandler.SnrValue );
-                        PRINTF( "rxDone\n\r" );
+ 												TimerTime_t ts = TimerGetCurrentTime(); 
+												PPRINTF("[%lu]", ts); 
+												PPRINTF( "rxDone\n\r" );
+												PPRINTF("rssi= %d\r\n",SX1276.Settings.LoRaPacketHandler.RssiValue);
                     }
                 }
                 break;
@@ -1656,7 +1659,9 @@ void SX1276OnDio0Irq( void )
                 if( ( RadioEvents != NULL ) && ( RadioEvents->TxDone != NULL ) )
                 {
                     RadioEvents->TxDone( );
-                    PRINTF( "txDone\n\r" );
+										TimerTime_t ts = TimerGetCurrentTime(); 
+										PPRINTF("[%lu]", ts); 									
+                    PPRINTF( "txDone\n\r" );
                 }
                 break;
             }
@@ -1709,7 +1714,9 @@ void SX1276OnDio1Irq( void )
                 if( ( RadioEvents != NULL ) && ( RadioEvents->RxTimeout != NULL ) )
                 {
                     RadioEvents->RxTimeout( );
-                    PRINTF( "rxTimeOut\n\r" );
+										TimerTime_t ts = TimerGetCurrentTime(); 
+										PPRINTF("[%lu]", ts); 									
+                    PPRINTF( "rxTimeOut\n\r" );
                 }
                 break;
             default:

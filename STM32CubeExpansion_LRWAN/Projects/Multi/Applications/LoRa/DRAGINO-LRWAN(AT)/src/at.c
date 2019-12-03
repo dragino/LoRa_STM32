@@ -456,6 +456,11 @@ ATEerror_t at_DataRate_set(const char *param)
 		{
     return AT_PARAM_ERROR;			
 		}
+#elif defined( REGION_RU864 )
+	  if(datarate>=8)
+		{
+    return AT_PARAM_ERROR;			
+		};		
 #endif
 	
   lora_config_tx_datarate_set(datarate) ;
@@ -1284,7 +1289,7 @@ ATEerror_t at_MOD_set(const char *param)
   {
     return AT_PARAM_ERROR;
   }
-	if ((workmode==1)||(workmode==2)||(workmode==3))
+	if ((workmode>=1)&&(workmode<=4))
   {
     mode=workmode;		
 	}
@@ -1309,7 +1314,7 @@ ATEerror_t at_INTMOD_set(const char *param)
   {
     return AT_PARAM_ERROR;
   }
-	if ((interrputmode==0)||(interrputmode==1)||(interrputmode==2)||(interrputmode==3))
+	if (interrputmode<=3)
   {
     inmode=interrputmode;		
 	}

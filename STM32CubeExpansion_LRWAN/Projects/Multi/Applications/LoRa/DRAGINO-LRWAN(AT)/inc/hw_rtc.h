@@ -170,8 +170,6 @@ uint32_t HW_RTC_ms2Tick( TimerTime_t timeMicroSec );
  */
 TimerTime_t HW_RTC_Tick2ms( uint32_t tick );
 
-//void LSN50runtime( void );
-
 #ifdef __cplusplus
 }
 #endif

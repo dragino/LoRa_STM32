@@ -79,18 +79,17 @@ Maintainer: Miguel Luis and Gregory Cristian
  * @retval None
  */
 void DS18B20_delay(uint16_t time);
-uint8_t DS18B20_Init(void);
-void DS18B20_Mode_IPU(void);
-void DS18B20_Mode_Out_PP(void);
-void DS18B20_Rst(void);
-uint8_t DS18B20_Presence(void);
-uint8_t DS18B20_ReadBit(void);
-uint8_t DS18B20_ReadByte(void);
-void DS18B20_WriteByte(uint8_t dat);
-void DS18B20_SkipRom( void );
-float DS18B20_GetTemp_SkipRom ( void );
-void DS18B20_ReadId (void);
-void DS18B20_IoDeInit(void);
+void DS18B20_Mode_IPU(uint8_t num);
+void DS18B20_Mode_Out_PP(uint8_t num);
+void DS18B20_IoDeInit(uint8_t num);
+void DS18B20_Rst(uint8_t num);
+uint8_t DS18B20_Presence(uint8_t num);
+uint8_t DS18B20_ReadBit(uint8_t num);
+uint8_t DS18B20_ReadByte(uint8_t num);
+void DS18B20_WriteBit(uint8_t dat,uint8_t num);
+void DS18B20_WriteByte(uint8_t dat,uint8_t num);
+void DS18B20_SkipRom(uint8_t num);
+float DS18B20_GetTemp_SkipRom (uint8_t num);
 #ifdef __cplusplus
 }
 #endif

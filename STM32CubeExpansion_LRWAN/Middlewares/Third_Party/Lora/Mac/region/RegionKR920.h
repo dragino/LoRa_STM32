@@ -475,4 +475,6 @@ uint8_t RegionKR920ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t d
 
 /*! \} defgroup REGIONKR920 */
 
+//void RegionKR920RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr );
+
 #endif // __REGION_KR920_H__

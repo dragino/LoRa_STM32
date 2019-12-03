@@ -37,10 +37,6 @@ extern uint8_t flag1;
 extern uint8_t symbtime2_value;
 extern uint8_t flag2;
 
-//extern uint16_t  daysss;
-//extern uint16_t  hours,minutes,sceonds;
-//extern void LSN50runtime( void );
-
 /*!
  * Maximum PHY layer payload size
  */
@@ -618,6 +614,8 @@ LoRaMacStatus_t SetTxContinuousWave1( uint16_t timeout, uint32_t frequency, uint
  */
 static void ResetMacParameters( void );
 
+void printf_joinmessage(void);
+
 static void OnRadioTxDone( void )
 {
     GetPhyParams_t getPhy;
@@ -1125,6 +1123,16 @@ static void OnRadioRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t
     // Trig OnMacCheckTimerEvent call as soon as possible
     TimerSetValue( &MacStateCheckTimer, 1 );
     TimerStart( &MacStateCheckTimer );
+}
+
+void printf_joinmessage(void)
+{
+	PPRINTF("\r\n");
+	PPRINTF("DevAddr:%02x %02x %02x %02x\r\n",LoRaMacRxPayload[10],LoRaMacRxPayload[9],LoRaMacRxPayload[8],LoRaMacRxPayload[7]);	
+  PPRINTF("Rx1DrOffset:%d\r\n",( LoRaMacRxPayload[11] >> 4 ) & 0x07);
+	PPRINTF("Rx2Datarate:%d\r\n",LoRaMacRxPayload[11] & 0x0F);
+	PPRINTF("ReceiveDelay1:%lu ms\r\n",LoRaMacParams.ReceiveDelay1);
+	PPRINTF("ReceiveDelay2:%lu ms\r\n",LoRaMacParams.ReceiveDelay2);					
 }
 
 static void OnRadioTxTimeout( void )
@@ -2312,9 +2320,9 @@ LoRaMacStatus_t SendFrameOnChannel( uint8_t channel )
     txConfig.AntennaGain = LoRaMacParams.AntennaGain;
     txConfig.PktLen = LoRaMacBufferPktLen;
 	
-//	  LSN50runtime();
-    PRINTF("\n\r***** UpLinkCounter= %d *****\n\r", UpLinkCounter );
-//	  PRINTF("[day:%d,hour:%d,minute:%d,second:%d]\r\n",daysss,hours,minutes,sceonds);	
+		TimerTime_t ts = TimerGetCurrentTime(); 
+		PPRINTF("\n\r[%lu]", ts); 
+    PRINTF("***** UpLinkCounter= %d *****\n\r", UpLinkCounter );
 	
     RegionTxConfig( LoRaMacRegion, &txConfig, &txPower, &TxTimeOnAir );
 

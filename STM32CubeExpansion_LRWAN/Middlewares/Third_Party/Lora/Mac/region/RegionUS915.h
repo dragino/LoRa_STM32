@@ -444,5 +444,6 @@ void RegionUS915SetContinuousWave( ContinuousWaveParams_t* continuousWave );
 uint8_t RegionUS915ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t drOffset );
 
 /*! \} defgroup REGIONUS915 */
+//void RegionUS915RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr );
 
 #endif // __REGION_US915_H__

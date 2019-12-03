@@ -37,6 +37,10 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 // Definitions
 #define CHANNELS_MASK_SIZE              1
 
+static uint8_t TXpower=0;
+static uint8_t TXdr=0;
+extern LoRaMacParams_t LoRaMacParams;
+
 // Global attributes
 /*!
  * LoRaMAC channels
@@ -369,6 +373,10 @@ void RegionKR920InitDefaults( InitType_t type )
         {
             // Restore channels default mask
             ChannelsMask[0] |= ChannelsDefaultMask[0];
+					
+            Channels[0] = ( ChannelParams_t ) KR920_LC1;
+            Channels[1] = ( ChannelParams_t ) KR920_LC2;
+            Channels[2] = ( ChannelParams_t ) KR920_LC3;
             break;
         }
         default:
@@ -598,7 +606,11 @@ bool RegionKR920RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
     Radio.SetRxConfig( MODEM_LORA, rxConfig->Bandwidth, phyDr, 1, 0, 8, rxConfig->WindowTimeout, false, 0, false, 0, 0, true, rxConfig->RxContinuous );
     maxPayload = MaxPayloadOfDatarateKR920[dr];
     Radio.SetMaxPayloadLength( MODEM_LORA, maxPayload + LORA_MAC_FRMPAYLOAD_OVERHEAD );
-//    PRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
+
+		TimerTime_t ts = TimerGetCurrentTime(); 
+		PPRINTF("[%lu]", ts); 
+		PPRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
+		
 
     *datarate = (uint8_t) dr;
     return true;
@@ -619,11 +631,16 @@ bool RegionKR920TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
     // Calculate physical TX power
     phyTxPower = RegionCommonComputeTxPower( txPowerLimited, maxEIRP, txConfig->AntennaGain );
 
+		TXpower=txConfig->TxPower;
+	  TXdr=txConfig->Datarate;
+	
     // Setup the radio frequency
     Radio.SetChannel( Channels[txConfig->Channel].Frequency );
 
     Radio.SetTxConfig( MODEM_LORA, phyTxPower, 0, bandwidth, phyDr, 1, 8, false, true, 0, 0, false, 3000 );
-    PRINTF( "TX on freq %d Hz at DR %d\n\r", Channels[txConfig->Channel].Frequency, txConfig->Datarate );
+		TimerTime_t ts = TimerGetCurrentTime(); 
+		PPRINTF("[%lu]", ts); 		
+    PPRINTF( "TX on freq %d Hz at DR %d\n\r", Channels[txConfig->Channel].Frequency, txConfig->Datarate );
 
     // Setup maximum payload lenght of the radio driver
     Radio.SetMaxPayloadLength( MODEM_LORA, txConfig->PktLen );
@@ -644,7 +661,8 @@ uint8_t RegionKR920LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     RegionCommonLinkAdrReqVerifyParams_t linkAdrVerifyParams;
-
+    uint8_t nbreq=LoRaMacParams.ChannelsNbRep;
+	
     while( bytesProcessed < linkAdrReq->PayloadSize )
     {
         // Get ADR request parameters
@@ -734,7 +752,14 @@ uint8_t RegionKR920LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     *txPowOut = linkAdrParams.TxPower;
     *nbRepOut = linkAdrParams.NbRep;
     *nbBytesParsed = bytesProcessed;
-
+		
+		PPRINTF("\r\n");
+		PPRINTF("ADR Message:\r\n");
+		PPRINTF("Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
+		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
+		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
+		PPRINTF("\r\n");
+		
     return status;
 }
 
@@ -1067,3 +1092,21 @@ uint8_t RegionKR920ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t d
     }
     return datarate;
 }
+
+//void RegionKR920RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr )
+//{
+//    RegionCommonRxBeaconSetupParams_t regionCommonRxBeaconSetup;
+
+//    regionCommonRxBeaconSetup.Datarates = DataratesKR920;
+//    regionCommonRxBeaconSetup.Frequency = rxBeaconSetup->Frequency;
+//    regionCommonRxBeaconSetup.BeaconSize = KR920_BEACON_SIZE;
+//    regionCommonRxBeaconSetup.BeaconDatarate = KR920_BEACON_CHANNEL_DR;
+//    regionCommonRxBeaconSetup.BeaconChannelBW = KR920_BEACON_CHANNEL_BW;
+//    regionCommonRxBeaconSetup.RxTime = rxBeaconSetup->RxTime;
+//    regionCommonRxBeaconSetup.SymbolTimeout = rxBeaconSetup->SymbolTimeout;
+
+//    RegionCommonRxBeaconSetup( &regionCommonRxBeaconSetup );
+
+//    // Store downlink datarate
+//    *outDr = KR920_BEACON_CHANNEL_DR;
+//}

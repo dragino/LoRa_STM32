@@ -108,7 +108,7 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	
 	sensor_data->in1=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN1);
 
-	sensor_data->temp1=DS18B20_GetTemp_SkipRom();
+	sensor_data->temp1=DS18B20_GetTemp_SkipRom(1);
 	
 	 if((mode==1)||(mode==3))
 	 {		
@@ -149,7 +149,13 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 		 ult=ULT_test();
 		 }
 	 }
-	 
+
+   else if(mode==4)
+   {
+		sensor_data->temp2=DS18B20_GetTemp_SkipRom(2);
+		sensor_data->temp3=DS18B20_GetTemp_SkipRom(3);	 
+	 }	
+		 
 	  if(mode==3)
 	 {	
 	   AD_code2=HW_AdcReadChannel( ADC_Channel_IN1 );  //PA1
@@ -224,6 +230,11 @@ void  BSP_sensor_Init( void  )
 	 pwr_control_IoInit();		
 
 	 Read_Config();
+
+  if(mode==0)
+	{
+		mode=1;
+	}	
 	
 	if((mode==1)||(mode==3))
 	{	 
@@ -275,7 +286,7 @@ void  BSP_sensor_Init( void  )
 	 {
 		 HAL_I2C_MspDeInit(&I2cHandle2);
 		 
-		 PRINTF("  IIC is not connect\n\r");
+		 PRINTF("  No I2C device detected\n\r");
 	 }	
 	 #endif
    }

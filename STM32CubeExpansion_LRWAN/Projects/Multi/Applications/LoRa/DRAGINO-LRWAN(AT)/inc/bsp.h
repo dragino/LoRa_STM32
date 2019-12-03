@@ -72,16 +72,20 @@ typedef struct{
 	
   int   in1;/*GPIO Digital Input 0 or 1*/
 	
-	float temp1;//DS18B20
+	float temp1;//DS18B20-1
+
+	float temp2;//DS18B20-2
+
+	float temp3;//DS18B20-3
 	
 	float oil;  //oil float
 
 	float ADC_1; //ADC1
 	
 	float ADC_2;  //ADC2	
-//	uint8_t PA1_mv;//PA1
 
 	float temp_sht;
+	
 	float hum_sht;
 	
   /**more may be added*/

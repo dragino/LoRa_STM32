@@ -12,7 +12,7 @@
  *               \____ \| ___ |    (_   _) ___ |/ ___)  _ \
  *               _____) ) ____| | | || |_| ____( (___| | | |
  *              (______/|_____)_|_|_| \__)_____)\____)_| |_|
- *              (C)2013 Semtech
+ *              (C)2013-2017 Semtech
  *
  *               ___ _____ _   ___ _  _____ ___  ___  ___ ___
  *              / __|_   _/_\ / __| |/ / __/ _ \| _ \/ __| __|
@@ -48,7 +48,7 @@
 /*!
  * Maximal datarate that can be used by the node
  */
-#define AU915_TX_MAX_DATARATE                       DR_6
+#define AU915_TX_MAX_DATARATE                       DR_13
 
 /*!
  * Minimal datarate that can be used by the node
@@ -63,7 +63,7 @@
 /*!
  * Default datarate used by the node
  */
-#define AU915_DEFAULT_DATARATE                      DR_0
+#define AU915_DEFAULT_DATARATE                      DR_2
 
 /*!
  * Minimal Rx1 receive datarate offset
@@ -452,4 +452,6 @@ uint8_t RegionAU915ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t d
 
 /*! \} defgroup REGIONAU915 */
 
+//void RegionAU915RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr );
+	
 #endif // __REGION_AU915_H__

@@ -35,6 +35,38 @@
 #ifndef __REGIONCOMMON_H__
 #define __REGIONCOMMON_H__
 
+//typedef struct sRegionCommonRxBeaconSetupParams
+//{
+//    /*!
+//     * A pointer to the available datarates.
+//     */
+//    const uint8_t* Datarates;
+//    /*!
+//     * Frequency
+//     */
+//    uint32_t Frequency;
+//    /*!
+//     * The size of the beacon frame.
+//     */
+//    uint8_t BeaconSize;
+//    /*!
+//     * The datarate of the beacon.
+//     */
+//    uint8_t BeaconDatarate;
+//    /*!
+//     * The channel bandwidth of the beacon.
+//     */
+//    uint8_t BeaconChannelBW;
+//    /*!
+//     * The RX time.
+//     */
+//    uint32_t RxTime;
+//    /*!
+//     * The symbol timeout of the RX procedure.
+//     */
+//    uint16_t SymbolTimeout;
+//}RegionCommonRxBeaconSetupParams_t;
+
 typedef struct sRegionCommonLinkAdrParams
 {
     /*!
@@ -363,5 +395,6 @@ int8_t RegionCommonComputeTxPower( int8_t txPowerIndex, float maxEirp, float ant
 void RegionCommonCalcBackOff( RegionCommonCalcBackOffParams_t* calcBackOffParams );
 
 /*! \} defgroup REGIONCOMMON */
+//void RegionCommonRxBeaconSetup( RegionCommonRxBeaconSetupParams_t* rxBeaconSetupParams );
 
 #endif // __REGIONCOMMON_H__

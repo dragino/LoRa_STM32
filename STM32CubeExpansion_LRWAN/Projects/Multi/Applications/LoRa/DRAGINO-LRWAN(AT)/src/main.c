@@ -138,6 +138,7 @@ static TimerEvent_t TxTimer;
 /* tx timer callback function*/
 static void OnTxTimerEvent( void );
 
+extern void printf_joinmessage(void);
 #endif
 
 /* Private variables ---------------------------------------------------------*/
@@ -217,7 +218,12 @@ int main( void )
 static void LORA_HasJoined( void )
 {
   AT_PRINTF("JOINED\n\r");
-
+	
+	if((lora_config_otaa_get() == LORA_ENABLE ? 1 : 0))
+	{
+  printf_joinmessage();
+	}		
+		
   LORA_RequestClass( LORAWAN_DEFAULT_CLASS );
 	
 	#if defined(LoRa_Sensor_Node) /*LSN50 Preprocessor compile swicth:hw_conf.h*/
@@ -345,6 +351,38 @@ static void Send( void )
 	
 	AppData.Buff[i++] =(int)(batteryLevel_mV/100);	
 	}
+	
+  else if(mode==4)
+	{		
+		
+	AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
+	AppData.Buff[i++] =batteryLevel_mV & 0xFF;
+	
+	AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
+  AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+	
+  AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
+	AppData.Buff[i++] =(int)sensor_data.oil;
+	
+	switch_status=HAL_GPIO_ReadPin(GPIO_EXTI_PORT,GPIO_EXTI_PIN);
+		
+	if(exti_flag==1)
+	{
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x10;
+		exti_flag=0;
+	}
+	else
+	{
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x10;
+	}
+
+	AppData.Buff[i++]=(int)(sensor_data.temp2*10)>>8;     //DS18B20
+  AppData.Buff[i++]=(int)(sensor_data.temp2*10);
+	AppData.Buff[i++]=(int)(sensor_data.temp3*10)>>8;     //DS18B20
+  AppData.Buff[i++]=(int)(sensor_data.temp3*10);
+	
+	}	
+	
 	AppData.BuffSize = i;
   LORA_send( &AppData, lora_config_reqack_get());
 	#endif
@@ -400,12 +438,12 @@ static void LORA_RxData( lora_AppData_t *AppData )
 			{
 				if( AppData->BuffSize == 4 )
 					{
-					  if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x01))
+					  if(AppData->Buff[1]==0x01)
 					  {
 							lora_config_reqack_set(LORAWAN_CONFIRMED_MSG);
 							Store_Config();
 					  }
-						else if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x00))
+						else if(AppData->Buff[1]==0x00)
 						{
 							lora_config_reqack_set(LORAWAN_UNCONFIRMED_MSG);
 							Store_Config();

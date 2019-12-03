@@ -12,7 +12,7 @@
  *               \____ \| ___ |    (_   _) ___ |/ ___)  _ \
  *               _____) ) ____| | | || |_| ____( (___| | | |
  *              (______/|_____)_|_|_| \__)_____)\____)_| |_|
- *              (C)2013 Semtech
+ *              (C)2013-2017 Semtech
  *
  *               ___ _____ _   ___ _  _____ ___  ___  ___ ___
  *              / __|_   _/_\ / __| |/ / __/ _ \| _ \/ __| __|
@@ -27,6 +27,8 @@
  * \author    Gregory Cristian ( Semtech )
  *
  * \author    Daniel Jaeckle ( STACKFORCE )
+ *
+ * \author    Johannes Bruder ( STACKFORCE )
  *
  * \defgroup  REGIONEU868 Region EU868
  *            Implementation according to LoRaWAN Specification v1.0.2.
@@ -187,7 +189,7 @@
 /*!
  * Maximum number of bands
  */
-#define EU868_MAX_NB_BANDS                          5
+#define EU868_MAX_NB_BANDS                          6
 
 /*!
  * Band 0 definition
@@ -218,6 +220,12 @@
  * Band = { DutyCycle, TxMaxPower, LastJoinTxDoneTime, LastTxDoneTime, TimeOff }
  */
 #define EU868_BAND4                                 { 100 , EU868_MAX_TX_POWER, 0, 0, 0 } //  1.0 %
+
+/*!
+ * Band 5 definition
+ * Band = { DutyCycle, TxMaxPower, LastJoinTxDoneTime, LastTxDoneTime, TimeOff }
+ */
+#define EU868_BAND5                                 { 1000, EU868_MAX_TX_POWER, 0, 0, 0 } //  0.1 %
 
 /*!
  * LoRaMac default channel 1
@@ -483,5 +491,7 @@ void RegionEU868SetContinuousWave( ContinuousWaveParams_t* continuousWave );
 uint8_t RegionEU868ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t drOffset );
 
 /*! \} defgroup REGIONEU868 */
+
+//void RegionEU868RxBeaconSetup( RxBeaconSetup_t* rxBeaconSetup, uint8_t* outDr );
 
 #endif // __REGION_EU868_H__
