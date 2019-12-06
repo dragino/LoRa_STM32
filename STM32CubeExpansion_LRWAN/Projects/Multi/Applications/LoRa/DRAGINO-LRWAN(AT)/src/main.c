@@ -438,12 +438,12 @@ static void LORA_RxData( lora_AppData_t *AppData )
 			{
 				if( AppData->BuffSize == 4 )
 					{
-					  if(AppData->Buff[1]==0x01)
+					  if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x01))
 					  {
 							lora_config_reqack_set(LORAWAN_CONFIRMED_MSG);
 							Store_Config();
 					  }
-						else if(AppData->Buff[1]==0x00)
+						else if((AppData->Buff[1]==0x00)&&(AppData->Buff[2]==0x00)&&(AppData->Buff[3]==0x00))
 						{
 							lora_config_reqack_set(LORAWAN_UNCONFIRMED_MSG);
 							Store_Config();
