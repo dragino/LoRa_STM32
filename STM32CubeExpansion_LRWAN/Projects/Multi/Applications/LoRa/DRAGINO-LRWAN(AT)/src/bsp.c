@@ -62,6 +62,7 @@
 #include "pwr_out.h"
 #include "ult.h"
 #include "lidar_lite_v3hp.h"
+#include "weight.h"
 #endif
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -155,7 +156,12 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 		sensor_data->temp2=DS18B20_GetTemp_SkipRom(2);
 		sensor_data->temp3=DS18B20_GetTemp_SkipRom(3);	 
 	 }	
-		 
+	 
+	 else if(mode==5)
+   {
+		Get_Weight();		 
+	 }		 
+	 
 	  if(mode==3)
 	 {	
 	   AD_code2=HW_AdcReadChannel( ADC_Channel_IN1 );  //PA1
@@ -313,6 +319,15 @@ void  BSP_sensor_Init( void  )
 		 TIM2_Init();
 		 PRINTF("  Use Sensor is ultrasonic distance measurement\n\r");	
 	 }
+	}
+	else if(mode==5)
+	{
+		WEIGHT_SCK_Init();
+		WEIGHT_DOUT_Init();
+		Get_Maopi();
+    HAL_Delay(500);
+		Get_Maopi();		
+		PPRINTF("  Use Sensor is HX711\n\r");			
 	}
 	
 	switch(inmode)

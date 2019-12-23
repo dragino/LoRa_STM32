@@ -336,9 +336,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--C99</MiscControls>
-              <Define>STM32L072xx, USE_STM32L0XX_NUCLEO,USE_HAL_DRIVER, REGION_AS923, USE_SHT</Define>
+              <Define>STM32L072xx, USE_STM32L0XX_NUCLEO,USE_HAL_DRIVER, REGION_EU868, USE_SHT</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\inc;..\..\..\..\..\..\..\Drivers\BSP\STM32L0xx_Nucleo;..\..\..\..\..\..\..\Drivers\STM32L0xx_HAL_Driver\Inc;..\..\..\..\..\..\..\Drivers\CMSIS\Device\ST\STM32L0xx\Include;..\..\..\..\..\..\..\Drivers\CMSIS\Include;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Crypto;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Phy;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Core;..\..\..\..\..\..\..\Drivers\BSP\Components\Common;..\..\..\..\..\..\..\Drivers\BSP\Components\sx1276;..\..\..\..\..\..\..\Drivers\BSP\sx1276mb1las;..\..\..\..\..\..\..\Drivers\BSP\Components\flash_eraseprogram;..\..\..\..\..\..\..\Drivers\BSP\Components\ds18b20;..\..\..\..\..\..\..\Drivers\BSP\Components\gpio_exti;..\..\..\..\..\..\..\Drivers\BSP\Components\oil_float;..\..\..\..\..\..\..\Drivers\BSP\Components\sht20;..\..\..\..\..\..\..\Drivers\BSP\Components\pwr_out;..\..\..\..\..\..\..\Drivers\BSP\Components\sht31;..\..\..\..\..\..\..\Drivers\BSP\Components\ult;..\..\..\..\..\..\..\Drivers\BSP\Components\lidar_lite_v3hp</IncludePath>
+              <IncludePath>..\..\inc;..\..\..\..\..\..\..\Drivers\BSP\STM32L0xx_Nucleo;..\..\..\..\..\..\..\Drivers\STM32L0xx_HAL_Driver\Inc;..\..\..\..\..\..\..\Drivers\CMSIS\Device\ST\STM32L0xx\Include;..\..\..\..\..\..\..\Drivers\CMSIS\Include;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Crypto;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Phy;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Core;..\..\..\..\..\..\..\Drivers\BSP\Components\Common;..\..\..\..\..\..\..\Drivers\BSP\Components\sx1276;..\..\..\..\..\..\..\Drivers\BSP\sx1276mb1las;..\..\..\..\..\..\..\Drivers\BSP\Components\flash_eraseprogram;..\..\..\..\..\..\..\Drivers\BSP\Components\ds18b20;..\..\..\..\..\..\..\Drivers\BSP\Components\gpio_exti;..\..\..\..\..\..\..\Drivers\BSP\Components\oil_float;..\..\..\..\..\..\..\Drivers\BSP\Components\sht20;..\..\..\..\..\..\..\Drivers\BSP\Components\pwr_out;..\..\..\..\..\..\..\Drivers\BSP\Components\sht31;..\..\..\..\..\..\..\Drivers\BSP\Components\ult;..\..\..\..\..\..\..\Drivers\BSP\Components\lidar_lite_v3hp;..\..\..\..\..\..\..\Drivers\BSP\Components\weight</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -431,6 +431,11 @@
               <FileName>lidar_lite_v3hp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\lidar_lite_v3hp\lidar_lite_v3hp.c</FilePath>
+            </File>
+            <File>
+              <FileName>weight.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\weight\weight.c</FilePath>
             </File>
           </Files>
         </Group>

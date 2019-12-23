@@ -43,6 +43,7 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 static uint8_t TXpower=0;
 static uint8_t TXdr=0;
 extern LoRaMacParams_t LoRaMacParams;
+extern uint8_t payloadlens;
 
 // Global attributes
 /*!
@@ -793,17 +794,28 @@ uint8_t RegionUS915LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
         ChannelsMaskRemaining[3] &= ChannelsMask[3];
         ChannelsMaskRemaining[4] = ChannelsMask[4];
         ChannelsMaskRemaining[5] = ChannelsMask[5];
+		PPRINTF("\r\n");
+		PPRINTF("ADR Message:\r\n");	
+		PPRINTF("ChannelsMask change to ");	
+		for(int i=0;i<6;i++)
+		{
+		PPRINTF("%04x ",channelsMask[i]);	
+		}		
+		PPRINTF("\r\n");				
     }
 
+		 if((linkAdrParams.Datarate==0)&&(payloadlens>11))
+		{
+			linkAdrParams.Datarate=1;
+		}	
+		
     // Update status variables
     *drOut = linkAdrParams.Datarate;
     *txPowOut = linkAdrParams.TxPower;
     *nbRepOut = linkAdrParams.NbRep;
     *nbBytesParsed = bytesProcessed;
 		
-		PPRINTF("\r\n");
-		PPRINTF("ADR Message:\r\n");
-		PPRINTF("Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
+		PPRINTF("TX Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
 		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
 		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
 		PPRINTF("\r\n");

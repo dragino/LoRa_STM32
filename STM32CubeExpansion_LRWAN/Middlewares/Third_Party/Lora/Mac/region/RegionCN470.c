@@ -660,6 +660,14 @@ uint8_t RegionCN470LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     {
         // Copy Mask
         RegionCommonChanMaskCopy( ChannelsMask, channelsMask, 6 );
+		PPRINTF("\r\n");
+		PPRINTF("ADR Message:\r\n");	
+		PPRINTF("ChannelsMask change to ");	
+		for(int i=0;i<6;i++)
+		{
+		PPRINTF("%04x ",channelsMask[i]);	
+		}		
+		PPRINTF("\r\n");				
     }
 
     // Update status variables
@@ -668,9 +676,7 @@ uint8_t RegionCN470LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     *nbRepOut = linkAdrParams.NbRep;
     *nbBytesParsed = bytesProcessed;
 		
-		PPRINTF("\r\n");
-		PPRINTF("ADR Message:\r\n");
-		PPRINTF("Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
+		PPRINTF("TX Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
 		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
 		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
 		PPRINTF("\r\n");

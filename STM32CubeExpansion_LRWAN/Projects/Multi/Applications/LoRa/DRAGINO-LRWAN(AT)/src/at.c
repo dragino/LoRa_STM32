@@ -60,6 +60,7 @@
 #include "flash_eraseprogram.h"
 #include "timeServer.h"
 #include "gpio_exti.h"
+#include "weight.h"
 
 uint8_t symbtime1_value=0;  //RX1windowtimeout 
 uint8_t flag1=0;
@@ -77,7 +78,9 @@ uint8_t flag2=0;
 extern uint32_t APP_TX_DUTYCYCLE;
 extern uint8_t mode;
 extern uint8_t inmode;
+extern float GapValue;
 
+extern void Get_Maopi(void);
 /* Private macro -------------------------------------------------------------*/
 /**
  * @brief Macro to return when an error occurs
@@ -1289,7 +1292,7 @@ ATEerror_t at_MOD_set(const char *param)
   {
     return AT_PARAM_ERROR;
   }
-	if ((workmode>=1)&&(workmode<=4))
+	if ((workmode>=1)&&(workmode<=5))
   {
     mode=workmode;		
 	}
@@ -1346,6 +1349,46 @@ ATEerror_t at_INTMOD_get(const char *param)
 { 
 	print_d(inmode);
 	return AT_OK;
+}
+
+ATEerror_t at_weightreset(const char *param)
+{
+	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_RESET);//Enable 5v power supply
+	WEIGHT_SCK_Init();
+	WEIGHT_DOUT_Init();
+	Get_Maopi();	
+  HAL_Delay(500);
+  Get_Maopi();		
+	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
+	
+	return AT_OK;	
+}
+
+ATEerror_t at_weight_GapValue_set(const char *param)
+{
+	uint16_t gapvalue_a;
+	uint8_t  gapvalue_b;
+	
+	if (tiny_sscanf(param, "%d.%d", &gapvalue_a,&gapvalue_b) != 2)
+  {
+    return AT_PARAM_ERROR;
+  }	
+	
+	if(gapvalue_b>=10)
+  {
+    return AT_PARAM_ERROR;
+  }	
+	
+	GapValue=gapvalue_a+((float)gapvalue_b/10.0);
+	
+  return AT_OK;	
+}
+
+ATEerror_t at_weight_GapValue_get(const char *param)
+{
+	PPRINTF("%0.1f\r\n",GapValue);
+	
+  return AT_OK;		
 }
 
 /* Private functions ---------------------------------------------------------*/

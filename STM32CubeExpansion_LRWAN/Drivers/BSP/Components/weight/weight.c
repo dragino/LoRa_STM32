@@ -1,23 +1,9 @@
- /*
- / _____)             _              | |
-( (____  _____ ____ _| |_ _____  ____| |__
- \____ \| ___ |    (_   _) ___ |/ ___)  _ \
- _____) ) ____| | | || |_| ____( (___| | | |
-(______/|_____)_|_|_| \__)_____)\____)_| |_|
-    (C)2013 Semtech
-
-Description: LoRaMac classA device implementation
-
-License: Revised BSD License, see LICENSE.TXT file include in the project
-
-Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
-*/
-/******************************************************************************
-  * @file    version.h
+ /******************************************************************************
+  * @file    weight.c
   * @author  MCD Application Team
-  * @version V1.1.4
-  * @date    08-January-2018
-  * @brief   defines the lora mac version
+  * @version V1.1.0
+  * @date    17-April-2019
+  * @brief   manages the sensors on the application
   ******************************************************************************
   * @attention
   *
@@ -57,33 +43,87 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
   *
   ******************************************************************************
   */
-/* Define to prevent recursive inclusion -------------------------------------*/
+  
+  /* Includes ------------------------------------------------------------------*/
+#include "hw.h"
+#include "weight.h"
 
-#ifndef __VERSION_H__
-#define __VERSION_H__
+uint32_t HX711_Buffer=0;
+uint32_t Weight_Maopi=0;
+int32_t Weight_Shiwu=0;
+float GapValue=400.0;
 
-#ifdef __cplusplus
- extern "C" {
-#endif
-   
-/* Includes ------------------------------------------------------------------*/
-#include "lora_mac_version.h"
-/* Exported constants --------------------------------------------------------*/
-#define TEST_VERSION (uint32_t) 0x00000000  /*1 lsb is always 0 in releases   */
-#define LRWAN_VERSION  (uint32_t) 0x00001140  /*3 next hex is i_cube release*/
-#define VERSION   (uint32_t) ( LORA_MAC_VERSION | LRWAN_VERSION | TEST_VERSION )
-#define AT_VERSION_STRING	"v1.6.2"
-#define AT_LoRaWan_VERSION_STRING	"DR-LWS-002"
+void WEIGHT_SCK_Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+  WEIGHT_SCK_CLK_ENABLE();
 
-/* Exported types ------------------------------------------------------------*/
-/* External variables --------------------------------------------------------*/
-/* Exported macros -----------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */ 
-
-#ifdef __cplusplus
+	//HX711_SCK
+	GPIO_InitStruct.Pin = WEIGHT_SCK_PIN;				 
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; 		 
+  GPIO_InitStruct.Pull  = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;		
+	HW_GPIO_Init(WEIGHT_SCK_PORT,WEIGHT_SCK_PIN,&GPIO_InitStruct);					
+	HX711_SCK_0; 
 }
-#endif
 
-#endif /*__VERSION_H__*/
+void WEIGHT_DOUT_Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+	WEIGHT_DOUT_CLK_ENABLE();
+	
+	//HX711_DOUT
+    GPIO_InitStruct.Pin = WEIGHT_DOUT_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	  GPIO_InitStruct.Pull  = GPIO_NOPULL;
+	  HW_GPIO_Init(WEIGHT_DOUT_PORT,WEIGHT_DOUT_PIN,&GPIO_InitStruct);	
+	
+}
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+uint32_t HX711_Read(void)	
+{
+	uint32_t count; 
+	uint8_t i;   
+	  HX711_SCK_0;  
+  	count=0; 
+  	while(HAL_GPIO_ReadPin(WEIGHT_DOUT_PORT,WEIGHT_DOUT_PIN)!=GPIO_PIN_RESET); 
+  	for(i=0;i<24;i++)
+	{ 
+	  	HX711_SCK_1; 	
+	  	count=count<<1; 
+			HX711_SCK_0; 
+	  	if(HAL_GPIO_ReadPin(WEIGHT_DOUT_PORT,WEIGHT_DOUT_PIN)==GPIO_PIN_SET)
+			count++;	
+	} 
+ 	HX711_SCK_1; 
+  count=count^0x800000;
+	HX711_SCK_0; 
+	return(count);
+}
+
+void Get_Maopi(void)
+{
+	Weight_Maopi = HX711_Read();	
+} 
+
+void Get_Weight(void)
+{
+	HX711_Buffer = HX711_Read();
+	if(HX711_Buffer != Weight_Maopi)			
+	{
+		Weight_Shiwu = HX711_Buffer;
+		Weight_Shiwu = Weight_Shiwu - Weight_Maopi;				
+	
+		Weight_Shiwu = (int32_t)((float)Weight_Shiwu/GapValue); 	
+  if((Weight_Shiwu<-5000)||(Weight_Shiwu>5000))
+	{
+		Weight_Shiwu =0;
+	}
+	}
+	else
+	{
+		Weight_Shiwu =0;
+	}
+	PPRINTF("Weight is %d g\r\n",Weight_Shiwu);
+}

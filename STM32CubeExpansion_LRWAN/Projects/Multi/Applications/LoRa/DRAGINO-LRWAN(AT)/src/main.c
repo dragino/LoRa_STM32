@@ -55,6 +55,7 @@
 #include "command.h"
 #include "at.h"
 #include "gpio_exti.h"
+#include "weight.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -103,13 +104,17 @@ static uint8_t switch_status=0;
 
 int exti_flag=0;
 uint8_t TDC_flag=0;
+uint8_t join_flag=0;
 uint16_t batteryLevel_mV;
+uint8_t payloadlens;
 void send_exti(void);
 extern uint8_t mode;
 extern uint16_t ult;
 extern __IO uint16_t AD_code2;
 extern __IO uint16_t AD_code3;
 extern uint8_t inmode;
+extern float GapValue;
+extern int32_t Weight_Shiwu;
 /*!
  * User application data structure
  */
@@ -133,10 +138,16 @@ static void Send( void );
 /* start the tx process*/
 static void LoraStartTx(TxEventType_t EventType);
 
+static void LoraStartjoin(TxEventType_t EventType);
+
 static TimerEvent_t TxTimer;
+
+static TimerEvent_t TxTimer2;
 
 /* tx timer callback function*/
 static void OnTxTimerEvent( void );
+
+static void OnTxTimerEvent2( void );
 
 extern void printf_joinmessage(void);
 #endif
@@ -223,11 +234,16 @@ static void LORA_HasJoined( void )
 	{
   printf_joinmessage();
 	}		
-		
+	
+	if(GapValue==0.0)	
+	{
+		GapValue=400.0;
+	}
+	
   LORA_RequestClass( LORAWAN_DEFAULT_CLASS );
 	
 	#if defined(LoRa_Sensor_Node) /*LSN50 Preprocessor compile swicth:hw_conf.h*/
-	LoraStartTx( TX_ON_TIMER);		
+	LoraStartjoin( TX_ON_TIMER);		
 	#endif
 	
 	#if defined(AT_Data_Send)     /*LoRa ST Module*/
@@ -243,7 +259,7 @@ static void Send( void )
     /*Not joined, try again later*/
     return;
   }
-
+	
 	BSP_sensor_Read( &sensor_data );
 	
 	#if defined(LoRa_Sensor_Node)
@@ -251,8 +267,6 @@ static void Send( void )
 	uint32_t i = 0;
 
   AppData.Port = lora_config_application_port_get();
-	
-	HW_GetBatteryLevel( );
 
   if(mode==1)
 	{		
@@ -269,12 +283,12 @@ static void Send( void )
 		
 	if(exti_flag==1)
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x01;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1);
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x01;
 	}
 	
 	#if defined USE_SHT
@@ -303,12 +317,12 @@ static void Send( void )
 		
 	if(exti_flag==1)
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x04;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x02;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x04;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x02;
 	}
 
 	AppData.Buff[i++]=(int)(ult)>>8;
@@ -332,12 +346,12 @@ static void Send( void )
 		
 	if(exti_flag==1)
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x08;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x03;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x08;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x03;
 	}
 	
 	#if defined USE_SHT
@@ -368,12 +382,12 @@ static void Send( void )
 		
 	if(exti_flag==1)
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x10;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x04;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x10;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x04;
 	}
 
 	AppData.Buff[i++]=(int)(sensor_data.temp2*10)>>8;     //DS18B20
@@ -382,8 +396,37 @@ static void Send( void )
   AppData.Buff[i++]=(int)(sensor_data.temp3*10);
 	
 	}	
+	else if(mode==5)
+	{
+	AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
+	AppData.Buff[i++] =batteryLevel_mV & 0xFF;
+	
+	AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
+  AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+	
+  AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
+	AppData.Buff[i++] =(int)sensor_data.oil;
+	
+	switch_status=HAL_GPIO_ReadPin(GPIO_EXTI_PORT,GPIO_EXTI_PIN);
+		
+	if(exti_flag==1)
+	{
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x05;
+		exti_flag=0;
+	}
+	else
+	{
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x05;
+	}
+
+	AppData.Buff[i++]=(int)(Weight_Shiwu)>>8;
+	AppData.Buff[i++]=(int)(Weight_Shiwu);	
+	AppData.Buff[i++] = 0xFF; 
+	AppData.Buff[i++] = 0xFF;		
+	}
 	
 	AppData.BuffSize = i;
+	payloadlens=i;
   LORA_send( &AppData, lora_config_reqack_get());
 	#endif
 	
@@ -516,6 +559,35 @@ static void LoraStartTx(TxEventType_t EventType)
     TimerInit( &TxTimer, OnTxTimerEvent );
     TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE); 
     OnTxTimerEvent();
+  }
+}
+static void OnTxTimerEvent2( void )
+{
+	if(join_flag==0)
+	{
+	TimerSetValue( &TxTimer2,  500);
+	
+  /*Wait for next tx slot*/
+  TimerStart( &TxTimer2);
+		
+	join_flag++;
+	}
+	else if(join_flag==1)
+	{
+	LoraStartTx(TX_ON_TIMER);
+	join_flag++;
+	}
+}
+
+static void LoraStartjoin(TxEventType_t EventType)
+{
+  if (EventType == TX_ON_TIMER)
+  {
+    /* send everytime timer elapses */
+    TimerInit( &TxTimer2, OnTxTimerEvent2 );
+    TimerSetValue( &TxTimer2, 500); 
+	
+    OnTxTimerEvent2();
   }
 }
 #endif

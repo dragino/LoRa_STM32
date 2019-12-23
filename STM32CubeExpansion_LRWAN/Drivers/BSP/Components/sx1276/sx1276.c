@@ -1636,7 +1636,7 @@ void SX1276OnDio0Irq( void )
  												TimerTime_t ts = TimerGetCurrentTime(); 
 												PPRINTF("[%lu]", ts); 
 												PPRINTF( "rxDone\n\r" );
-												PPRINTF("rssi= %d\r\n",SX1276.Settings.LoRaPacketHandler.RssiValue);
+												PPRINTF("Rssi= %d\r\n",SX1276.Settings.LoRaPacketHandler.RssiValue);
                     }
                 }
                 break;

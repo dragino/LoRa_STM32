@@ -1576,10 +1576,10 @@ static bool ValidatePayloadLength( uint8_t lenN, int8_t datarate, uint8_t fOptsL
     payloadSize = ( lenN + fOptsLen );
 
     // Validation of the application payload size
-    if( ( payloadSize <= maxN ) && ( payloadSize <= LORAMAC_PHY_MAXPAYLOAD ) )
-    {
-        return true;
-    }
+		if ( ((( payloadSize > maxN ) && (fOptsLen != 0) && (fOptsLen <= maxN)) || ( payloadSize <= maxN )) && ( payloadSize <= LORAMAC_PHY_MAXPAYLOAD ) )	
+			{
+				return true;		
+			}		
     return false;
 }
 

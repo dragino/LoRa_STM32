@@ -210,6 +210,16 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define DOUT3_0             HAL_GPIO_WritePin(DOUT3_PORT,DOUT3_PIN,GPIO_PIN_RESET)
 #define DOUT3_1             HAL_GPIO_WritePin(DOUT3_PORT,DOUT3_PIN,GPIO_PIN_SET)
 
+/* ---------------------------  WEIGHT HW definition -------------------------------*/
+#define WEIGHT_SCK_CLK_ENABLE()    __HAL_RCC_GPIOA_CLK_ENABLE()
+#define WEIGHT_SCK_PORT       		 GPIOA	 
+#define WEIGHT_SCK_PIN       			 GPIO_PIN_11 
+#define WEIGHT_DOUT_CLK_ENABLE()   __HAL_RCC_GPIOB_CLK_ENABLE()
+#define WEIGHT_DOUT_PORT      		 GPIOB
+#define WEIGHT_DOUT_PIN     			 GPIO_PIN_12  
+#define HX711_SCK_0          			 HAL_GPIO_WritePin(WEIGHT_SCK_PORT,WEIGHT_SCK_PIN ,GPIO_PIN_RESET)
+#define HX711_SCK_1          			 HAL_GPIO_WritePin(WEIGHT_SCK_PORT,WEIGHT_SCK_PIN ,GPIO_PIN_SET)
+
 /* ---------------------------  OIL FLOAT definition -------------------------------*/
 #define OIL_CLK_ENABLE()   __HAL_RCC_GPIOB_CLK_ENABLE()
 #define OIL_CONTROL_PORT          GPIOB	 

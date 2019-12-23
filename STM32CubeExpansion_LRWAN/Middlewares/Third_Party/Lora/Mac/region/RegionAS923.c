@@ -40,6 +40,7 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 static uint8_t TXpower=0;
 static uint8_t TXdr=0;
 extern LoRaMacParams_t LoRaMacParams;
+extern uint8_t payloadlens;
 
 // Global attributes
 /*!
@@ -810,7 +811,12 @@ uint8_t RegionAS923LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
         // Update the channels mask
         ChannelsMask[0] = chMask;
     }
-
+		
+		 if((linkAdrParams.Datarate==2)&&(payloadlens>11))
+		{
+			linkAdrParams.Datarate=3;
+		}	
+	
     // Update status variables
     *drOut = linkAdrParams.Datarate;
     *txPowOut = linkAdrParams.TxPower;
@@ -819,7 +825,7 @@ uint8_t RegionAS923LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
 		
 		PPRINTF("\r\n");
 		PPRINTF("ADR Message:\r\n");
-		PPRINTF("Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
+		PPRINTF("TX Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
 		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
 		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
 		PPRINTF("\r\n");

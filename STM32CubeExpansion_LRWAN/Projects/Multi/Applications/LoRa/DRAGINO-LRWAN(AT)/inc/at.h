@@ -123,8 +123,9 @@ typedef enum eATEerror
 #define AT_RX1WTO     "+RX1WTO"
 #define AT_RX2WTO     "+RX2WTO"
 #define AT_MOD        "+MOD"
-#define AT_INTMOD      "+INTMOD"
-
+#define AT_INTMOD     "+INTMOD"
+#define AT_WEIGRE     "+WEIGRE"
+#define AT_WEIGAP     "+WEIGAP"
 /* Exported functions ------------------------------------------------------- */
 
 /**
@@ -629,6 +630,12 @@ ATEerror_t at_MOD_get(const char *param);
 ATEerror_t at_INTMOD_set(const char *param);
 
 ATEerror_t at_INTMOD_get(const char *param);
+
+ATEerror_t at_weightreset(const char *param);
+
+ATEerror_t at_weight_GapValue_set(const char *param);
+
+ATEerror_t at_weight_GapValue_get(const char *param);
 
 #ifdef __cplusplus
 }

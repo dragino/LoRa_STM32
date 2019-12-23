@@ -765,7 +765,7 @@ uint8_t RegionIN865LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
 		
 		PPRINTF("\r\n");
 		PPRINTF("ADR Message:\r\n");
-		PPRINTF("Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
+		PPRINTF("TX Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
 		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
 		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
 		PPRINTF("\r\n");
