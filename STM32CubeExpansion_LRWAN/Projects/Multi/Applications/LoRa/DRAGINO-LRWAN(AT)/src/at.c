@@ -1380,6 +1380,7 @@ ATEerror_t at_weight_GapValue_set(const char *param)
   }	
 	
 	GapValue=gapvalue_a+((float)gapvalue_b/10.0);
+	Get_Weight();
 	
   return AT_OK;	
 }

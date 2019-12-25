@@ -116,10 +116,10 @@ void Get_Weight(void)
 		Weight_Shiwu = Weight_Shiwu - Weight_Maopi;				
 	
 		Weight_Shiwu = (int32_t)((float)Weight_Shiwu/GapValue); 	
-  if((Weight_Shiwu<-5000)||(Weight_Shiwu>5000))
-	{
-		Weight_Shiwu =0;
-	}
+		if((Weight_Shiwu<-5000)||(Weight_Shiwu>5000))
+		{
+			Weight_Shiwu =0;
+		}
 	}
 	else
 	{

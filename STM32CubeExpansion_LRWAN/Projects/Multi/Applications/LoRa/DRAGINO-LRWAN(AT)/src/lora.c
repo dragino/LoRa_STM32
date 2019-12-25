@@ -464,7 +464,7 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
 				
 				mode=1;			
 				inmode=2;					
-				APP_TX_DUTYCYCLE=30000;
+				APP_TX_DUTYCYCLE=300000;
 				GapValue=400.0;
 				
 				Store_Config();
