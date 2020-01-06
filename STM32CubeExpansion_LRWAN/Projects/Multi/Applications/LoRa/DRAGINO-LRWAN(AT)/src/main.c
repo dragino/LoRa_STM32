@@ -234,6 +234,11 @@ static void LORA_HasJoined( void )
 	{
   printf_joinmessage();
 	}		
+
+  if(mode==0)
+	{
+		mode=1;
+	}	
 	
 	if(GapValue==0.0)	
 	{
