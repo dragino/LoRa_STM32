@@ -288,12 +288,12 @@ static void Send( void )
 		
 	if(exti_flag==1)
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x01;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x01;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1);
 	}
 	
 	#if defined USE_SHT
@@ -322,12 +322,12 @@ static void Send( void )
 		
 	if(exti_flag==1)
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x02;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x04;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x02;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x04;
 	}
 
 	AppData.Buff[i++]=(int)(ult)>>8;
@@ -351,12 +351,12 @@ static void Send( void )
 		
 	if(exti_flag==1)
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x03;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x08;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x03;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x08;
 	}
 	
 	#if defined USE_SHT
@@ -387,12 +387,12 @@ static void Send( void )
 		
 	if(exti_flag==1)
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x04;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x0C;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x04;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x0C;
 	}
 
 	AppData.Buff[i++]=(int)(sensor_data.temp2*10)>>8;     //DS18B20
@@ -416,12 +416,12 @@ static void Send( void )
 		
 	if(exti_flag==1)
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x20|0x05;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x01|0x10;
 		exti_flag=0;
 	}
 	else
 	{
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<6)|0x05;
+		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x10;
 	}
 
 	AppData.Buff[i++]=(int)(Weight_Shiwu)>>8;

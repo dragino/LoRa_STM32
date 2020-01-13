@@ -65,6 +65,8 @@ extern uint8_t flag1;
 extern uint8_t symbtime2_value;
 extern uint8_t flag2;
 
+extern uint16_t power_time;
+
 static uint8_t config_count=0;
 static uint8_t key_count=0;
 
@@ -1017,7 +1019,7 @@ void Store_Config(void)
 	
 	s_config[config_count++]=(symbtime1_value<<24)|(flag1<<16)|(symbtime2_value<<8)| flag2;
 
-	s_config[config_count++]=(mode<<24)|(inmode<<16);
+	s_config[config_count++]=(mode<<24)|(inmode<<16)|power_time;
 
 	s_config[config_count++]=GapValue*10;
 	
@@ -1144,6 +1146,8 @@ void Read_Config(void)
 	mode=(r_config[14]>>24)&0xFF;
 	
 	inmode=(r_config[14]>>16)&0xFF;	
+
+	power_time=(r_config[14])&0xFFFF;	
 	
 	GapValue=(float)(r_config[15]/10);
 }

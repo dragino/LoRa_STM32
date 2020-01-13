@@ -582,7 +582,18 @@ static const struct ATCommand_s ATCommand[] =
     .set = at_weight_GapValue_set,
     .run = at_return_error,
 	},
-		
+
+		{
+	  .string = AT_5VT,
+    .size_string = sizeof(AT_5VT) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_5VT ":Get or Set extend the time of 5V power\r\n",
+#endif
+    .get = at_5Vtime_get,
+    .set = at_5Vtime_set,
+    .run = at_return_error,
+	},
+				
 	{
 	  .string = AT_CHS,
     .size_string = sizeof(AT_CHS) - 1,

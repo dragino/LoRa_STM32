@@ -92,6 +92,7 @@ extern I2C_HandleTypeDef I2cHandle3;
 extern void Read_Config(void);
 extern uint8_t mode;
 extern uint8_t inmode;
+extern uint16_t power_time;
 
 void BSP_sensor_Read( sensor_t *sensor_data)
 {
@@ -170,7 +171,9 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	   AD_code3=HW_AdcReadChannel( ADC_Channel_IN4 );	//PA4
 	   sensor_data->ADC_2=AD_code3*batteryLevel_mV/4095;  			
 	 }	 
-	
+
+	HAL_Delay(500+power_time);
+	 
 	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
 	 
 	#endif

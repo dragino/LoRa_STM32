@@ -126,6 +126,8 @@ typedef enum eATEerror
 #define AT_INTMOD     "+INTMOD"
 #define AT_WEIGRE     "+WEIGRE"
 #define AT_WEIGAP     "+WEIGAP"
+#define AT_5VT        "+5VT"
+
 /* Exported functions ------------------------------------------------------- */
 
 /**
@@ -636,6 +638,10 @@ ATEerror_t at_weightreset(const char *param);
 ATEerror_t at_weight_GapValue_set(const char *param);
 
 ATEerror_t at_weight_GapValue_get(const char *param);
+
+ATEerror_t at_5Vtime_set(const char *param);
+
+ATEerror_t at_5Vtime_get(const char *param);
 
 #ifdef __cplusplus
 }

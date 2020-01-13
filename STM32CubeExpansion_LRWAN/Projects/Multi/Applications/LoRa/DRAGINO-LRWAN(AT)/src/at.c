@@ -67,7 +67,7 @@ uint8_t flag1=0;
 
 uint8_t symbtime2_value=0;  //RX2windowtimeout 
 uint8_t flag2=0;
-
+uint16_t power_time=0;
 /* External variables --------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -1390,6 +1390,25 @@ ATEerror_t at_weight_GapValue_get(const char *param)
 	PPRINTF("%0.1f\r\n",GapValue);
 	
   return AT_OK;		
+}
+
+ATEerror_t at_5Vtime_set(const char *param)
+{
+	uint16_t power_5v;
+	if (tiny_sscanf(param, "%d", &power_5v) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }	
+	
+	power_time=power_5v;
+	
+  return AT_OK;		
+}
+
+ATEerror_t at_5Vtime_get(const char *param)
+{
+	print_d(power_time);
+	return AT_OK;
 }
 
 /* Private functions ---------------------------------------------------------*/

@@ -64,7 +64,7 @@ void  GPIO_EXTI_FALLINGInit( void  )
 	GPIO_EXTI_CLK_ENABLE();
   	
 	GPIO_InitStruct.Mode =GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
 	GPIO_InitStruct.Pin = GPIO_EXTI_PIN;
 
   HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
@@ -80,7 +80,7 @@ void  GPIO_EXTI_RISINGInit( void  )
 	GPIO_EXTI_CLK_ENABLE();
   	
 	GPIO_InitStruct.Mode =GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 	GPIO_InitStruct.Pin = GPIO_EXTI_PIN;
 
   HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
