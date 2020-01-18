@@ -37,8 +37,12 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 // Definitions
 #define CHANNELS_MASK_SIZE              1
 
-static uint8_t TXpower=0;
-static uint8_t TXdr=0;
+#if defined ( REGION_KR920 )
+uint8_t TXpower=0;
+uint8_t TXdr=0;
+uint8_t nbreq;
+#endif	
+
 extern LoRaMacParams_t LoRaMacParams;
 
 // Global attributes
@@ -630,9 +634,11 @@ bool RegionKR920TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
 
     // Calculate physical TX power
     phyTxPower = RegionCommonComputeTxPower( txPowerLimited, maxEIRP, txConfig->AntennaGain );
-
+	
+	  #if defined ( REGION_KR920 )
 		TXpower=txConfig->TxPower;
 	  TXdr=txConfig->Datarate;
+		#endif
 	
     // Setup the radio frequency
     Radio.SetChannel( Channels[txConfig->Channel].Frequency );
@@ -661,7 +667,9 @@ uint8_t RegionKR920LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     RegionCommonLinkAdrReqVerifyParams_t linkAdrVerifyParams;
-    uint8_t nbreq=LoRaMacParams.ChannelsNbRep;
+	  #if defined ( REGION_KR920 )
+		nbreq=LoRaMacParams.ChannelsNbRep;
+		#endif  
 	
     while( bytesProcessed < linkAdrReq->PayloadSize )
     {
@@ -752,13 +760,6 @@ uint8_t RegionKR920LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     *txPowOut = linkAdrParams.TxPower;
     *nbRepOut = linkAdrParams.NbRep;
     *nbBytesParsed = bytesProcessed;
-		
-		PPRINTF("\r\n");
-		PPRINTF("ADR Message:\r\n");
-		PPRINTF("TX Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
-		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
-		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
-		PPRINTF("\r\n");
 		
     return status;
 }

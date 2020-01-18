@@ -48,8 +48,12 @@
 // Definitions
 #define CHANNELS_MASK_SIZE              1
 
-static uint8_t TXpower=0;
-static uint8_t TXdr=0;
+#if defined ( REGION_RU864 )
+uint8_t TXpower=0;
+uint8_t TXdr=0;
+uint8_t nbreq;
+#endif
+
 extern LoRaMacParams_t LoRaMacParams;
 
 /*!
@@ -655,8 +659,10 @@ bool RegionRU864TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
     // Calculate physical TX power
     phyTxPower = RegionCommonComputeTxPower( txPowerLimited, txConfig->MaxEirp, txConfig->AntennaGain );
 
+	  #if defined ( REGION_RU864 )
 		TXpower=txConfig->TxPower;
 	  TXdr=txConfig->Datarate;
+		#endif
 	
     // Setup the radio frequency
     Radio.SetChannel( Channels[txConfig->Channel].Frequency );
@@ -695,8 +701,11 @@ uint8_t RegionRU864LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     RegionCommonLinkAdrReqVerifyParams_t linkAdrVerifyParams;
-    uint8_t nbreq=LoRaMacParams.ChannelsNbRep;
 	
+	  #if defined ( REGION_RU864 )
+		nbreq=LoRaMacParams.ChannelsNbRep;
+		#endif  
+
     while( bytesProcessed < linkAdrReq->PayloadSize )
     {
         // Get ADR request parameters
@@ -786,13 +795,6 @@ uint8_t RegionRU864LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     *txPowOut = linkAdrParams.TxPower;
     *nbRepOut = linkAdrParams.NbRep;
     *nbBytesParsed = bytesProcessed;
-		
-		PPRINTF("\r\n");
-		PPRINTF("ADR Message:\r\n");
-		PPRINTF("TX Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
-		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
-		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
-		PPRINTF("\r\n");
 		
     return status;
 }

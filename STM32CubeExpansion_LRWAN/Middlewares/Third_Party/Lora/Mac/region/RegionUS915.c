@@ -40,8 +40,12 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 // A mask to select only valid 500KHz channels
 #define CHANNELS_MASK_500KHZ_MASK       0x00FF
 
-static uint8_t TXpower=0;
-static uint8_t TXdr=0;
+#if defined ( REGION_US915 )
+uint8_t TXpower=0;
+uint8_t TXdr=0;
+uint8_t nbreq;
+#endif
+
 extern LoRaMacParams_t LoRaMacParams;
 extern uint8_t payloadlens;
 
@@ -624,8 +628,10 @@ bool RegionUS915TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
     // Calculate physical TX power
     phyTxPower = RegionCommonComputeTxPower( txPowerLimited, US915_DEFAULT_MAX_ERP, 0 );
 
+	  #if defined ( REGION_US915 )
 		TXpower=txConfig->TxPower;
 	  TXdr=txConfig->Datarate;
+		#endif
 	
     // Setup the radio frequency
     Radio.SetChannel( Channels[txConfig->Channel].Frequency );
@@ -654,7 +660,10 @@ uint8_t RegionUS915LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     RegionCommonLinkAdrReqVerifyParams_t linkAdrVerifyParams;
-    uint8_t nbreq=LoRaMacParams.ChannelsNbRep;
+		
+	  #if defined ( REGION_US915)
+		nbreq=LoRaMacParams.ChannelsNbRep;
+		#endif 
 		
     // Initialize local copy of channels mask
     RegionCommonChanMaskCopy( channelsMask, ChannelsMask, 6 );
@@ -793,15 +802,7 @@ uint8_t RegionUS915LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
         ChannelsMaskRemaining[2] &= ChannelsMask[2];
         ChannelsMaskRemaining[3] &= ChannelsMask[3];
         ChannelsMaskRemaining[4] = ChannelsMask[4];
-        ChannelsMaskRemaining[5] = ChannelsMask[5];
-		PPRINTF("\r\n");
-		PPRINTF("ADR Message:\r\n");	
-		PPRINTF("ChannelsMask change to ");	
-		for(int i=0;i<6;i++)
-		{
-		PPRINTF("%04x ",channelsMask[i]);	
-		}		
-		PPRINTF("\r\n");				
+        ChannelsMaskRemaining[5] = ChannelsMask[5];			
     }
 
 		 if((linkAdrParams.Datarate==0)&&(payloadlens>11))
@@ -814,11 +815,6 @@ uint8_t RegionUS915LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     *txPowOut = linkAdrParams.TxPower;
     *nbRepOut = linkAdrParams.NbRep;
     *nbBytesParsed = bytesProcessed;
-		
-		PPRINTF("TX Datarate %d change to %d\r\n",TXdr,linkAdrParams.Datarate);
-		PPRINTF("TxPower %d change to %d\r\n",TXpower,linkAdrParams.TxPower);
-		PPRINTF("NbRep %d change to %d\r\n",nbreq,linkAdrParams.NbRep);		
-		PPRINTF("\r\n");
 		
     return status;
 }
