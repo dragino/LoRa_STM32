@@ -1,0 +1,1 @@
+Firmware Relocate to http://www.dragino.com/downloads/index.php?dir=LSN50-LoRaST/Firmware/
