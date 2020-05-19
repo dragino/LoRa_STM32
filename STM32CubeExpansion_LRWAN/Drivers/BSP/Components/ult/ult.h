@@ -66,6 +66,8 @@ Maintainer: Miguel Luis and Gregory Cristian
 
 void GPIO_ULT_INPUT_Init(void);
 void GPIO_ULT_OUTPUT_Init(void);
+void GPIO_ULT_INPUT_DeInit(void);
+void GPIO_ULT_OUTPUT_DeInit(void);
 void TIM2_Init(void);
 uint16_t ULT_test(void);
 

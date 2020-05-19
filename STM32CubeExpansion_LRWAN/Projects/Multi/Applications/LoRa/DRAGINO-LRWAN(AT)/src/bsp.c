@@ -50,7 +50,7 @@
 #include "hw.h"
 #include "timeServer.h"
 #include "bsp.h"
-
+#include "delay.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #if defined(LoRa_Sensor_Node)
@@ -84,6 +84,7 @@ uint8_t flags=0;
 extern uint16_t batteryLevel_mV;
 
 #ifdef USE_SHT
+extern float sht31_tem,sht31_hum;
 extern I2C_HandleTypeDef I2cHandle1;
 extern I2C_HandleTypeDef I2cHandle2;
 extern I2C_HandleTypeDef I2cHandle3;
@@ -100,7 +101,9 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	
 	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_RESET);//Enable 5v power supply
 	
-	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);
+	DelayMs(500+power_time);
+
+	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);	
 	HW_GetBatteryLevel( );	
 	AD_code1=HW_AdcReadChannel( ADC_Channel_Oil );  //PA0
 	
@@ -114,41 +117,49 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	
 	 if((mode==1)||(mode==3))
 	 {		
-   #ifdef USE_SHT
-	 if(flags==0)
-	 {
-		 sensor_data->temp_sht=6553.5;
-		 sensor_data->hum_sht=6553.5;
-	 } 
-	 else if(flags==1)
-	 {
-	   float temp2,hum1;
-	   temp2=SHT20_RT();//get temperature
-	   hum1=SHT20_RH(); //get humidity
-	   sensor_data->temp_sht=temp2;
-	   sensor_data->hum_sht=hum1;
-   }
-	 else if(flags==2)
-	 {
-	   float temp2,hum1;
-	   temp2=SHT31_RT();//get temperature
-	   hum1=SHT31_RH(); //get humidity
-	   sensor_data->temp_sht=temp2;
-	   sensor_data->hum_sht=hum1;
-	 }
-	
-	 #endif
+		#ifdef USE_SHT
+		if(flags==0)
+		{
+			sensor_data->temp_sht=6553.5;
+			sensor_data->hum_sht=6553.5;
+		} 
+		else if(flags==1)
+		{
+			float temp2,hum1;
+			HAL_I2C_MspInit(&I2cHandle1);
+			PPRINTF("\r\n");
+			temp2=SHT20_RT();//get temperature
+			hum1=SHT20_RH(); //get humidity
+			sensor_data->temp_sht=temp2;
+			sensor_data->hum_sht=hum1;
+		}
+		else if(flags==2)
+		{			
+			HAL_I2C_MspInit(&I2cHandle2);			
+			PPRINTF("\r\n");
+			tran_SHT31data();		
+			sensor_data->temp_sht=sht31_tem;
+			sensor_data->hum_sht=sht31_hum;
+		}
+		#endif
 		}
 	 
 		else if(mode==2)
 	 {
 		 if(mode2_flag==1)
 		 {
-		 ult=LidarLite()*10;				 
+			HAL_I2C_MspInit(&I2cHandle3);			 
+			PPRINTF("\r\n");
+			ult=LidarLite()*10;	 
 		 }
 		 else
 		 {
+		 PPRINTF("\r\n");
+		 GPIO_ULT_INPUT_Init();
+		 GPIO_ULT_OUTPUT_Init();			 
 		 ult=ULT_test();
+		 GPIO_ULT_INPUT_DeInit();
+		 GPIO_ULT_OUTPUT_DeInit();			 
 		 }
 	 }
 
@@ -160,7 +171,12 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	 
 	 else if(mode==5)
    {
-		Get_Weight();		 
+		PPRINTF("\r\n");
+		WEIGHT_SCK_Init();
+		WEIGHT_DOUT_Init();		 
+		Get_Weight();		
+		WEIGHT_SCK_DeInit();
+		WEIGHT_DOUT_DeInit();		 
 	 }		 
 	 
 	  if(mode==3)
@@ -171,8 +187,6 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	   AD_code3=HW_AdcReadChannel( ADC_Channel_IN4 );	//PA4
 	   sensor_data->ADC_2=AD_code3*batteryLevel_mV/4095;  			
 	 }	 
-
-	HAL_Delay(500+power_time);
 	 
 	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
 	 
@@ -248,16 +262,15 @@ void  BSP_sensor_Init( void  )
 	if((mode==1)||(mode==3))
 	{	 
 	 #ifdef USE_SHT
-	 uint16_t sum1=0,sum2=0;
 	 uint8_t txdata1[1]={0xE7},txdata2[2]={0xF3,0x2D};
 	 
 	 BSP_sht20_Init();
- 
-		 while(HAL_I2C_Master_Transmit(&I2cHandle1,0x80,txdata1,1,1000) != HAL_OK)
+
+	 uint32_t currentTime = TimerGetCurrentTime();	 
+	 while(HAL_I2C_Master_Transmit(&I2cHandle1,0x80,txdata1,1,1000) != HAL_OK)
 	 {
-		 sum1++;
-		 if(sum1==100)
-		 {
+			if(TimerGetElapsedTime(currentTime) >= 500)
+			{
 			 flags=0;
 			 break;
 		 }
@@ -269,26 +282,24 @@ void  BSP_sensor_Init( void  )
 	 }
 	 
 	 if(flags==0)
-	 {
-		 
-		 HAL_I2C_MspDeInit(&I2cHandle1);
-		 
+	 {	 
+		 HAL_I2C_MspDeInit(&I2cHandle1);	 
 		 BSP_sht31_Init();
-		 
+
+		 currentTime = TimerGetCurrentTime();		 
 	 	 while(HAL_I2C_Master_Transmit(&I2cHandle2,0x88,txdata2,2,1000) != HAL_OK) 
-	 {
-		 sum2++;
-		 if(sum2==100)
-		 {
+		{
+			if(TimerGetElapsedTime(currentTime) >= 500)
+			{
 			 flags=0;
 			 break;
-		 }
-	 }
+			}
+		}
 	 if(HAL_I2C_Master_Transmit(&I2cHandle2,0x88,txdata2,2,1000) == HAL_OK)
 	 {
 		 flags=2;
 		 PRINTF("  Use Sensor is STH31\n\r");
-	 }
+	 }	 
    }
 	 
 	 if(flags==0)
@@ -316,10 +327,9 @@ void  BSP_sensor_Init( void  )
 	 }
 	  else
 	 {
+     HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply				 
 		 HAL_I2C_MspDeInit(&I2cHandle3);
-		 GPIO_ULT_INPUT_Init();
-		 GPIO_ULT_OUTPUT_Init();
-		 TIM2_Init();
+		 TIM2_Init();			 
 		 PRINTF("  Use Sensor is ultrasonic distance measurement\n\r");	
 	 }
 	}

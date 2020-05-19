@@ -68,8 +68,8 @@
 #include "hw.h"
 
 void  BSP_sht31_Init( void );
-float SHT31_RH(void);
-float SHT31_RT(void);
+void SHT31_Read(uint8_t rxdata[]);
+void tran_SHT31data(void);
 #ifdef __cplusplus
 }
 #endif

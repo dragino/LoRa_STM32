@@ -56,6 +56,7 @@
 #include "at.h"
 #include "gpio_exti.h"
 #include "weight.h"
+#include "iwdg.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -95,7 +96,7 @@ uint32_t ServerSetTDC;
 /*!
  * User application data buffer size
  */
-#define LORAWAN_APP_DATA_BUFF_SIZE                           64
+#define LORAWAN_APP_DATA_BUFF_SIZE                           256
 /*!
  * User application data
  */
@@ -107,6 +108,8 @@ uint8_t TDC_flag=0;
 uint8_t join_flag=0;
 uint16_t batteryLevel_mV;
 uint8_t payloadlens;
+bool is_time_to_IWDG_Refresh=0;
+
 void send_exti(void);
 extern uint8_t mode;
 extern uint16_t ult;
@@ -115,6 +118,7 @@ extern __IO uint16_t AD_code3;
 extern uint8_t inmode;
 extern float GapValue;
 extern int32_t Weight_Shiwu;
+extern bool rx2_flags;
 /*!
  * User application data structure
  */
@@ -140,14 +144,20 @@ static void LoraStartTx(TxEventType_t EventType);
 
 static void LoraStartjoin(TxEventType_t EventType);
 
+static void StartIWDGRefresh(TxEventType_t EventType);
+
 static TimerEvent_t TxTimer;
 
 static TimerEvent_t TxTimer2;
+
+static TimerEvent_t IWDGRefreshTimer;//watch dog
 
 /* tx timer callback function*/
 static void OnTxTimerEvent( void );
 
 static void OnTxTimerEvent2( void );
+
+static void OnIWDGRefreshTimeoutEvent(void);
 
 extern void printf_joinmessage(void);
 #endif
@@ -195,6 +205,10 @@ int main( void )
   /* USER CODE END 1 */
   CMD_Init();
 	
+	iwdg_init();		
+	
+ 	StartIWDGRefresh(TX_ON_EVENT); 
+			
   /*Disbale Stand-by mode*/
   LPM_SetOffMode(LPM_APPLI_Id , LPM_Disable );
   
@@ -209,7 +223,13 @@ int main( void )
 		#if defined(LoRa_Sensor_Node)
 		send_exti();
 		#endif
-		
+
+		if(is_time_to_IWDG_Refresh==1)
+		{
+			is_time_to_IWDG_Refresh=0;
+			IWDG_Refresh();
+		}			
+						
     DISABLE_IRQ( );
     /*
      * if an interrupt has occurred after DISABLE_IRQ, it is kept pending
@@ -228,7 +248,9 @@ int main( void )
 
 static void LORA_HasJoined( void )
 {
-  AT_PRINTF("JOINED\n\r");
+	rx2_flags=1;
+	
+  AT_PRINTF("JOINED\r\n");
 	
 	if((lora_config_otaa_get() == LORA_ENABLE ? 1 : 0))
 	{
@@ -304,7 +326,6 @@ static void Send( void )
 	AppData.Buff[i++] =(int)(sensor_data.hum_sht*10);
 	
 	#endif
-	
 	}
 	
 	else if(mode==2)
@@ -432,6 +453,7 @@ static void Send( void )
 	
 	AppData.BuffSize = i;
 	payloadlens=i;
+	IWDG_Refresh();	
   LORA_send( &AppData, lora_config_reqack_get());
 	#endif
 	
@@ -539,6 +561,7 @@ static void LORA_RxData( lora_AppData_t *AppData )
 		TimerInit( &TxTimer, OnTxTimerEvent );
     TimerSetValue( &TxTimer,  APP_TX_DUTYCYCLE);		
     TimerStart( &TxTimer); 
+		TimerStart( &IWDGRefreshTimer);		
 		TDC_flag=0;
 	}	
 	
@@ -595,6 +618,27 @@ static void LoraStartjoin(TxEventType_t EventType)
     OnTxTimerEvent2();
   }
 }
+
+static void OnIWDGRefreshTimeoutEvent( void )
+{
+	TimerSetValue( &IWDGRefreshTimer,  18000);
+
+  TimerStart( &IWDGRefreshTimer);
+
+	is_time_to_IWDG_Refresh=1;
+}
+
+static void StartIWDGRefresh(TxEventType_t EventType)
+{
+  if (EventType == TX_ON_EVENT)
+  {
+    /* send everytime timer elapses */
+    TimerInit( &IWDGRefreshTimer, OnIWDGRefreshTimeoutEvent );
+    TimerSetValue( &IWDGRefreshTimer,  18000); 
+		TimerStart( &IWDGRefreshTimer);
+  }
+}
+
 #endif
 
 static void LORA_ConfirmClass ( DeviceClass_t Class )

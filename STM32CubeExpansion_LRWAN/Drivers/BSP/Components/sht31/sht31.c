@@ -47,7 +47,7 @@
   /* Includes ------------------------------------------------------------------*/
 
 #include "sht31.h"
-
+#include "timeServer.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -60,7 +60,9 @@
 /* Private variables ---------------------------------------------------------*/
 /* I2C handler declaration */
 #ifdef USE_SHT
-static int i=0,j=0;
+static int j=0;
+static uint8_t rxdatas[6];
+float sht31_tem,sht31_hum;
 I2C_HandleTypeDef I2cHandle2;
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
@@ -77,7 +79,6 @@ I2C_HandleTypeDef I2cHandle2;
 /* Private variables ---------------------------------------------------------*/
 void  BSP_sht31_Init( void )
 {
-	uint8_t SHT3X_Modecommand_Buffer[2]={0x20,0x32}; 
   /*##-1- Configure the I2C peripheral ######################################*/
   I2cHandle2.Instance              = I2Cx;
   I2cHandle2.Init.Timing           = I2C_TIMING;
@@ -98,115 +99,77 @@ void  BSP_sht31_Init( void )
   /* Enable the Analog I2C Filter */
   HAL_I2CEx_ConfigAnalogFilter(&I2cHandle2,I2C_ANALOGFILTER_ENABLE);
   /* Infinite loop */
-	
-			HAL_I2C_Master_Transmit(&I2cHandle2,0x88,SHT3X_Modecommand_Buffer,2,1000); //work mode
 }
 
-float SHT31_RH(void)
+void SHT31_Read(uint8_t rxdata[])
 {
 	  uint8_t txdata[2]={0xE0,0x00}; //Humidity measurement
-		uint8_t rxdata[6];
-		uint16_t AD_code;
-		uint16_t sum1=0;
-		uint16_t sum2=0;
-		float hum;
-			while(HAL_I2C_Master_Transmit(&I2cHandle2,0x88,txdata,2,1000) != HAL_OK)   
-    {
-		    sum1++;
-				if(sum1>=500)
-				{
-					break;
-				}
-        if(HAL_I2C_GetError(&I2cHandle2) != HAL_I2C_ERROR_AF)
-        {}
-    }
-		while(HAL_I2C_Master_Receive(&I2cHandle2,0x89,rxdata,6,1000) != HAL_OK)  
-    {
-		    sum2++;
-				if(sum2>=30000)     //The minimum time required for humidity conversion, the timeout jumps out of the loop
-				{
-					break;
-				}
-        if(HAL_I2C_GetError(&I2cHandle2 ) != HAL_I2C_ERROR_AF)
-        {}
-    }
-	AD_code=(rxdata[3]<<8)+rxdata[4];
-	AD_code &=~0x0003;   //14bit
-	hum=AD_code*100.0/(65536-1);
-	if(hum>100.0)
-	{
-		hum=100.0;
-	}
-  if(hum<0.0)
-	{
-		i++;
-	if(i==2)
-	{
-	BSP_sht31_Init();
-	}
-	if(i==3)
-	{
-	NVIC_SystemReset();
-	}
-	}
-  else
-	{
-		i=0;
-	}
-  PPRINTF("Humidity =%f\r\n",hum);
-	return hum;
-}
+		uint8_t SHT3X_Modecommand_Buffer[2]={0x2c,0x06};  //Measurement Commands for Single Shot Data Acquisition Mode
 
-float SHT31_RT(void)
-{
-	  uint8_t txdata[2]={0xE0,0x00};//Temperature measurement
-		uint8_t rxdata[6];
-		uint16_t AD_code;
-		uint16_t sum1=0;
-		uint16_t sum2=0;
-		float tem;
-	while(HAL_I2C_Master_Transmit(&I2cHandle2,0x88,txdata,2,1000) != HAL_OK)   
-    {
-			  sum1++;
-				if(sum1>=500)
+		uint32_t currentTime = TimerGetCurrentTime();
+		while(HAL_I2C_Master_Transmit(&I2cHandle2,0x88,SHT3X_Modecommand_Buffer,2,1000)!= HAL_OK)//work mode
+		{
+			  if(TimerGetElapsedTime(currentTime) >= 500)
 				{
 					break;
 				}
         if(HAL_I2C_GetError(&I2cHandle2) != HAL_I2C_ERROR_AF)
-        {}
-    }
-		while(HAL_I2C_Master_Receive(&I2cHandle2,0x89,rxdata,6,1000) != HAL_OK)  
+        {}			
+		} 
+ 		
+	  currentTime = TimerGetCurrentTime();
+		while(HAL_I2C_Master_Transmit(&I2cHandle2,0x88,txdata,2,1000) != HAL_OK)   
     {
-			  sum2++;
-				if(sum2>=3000)       // The minimum time required for temperature conversion, the timeout jumps out of the loop
+			  if(TimerGetElapsedTime(currentTime) >= 500)
 				{
 					break;
 				}
         if(HAL_I2C_GetError(&I2cHandle2) != HAL_I2C_ERROR_AF)
         {}
     }	
-	AD_code=(rxdata[0]<<8)+rxdata[1];
-	AD_code &=~0x0003;   //14bit
-	tem=AD_code*175.0/(65536-1)-45.0;
-	if((tem<-40.0)||(tem>125.0))
+		
+		currentTime = TimerGetCurrentTime();		
+		while(HAL_I2C_Master_Receive(&I2cHandle2,0x89,rxdata,6,3000) != HAL_OK)  
+    {
+			  if(TimerGetElapsedTime(currentTime) >= 4000)
+				{
+					break;
+				}
+        if(HAL_I2C_GetError(&I2cHandle2) != HAL_I2C_ERROR_AF)
+        {}
+    }	
+}
+
+void tran_SHT31data(void)
+{
+	for(int i=0;i<6;i++)
 	{
-		j++;
-	if(j==2)
-	{
-	BSP_sht31_Init();
+		rxdatas[i]=0x00;
 	}
-	if(j==3)
+	
+	SHT31_Read(rxdatas);
+	sht31_tem=((rxdatas[0]<<8)+rxdatas[1])*175.0/(65536-1)-45.0;
+	sht31_hum=((rxdatas[3]<<8)+rxdatas[4])*100.0/(65536-1);
+  if(sht31_hum>100.0)	
 	{
-	NVIC_SystemReset();
+		sht31_hum=100.0;
 	}
+	if((sht31_hum<0.0)||(sht31_tem<-40.0)||(sht31_tem>125.0))
+	{		
+		j++;		
+		if(j==2)
+		{
+			BSP_sht31_Init();
+		}
 	}
 	else
 	{
 		j=0;
-	}
-	PPRINTF("Temperature =%f\r\n",tem);
-  return tem;
+	}	
+	PPRINTF("Temperature =%0.1f\r\n",sht31_tem);
+	PPRINTF("Humidity =%0.1f\r\n",sht31_hum);
 }
+
 #endif
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

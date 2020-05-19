@@ -62,7 +62,8 @@ void WEIGHT_SCK_Init(void)
 	GPIO_InitStruct.Pin = WEIGHT_SCK_PIN;				 
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; 		 
   GPIO_InitStruct.Pull  = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;		
+	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;	
+	
 	HW_GPIO_Init(WEIGHT_SCK_PORT,WEIGHT_SCK_PIN,&GPIO_InitStruct);					
 	HX711_SCK_0; 
 }
@@ -73,13 +74,26 @@ void WEIGHT_DOUT_Init(void)
 	WEIGHT_DOUT_CLK_ENABLE();
 	
 	//HX711_DOUT
-    GPIO_InitStruct.Pin = WEIGHT_DOUT_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	  GPIO_InitStruct.Pull  = GPIO_NOPULL;
-	  HW_GPIO_Init(WEIGHT_DOUT_PORT,WEIGHT_DOUT_PIN,&GPIO_InitStruct);	
+  GPIO_InitStruct.Pin = WEIGHT_DOUT_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull  = GPIO_NOPULL;
 	
+	HW_GPIO_Init(WEIGHT_DOUT_PORT,WEIGHT_DOUT_PIN,&GPIO_InitStruct);		
 }
 
+void WEIGHT_SCK_DeInit(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};	
+	
+	HW_GPIO_Init(WEIGHT_SCK_PORT,WEIGHT_SCK_PIN,&GPIO_InitStruct);	
+}
+
+void WEIGHT_DOUT_DeInit(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};	
+	
+	HW_GPIO_Init(WEIGHT_DOUT_PORT,WEIGHT_DOUT_PIN,&GPIO_InitStruct);			
+}
 
 uint32_t HX711_Read(void)	
 {

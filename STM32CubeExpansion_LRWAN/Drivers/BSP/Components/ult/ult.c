@@ -86,10 +86,22 @@ void GPIO_ULT_OUTPUT_Init(void)
   HW_GPIO_Init( ULT_TRIG_PORT, ULT_TRIG_PIN, &GPIO_InitStruct );
 }
 
+void GPIO_ULT_INPUT_DeInit(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};	
+	
+  HW_GPIO_Init( ULT_Echo_PORT, ULT_Echo_PIN, &GPIO_InitStruct );
+}
+
+void GPIO_ULT_OUTPUT_DeInit(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+
+  HW_GPIO_Init( ULT_TRIG_PORT, ULT_TRIG_PIN, &GPIO_InitStruct );	
+}
 
 void TIM2_Init(void)
-{
-	
+{	
 	__HAL_RCC_TIM2_CLK_ENABLE();
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 159;

@@ -68,6 +68,7 @@ void pwr_control_IoInit(void)
   GPIO_InitStruct.Pull  = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(PWR_OUT_PORT, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);	//Disable 5v power supply
 }
 
 void pwr_control_IoDeInit(void)

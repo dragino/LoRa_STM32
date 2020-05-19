@@ -464,6 +464,11 @@ ATEerror_t at_DataRate_set(const char *param)
 		{
     return AT_PARAM_ERROR;			
 		}	
+#elif defined( REGION_KZ865 )
+	  if(datarate>=8)
+		{
+    return AT_PARAM_ERROR;			
+		}			
 #endif
 	
   lora_config_tx_datarate_set(datarate) ;
@@ -1358,7 +1363,9 @@ ATEerror_t at_weightreset(const char *param)
 	WEIGHT_DOUT_Init();
 	Get_Maopi();	
   HAL_Delay(500);
-  Get_Maopi();		
+  Get_Maopi();
+	WEIGHT_SCK_DeInit();
+	WEIGHT_DOUT_DeInit();		
 	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
 	
 	return AT_OK;	

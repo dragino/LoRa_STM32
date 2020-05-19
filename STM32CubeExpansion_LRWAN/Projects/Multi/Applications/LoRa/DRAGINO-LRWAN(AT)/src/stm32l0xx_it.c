@@ -62,6 +62,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "hw.h"
 #include "stm32l0xx_it.h"
 #include "vcom.h"
+#include "iwdg.h"
 
 extern int exti_flag;
 extern uint8_t inmode;
@@ -274,4 +275,13 @@ void EXTI4_15_IRQHandler( void )
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_15 );
 }
 
+/**
+  * @brief  This function handles TIM21 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM21_IRQHandler(void)
+{ 
+  TIMER_IRQHandler();
+}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

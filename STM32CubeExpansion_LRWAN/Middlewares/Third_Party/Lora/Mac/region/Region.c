@@ -572,6 +572,60 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 //#define RU864_RX_BEACON_SETUP( )   
 #endif
 
+#ifdef REGION_KZ865
+#include "RegionKZ865.h"
+#define KZ865_CASE                                 case LORAMAC_REGION_KZ865:
+#define KZ865_IS_ACTIVE( )                         KZ865_CASE { return true; }
+#define KZ865_GET_PHY_PARAM( )                     KZ865_CASE { return RegionKZ865GetPhyParam( getPhy ); }
+#define KZ865_SET_BAND_TX_DONE( )                  KZ865_CASE { RegionKZ865SetBandTxDone( txDone ); break; }
+#define KZ865_INIT_DEFAULTS( )                     KZ865_CASE { RegionKZ865InitDefaults( type ); break; }
+#define KZ865_VERIFY( )                            KZ865_CASE { return RegionKZ865Verify( verify, phyAttribute ); }
+#define KZ865_APPLY_CF_LIST( )                     KZ865_CASE { RegionKZ865ApplyCFList( applyCFList ); break; }
+#define KZ865_CHAN_MASK_SET( )                     KZ865_CASE { return RegionKZ865ChanMaskSet( chanMaskSet ); }
+#define KZ865_ADR_NEXT( )                          KZ865_CASE { return RegionKZ865AdrNext( adrNext, drOut, txPowOut, adrAckCounter ); }
+#define KZ865_COMPUTE_RX_WINDOW_PARAMETERS( )      KZ865_CASE { RegionKZ865ComputeRxWindowParameters( datarate, minRxSymbols, rxError, rxConfigParams ); break; }
+#define KZ865_RX_CONFIG( )                         KZ865_CASE { return RegionKZ865RxConfig( rxConfig, datarate ); }
+#define KZ865_TX_CONFIG( )                         KZ865_CASE { return RegionKZ865TxConfig( txConfig, txPower, txTimeOnAir ); }
+#define KZ865_LINK_ADR_REQ( )                      KZ865_CASE { return RegionKZ865LinkAdrReq( linkAdrReq, drOut, txPowOut, nbRepOut, nbBytesParsed ); }
+#define KZ865_RX_PARAM_SETUP_REQ( )                KZ865_CASE { return RegionKZ865RxParamSetupReq( rxParamSetupReq ); }
+#define KZ865_NEW_CHANNEL_REQ( )                   KZ865_CASE { return RegionKZ865NewChannelReq( newChannelReq ); }
+#define KZ865_TX_PARAM_SETUP_REQ( )                KZ865_CASE { return RegionKZ865TxParamSetupReq( txParamSetupReq ); }
+#define KZ865_DL_CHANNEL_REQ( )                    KZ865_CASE { return RegionKZ865DlChannelReq( dlChannelReq ); }
+#define KZ865_ALTERNATE_DR( )                      KZ865_CASE { return RegionKZ865AlternateDr( alternateDr ); }
+#define KZ865_CALC_BACKOFF( )                      KZ865_CASE { RegionKZ865CalcBackOff( calcBackOff ); break; }
+#define KZ865_NEXT_CHANNEL( )                      KZ865_CASE { return RegionKZ865NextChannel( nextChanParams, channel, time, aggregatedTimeOff ); }
+#define KZ865_CHANNEL_ADD( )                       KZ865_CASE { return RegionKZ865ChannelAdd( channelAdd ); }
+#define KZ865_CHANNEL_REMOVE( )                    KZ865_CASE { return RegionKZ865ChannelsRemove( channelRemove ); }
+#define KZ865_SET_CONTINUOUS_WAVE( )               KZ865_CASE { RegionKZ865SetContinuousWave( continuousWave ); break; }
+#define KZ865_APPLY_DR_OFFSET( )                   KZ865_CASE { return RegionKZ865ApplyDrOffset( downlinkDwellTime, dr, drOffset ); }
+//#define KZ865_RX_BEACON_SETUP( )                   KZ865_CASE { RegionKZ865RxBeaconSetup( rxBeaconSetup, outDr ); break; }
+#else
+#define KZ865_IS_ACTIVE( )
+#define KZ865_GET_PHY_PARAM( )
+#define KZ865_SET_BAND_TX_DONE( )
+#define KZ865_INIT_DEFAULTS( )
+#define KZ865_VERIFY( )
+#define KZ865_APPLY_CF_LIST( )
+#define KZ865_CHAN_MASK_SET( )
+#define KZ865_ADR_NEXT( )
+#define KZ865_COMPUTE_RX_WINDOW_PARAMETERS( )
+#define KZ865_RX_CONFIG( )
+#define KZ865_TX_CONFIG( )
+#define KZ865_LINK_ADR_REQ( )
+#define KZ865_RX_PARAM_SETUP_REQ( )
+#define KZ865_NEW_CHANNEL_REQ( )
+#define KZ865_TX_PARAM_SETUP_REQ( )
+#define KZ865_DL_CHANNEL_REQ( )
+#define KZ865_ALTERNATE_DR( )
+#define KZ865_CALC_BACKOFF( )
+#define KZ865_NEXT_CHANNEL( )
+#define KZ865_CHANNEL_ADD( )
+#define KZ865_CHANNEL_REMOVE( )
+#define KZ865_SET_CONTINUOUS_WAVE( )
+#define KZ865_APPLY_DR_OFFSET( )
+//#define KZ865_RX_BEACON_SETUP( )
+#endif
+
 bool RegionIsActive( LoRaMacRegion_t region )
 {
     switch( region )
@@ -586,6 +640,7 @@ bool RegionIsActive( LoRaMacRegion_t region )
         IN865_IS_ACTIVE( );
         US915_IS_ACTIVE( );
         RU864_IS_ACTIVE( );
+				KZ865_IS_ACTIVE( );
         default:
         {
             return false;
@@ -608,6 +663,7 @@ PhyParam_t RegionGetPhyParam( LoRaMacRegion_t region, GetPhyParams_t* getPhy )
         IN865_GET_PHY_PARAM( );
         US915_GET_PHY_PARAM( );
         RU864_GET_PHY_PARAM( );
+				KZ865_GET_PHY_PARAM( );
         default:
         {
             return phyParam;
@@ -629,6 +685,7 @@ void RegionSetBandTxDone( LoRaMacRegion_t region, SetBandTxDoneParams_t* txDone 
         IN865_SET_BAND_TX_DONE( );
         US915_SET_BAND_TX_DONE( );
         RU864_SET_BAND_TX_DONE( );
+				KZ865_SET_BAND_TX_DONE( );
         default:
         {
             return;
@@ -650,6 +707,7 @@ void RegionInitDefaults( LoRaMacRegion_t region, InitType_t type )
         IN865_INIT_DEFAULTS( );
         US915_INIT_DEFAULTS( );
         RU864_INIT_DEFAULTS( );
+				KZ865_INIT_DEFAULTS( );
         default:
         {
             break;
@@ -671,6 +729,7 @@ bool RegionVerify( LoRaMacRegion_t region, VerifyParams_t* verify, PhyAttribute_
         IN865_VERIFY( );
         US915_VERIFY( );
         RU864_VERIFY( );
+				KZ865_VERIFY( );
         default:
         {
             return false;
@@ -692,6 +751,7 @@ void RegionApplyCFList( LoRaMacRegion_t region, ApplyCFListParams_t* applyCFList
         IN865_APPLY_CF_LIST( );
         US915_APPLY_CF_LIST( );
         RU864_APPLY_CF_LIST( );
+				KZ865_APPLY_CF_LIST( );
         default:
         {
             break;
@@ -713,6 +773,7 @@ bool RegionChanMaskSet( LoRaMacRegion_t region, ChanMaskSetParams_t* chanMaskSet
         IN865_CHAN_MASK_SET( );
         US915_CHAN_MASK_SET( );
         RU864_CHAN_MASK_SET( );
+				KZ865_CHAN_MASK_SET( );
         default:
         {
             return false;
@@ -734,6 +795,7 @@ bool RegionAdrNext( LoRaMacRegion_t region, AdrNextParams_t* adrNext, int8_t* dr
         IN865_ADR_NEXT( );
         US915_ADR_NEXT( );
         RU864_ADR_NEXT( );
+				KZ865_ADR_NEXT( );
         default:
         {
             return false;
@@ -754,7 +816,8 @@ void RegionComputeRxWindowParameters( LoRaMacRegion_t region, int8_t datarate, u
         KR920_COMPUTE_RX_WINDOW_PARAMETERS( );
         IN865_COMPUTE_RX_WINDOW_PARAMETERS( );
         US915_COMPUTE_RX_WINDOW_PARAMETERS( );
-        RU864_COMPUTE_RX_WINDOW_PARAMETERS( );
+				RU864_COMPUTE_RX_WINDOW_PARAMETERS( );
+				KZ865_COMPUTE_RX_WINDOW_PARAMETERS( );
         default:
         {
             break;
@@ -776,6 +839,7 @@ bool RegionRxConfig( LoRaMacRegion_t region, RxConfigParams_t* rxConfig, int8_t*
         IN865_RX_CONFIG( );
         US915_RX_CONFIG( );
         RU864_RX_CONFIG( );
+				KZ865_RX_CONFIG( );
         default:
         {
             return false;
@@ -797,6 +861,7 @@ bool RegionTxConfig( LoRaMacRegion_t region, TxConfigParams_t* txConfig, int8_t*
         IN865_TX_CONFIG( );
         US915_TX_CONFIG( );
         RU864_TX_CONFIG( );
+				KZ865_TX_CONFIG( );
         default:
         {
             return false;
@@ -818,6 +883,7 @@ uint8_t RegionLinkAdrReq( LoRaMacRegion_t region, LinkAdrReqParams_t* linkAdrReq
         IN865_LINK_ADR_REQ( );
         US915_LINK_ADR_REQ( );
         RU864_LINK_ADR_REQ( );
+				KZ865_LINK_ADR_REQ( );
         default:
         {
             return 0;
@@ -839,6 +905,7 @@ uint8_t RegionRxParamSetupReq( LoRaMacRegion_t region, RxParamSetupReqParams_t* 
         IN865_RX_PARAM_SETUP_REQ( );
         US915_RX_PARAM_SETUP_REQ( );
         RU864_RX_PARAM_SETUP_REQ( );
+				KZ865_RX_PARAM_SETUP_REQ( );
         default:
         {
             return 0;
@@ -860,6 +927,7 @@ uint8_t RegionNewChannelReq( LoRaMacRegion_t region, NewChannelReqParams_t* newC
         IN865_NEW_CHANNEL_REQ( );
         US915_NEW_CHANNEL_REQ( );
         RU864_NEW_CHANNEL_REQ( );
+				KZ865_NEW_CHANNEL_REQ( );
         default:
         {
             return 0;
@@ -881,6 +949,7 @@ int8_t RegionTxParamSetupReq( LoRaMacRegion_t region, TxParamSetupReqParams_t* t
         IN865_TX_PARAM_SETUP_REQ( );
         US915_TX_PARAM_SETUP_REQ( );
         RU864_TX_PARAM_SETUP_REQ( );
+				KZ865_TX_PARAM_SETUP_REQ( );
         default:
         {
             return 0;
@@ -902,7 +971,8 @@ uint8_t RegionDlChannelReq( LoRaMacRegion_t region, DlChannelReqParams_t* dlChan
         IN865_DL_CHANNEL_REQ( );
         US915_DL_CHANNEL_REQ( );
         RU864_DL_CHANNEL_REQ( );
-        default:
+				KZ865_DL_CHANNEL_REQ( );
+				default:
         {
             return 0;
         }
@@ -923,6 +993,7 @@ int8_t RegionAlternateDr( LoRaMacRegion_t region, AlternateDrParams_t* alternate
         IN865_ALTERNATE_DR( );
         US915_ALTERNATE_DR( );
         RU864_ALTERNATE_DR( );
+				KZ865_ALTERNATE_DR( );
         default:
         {
             return 0;
@@ -944,6 +1015,7 @@ void RegionCalcBackOff( LoRaMacRegion_t region, CalcBackOffParams_t* calcBackOff
         IN865_CALC_BACKOFF( );
         US915_CALC_BACKOFF( );
         RU864_CALC_BACKOFF( );
+				KZ865_CALC_BACKOFF( );
         default:
         {
             break;
@@ -965,6 +1037,7 @@ bool RegionNextChannel( LoRaMacRegion_t region, NextChanParams_t* nextChanParams
         IN865_NEXT_CHANNEL( );
         US915_NEXT_CHANNEL( );
         RU864_NEXT_CHANNEL( );
+				KZ865_NEXT_CHANNEL( );
         default:
         {
             return false;
@@ -986,6 +1059,7 @@ LoRaMacStatus_t RegionChannelAdd( LoRaMacRegion_t region, ChannelAddParams_t* ch
         IN865_CHANNEL_ADD( );
         US915_CHANNEL_ADD( );
         RU864_CHANNEL_ADD( );
+				KZ865_CHANNEL_ADD( );
         default:
         {
             return LORAMAC_STATUS_PARAMETER_INVALID;
@@ -1007,6 +1081,7 @@ bool RegionChannelsRemove( LoRaMacRegion_t region, ChannelRemoveParams_t* channe
         IN865_CHANNEL_REMOVE( );
         US915_CHANNEL_REMOVE( );
         RU864_CHANNEL_REMOVE( );
+				KZ865_CHANNEL_REMOVE( );
         default:
         {
             return false;
@@ -1028,6 +1103,7 @@ void RegionSetContinuousWave( LoRaMacRegion_t region, ContinuousWaveParams_t* co
         IN865_SET_CONTINUOUS_WAVE( );
         US915_SET_CONTINUOUS_WAVE( );
         RU864_SET_CONTINUOUS_WAVE( );
+				KZ865_SET_CONTINUOUS_WAVE( );
         default:
         {
             break;
@@ -1049,6 +1125,7 @@ uint8_t RegionApplyDrOffset( LoRaMacRegion_t region, uint8_t downlinkDwellTime, 
         IN865_APPLY_DR_OFFSET( );
         US915_APPLY_DR_OFFSET( );
         RU864_APPLY_DR_OFFSET( );
+				KZ865_APPLY_DR_OFFSET( );
         default:
         {
             return dr;
@@ -1070,6 +1147,7 @@ uint8_t RegionApplyDrOffset( LoRaMacRegion_t region, uint8_t downlinkDwellTime, 
 //        IN865_RX_BEACON_SETUP( );
 //        US915_RX_BEACON_SETUP( );
 //        RU864_RX_BEACON_SETUP( );
+//        KZ865_RX_BEACON_SETUP( );
 //        default:
 //        {
 //            break;

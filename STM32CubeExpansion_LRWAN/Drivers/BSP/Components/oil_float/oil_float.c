@@ -61,7 +61,7 @@
 void  BSP_oil_float_Init( void )
 {
 	GPIO_InitTypeDef GPIO_InitStruct={0};
-	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 	GPIO_InitStruct.Pin = OIL_CONTROL_PIN;
   GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull  = GPIO_NOPULL;

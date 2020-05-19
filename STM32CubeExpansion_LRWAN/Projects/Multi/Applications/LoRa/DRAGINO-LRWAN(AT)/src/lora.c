@@ -56,6 +56,7 @@
 
 uint8_t mode;
 uint8_t inmode;
+bool rx2_flags=0;
 
 extern float GapValue;
 
@@ -64,6 +65,8 @@ extern uint8_t flag1;
 
 extern uint8_t symbtime2_value;
 extern uint8_t flag2;
+extern uint8_t rx_flags;
+extern uint32_t rx1_de,rx2_de;
 
 extern uint16_t power_time;
 
@@ -414,6 +417,8 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_US915 );
 #elif defined( REGION_RU864 )
   LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_RU864 );
+#elif defined( REGION_KZ865 )
+  LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_KZ865 );			
 #else
     #error "Please define a region in the compiler options."
 #endif
@@ -503,6 +508,8 @@ void region_printf(void)
   PPRINTF("US915\n\r");
 #elif defined( REGION_RU864 )
   PPRINTF("RU864\n\r");
+#elif defined( REGION_KZ865 )
+  PPRINTF("KZ865\n\r");			
 #else
     #error "Please define a region in the compiler options."
 #endif
@@ -1097,17 +1104,44 @@ void Read_Config(void)
 	mib.Param.Rx2Channel.Frequency=r_config[2];
 	LoRaMacMibSetRequestConfirm( &mib );
 	
+  if((rx2_flags==0)||(lora_config.otaa==LORA_DISABLE))
+  {		
 	mib.Type = MIB_RX2_CHANNEL;
 	mib.Param.Rx2Channel.Datarate=r_config[3];
 	LoRaMacMibSetRequestConfirm( &mib );
+  }
+  else if(rx2_flags==1)
+	{
+	mib.Type = MIB_RX2_CHANNEL;
+	mib.Param.Rx2Channel.Datarate=rx_flags;
+	LoRaMacMibSetRequestConfirm( &mib );
+	}
 	
+  if((rx2_flags==0)||(lora_config.otaa==LORA_DISABLE))
+  {		
 	mib.Type = MIB_RECEIVE_DELAY_1;
 	mib.Param.ReceiveDelay1=r_config[4];
 	LoRaMacMibSetRequestConfirm( &mib );
-	
+  }
+  else if(rx2_flags==1)
+	{
+	mib.Type = MIB_RECEIVE_DELAY_1;
+	mib.Param.ReceiveDelay1=rx1_de;
+	LoRaMacMibSetRequestConfirm( &mib );		
+  }
+
+  if((rx2_flags==0)||(lora_config.otaa==LORA_DISABLE))
+  {			
 	mib.Type = MIB_RECEIVE_DELAY_2;
 	mib.Param.ReceiveDelay2=r_config[5];
 	LoRaMacMibSetRequestConfirm( &mib );
+  }
+  else if(rx2_flags==1)
+	{
+	mib.Type = MIB_RECEIVE_DELAY_2;
+	mib.Param.ReceiveDelay2=rx2_de;
+	LoRaMacMibSetRequestConfirm( &mib );		
+  }
 	
 	mib.Type = MIB_JOIN_ACCEPT_DELAY_1;
 	mib.Param.JoinAcceptDelay1=r_config[6];
