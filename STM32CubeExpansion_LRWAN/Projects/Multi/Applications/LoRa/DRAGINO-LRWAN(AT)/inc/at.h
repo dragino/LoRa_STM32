@@ -65,6 +65,8 @@ typedef enum eATEerror
   AT_OK = 0,
   AT_ERROR,
   AT_PARAM_ERROR,
+  AT_PARAM_NOT_Range,	
+  AT_PARAM_FDR,		
   AT_BUSY_ERROR,
   AT_TEST_PARAM_OVERFLOW,
   AT_NO_NET_JOINED,
@@ -109,14 +111,17 @@ typedef enum eATEerror
 #define AT_SEND       "+SEND"
 #define AT_RECVB      "+RECVB"
 #define AT_RECV       "+RECV"
+#define AT_DWELLT     "+DWELLT"
 #define AT_VER        "+VER"
 #define AT_CFM        "+CFM"
 #define AT_CFS        "+CFS"
 #define AT_SNR        "+SNR"
 #define AT_RSSI       "+RSSI"
+#define AT_RJTDC      "+RJTDC"
+#define AT_RPL        "+RPL"
+#define AT_DEBUG      "+DEBUG"
 #define AT_TDC        "+TDC"
 #define AT_PORT       "+PORT"
-#define AT_DISAT      "+DISAT"
 #define AT_CHS        "+CHS"
 #define AT_CHE        "+CHE"
 #define AT_CFG        "+CFG"
@@ -129,7 +134,7 @@ typedef enum eATEerror
 #define AT_5VT        "+5VT"
 
 /* Exported functions ------------------------------------------------------- */
-
+void weightreset(void);
 /**
  * @brief  Store the received data
  * @param  Application port
@@ -561,6 +566,34 @@ ATEerror_t at_snr_get(const char *param);
 ATEerror_t at_rssi_get(const char *param);
 
 /**
+ * @brief  
+ * @param  String parameter
+ * @retval AT_OK
+ */
+ATEerror_t at_RJTDC_get(const char *param);
+
+/**
+ * @brief  
+ * @param  String parameter
+ * @retval AT_OK
+ */
+ATEerror_t at_RJTDC_set(const char *param);
+
+/**
+ * @brief  
+ * @param  String parameter
+ * @retval AT_OK
+ */
+ATEerror_t at_RPL_get(const char *param);
+
+/**
+ * @brief  
+ * @param  String parameter
+ * @retval AT_OK
+ */
+ATEerror_t at_RPL_set(const char *param);
+
+/**
  * @brief  Set Rx or Tx test config
  * @param  String parameter
  * @retval AT_OK
@@ -607,6 +640,15 @@ ATEerror_t at_application_port_get(const char *param);
  * @param  String parameter
  * @retval AT_OK
  */
+
+ATEerror_t at_CFG_run(const char *param);
+ 
+ATEerror_t at_DEBUG_run(const char *param);
+	
+ATEerror_t at_DwellTime_set(const char *param);
+
+ATEerror_t at_DwellTime_get(const char *param);
+
 ATEerror_t at_application_port_set(const char *param);
 
 ATEerror_t at_CHS_get(const char *param);

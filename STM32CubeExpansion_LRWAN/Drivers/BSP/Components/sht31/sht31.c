@@ -64,6 +64,7 @@ static int j=0;
 static uint8_t rxdatas[6];
 float sht31_tem,sht31_hum;
 I2C_HandleTypeDef I2cHandle2;
+extern bool debug_flags;
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
 #define I2C_TIMING    0x10A13E56 /* 100 kHz with analog Filter ON, Rise Time 400ns, Fall Time 100ns */ 
@@ -166,8 +167,12 @@ void tran_SHT31data(void)
 	{
 		j=0;
 	}	
-	PPRINTF("Temperature =%0.1f\r\n",sht31_tem);
-	PPRINTF("Humidity =%0.1f\r\n",sht31_hum);
+  if(debug_flags==1)
+	{		
+		PPRINTF("\r\n");
+		PPRINTF("Temperature =%0.1f\r\n",sht31_tem);
+		PPRINTF("Humidity =%0.1f\r\n",sht31_hum);
+	}
 }
 
 #endif

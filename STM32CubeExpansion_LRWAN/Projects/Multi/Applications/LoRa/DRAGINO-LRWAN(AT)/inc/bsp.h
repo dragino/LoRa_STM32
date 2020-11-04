@@ -88,6 +88,12 @@ typedef struct{
 	
 	float hum_sht;
 	
+	float illuminance;	
+	
+  int distance_mm;
+	
+	int distance_signal_strengh;
+	
   /**more may be added*/
 } sensor_t;
 

@@ -67,6 +67,34 @@ static FLASH_EraseInitTypeDef EraseInitStruct;
 /* Private variables ---------------------------------------------------------*/
 /* Erase the user Flash area
     (area defined by FLASH_USER_START_ADDR and FLASH_USER_END_ADDR) ***********/
+void EEPROM_program(uint32_t add, uint32_t *data, uint8_t count)
+{
+	uint32_t Address=0;
+	int i=0;
+	Address = add;
+	
+	BACKUP_PRIMASK();
+	
+	DISABLE_IRQ( );
+	
+	HAL_FLASHEx_DATAEEPROM_Unlock();
+	while (i<count)
+  {
+		if(HAL_FLASHEx_DATAEEPROM_Program(FLASH_TYPEPROGRAMDATA_WORD,Address,data[i])== HAL_OK)
+		{
+			Address = Address + 4;
+				i++;
+		}
+		else
+		{
+			RESTORE_PRIMASK();
+      PRINTF("error in EEPROM Write error\r");
+		}
+  }
+	HAL_FLASHEx_DATAEEPROM_Lock();
+	RESTORE_PRIMASK();
+}
+
 void  FLASH_erase(uint32_t page_address)
 {
 	HAL_FLASH_Unlock();

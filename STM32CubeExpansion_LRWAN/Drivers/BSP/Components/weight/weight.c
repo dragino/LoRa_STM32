@@ -52,6 +52,7 @@ uint32_t HX711_Buffer=0;
 uint32_t Weight_Maopi=0;
 int32_t Weight_Shiwu=0;
 float GapValue=400.0;
+extern bool debug_flags;
 
 void WEIGHT_SCK_Init(void)
 {
@@ -139,5 +140,9 @@ void Get_Weight(void)
 	{
 		Weight_Shiwu =0;
 	}
+	if(debug_flags==1)
+	{		
+	PPRINTF("\r\n");		
 	PPRINTF("Weight is %d g\r\n",Weight_Shiwu);
+	}
 }

@@ -51,6 +51,7 @@
 #include "timeServer.h"
 #include "bsp.h"
 #include "delay.h"
+#include "vcom.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #if defined(LoRa_Sensor_Node)
@@ -63,6 +64,9 @@
 #include "ult.h"
 #include "lidar_lite_v3hp.h"
 #include "weight.h"
+#include "iwdg.h"
+#include "bh1750.h"
+#include "tfsensor.h"
 #endif
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -70,8 +74,8 @@
 /* Exported functions ---------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+bool bh1750flags=0;
 uint8_t mode2_flag=0;
-uint16_t ult;
 static __IO uint16_t AD_code1=0;
 __IO uint16_t AD_code2=0;
 __IO uint16_t AD_code3=0;
@@ -88,6 +92,7 @@ extern float sht31_tem,sht31_hum;
 extern I2C_HandleTypeDef I2cHandle1;
 extern I2C_HandleTypeDef I2cHandle2;
 extern I2C_HandleTypeDef I2cHandle3;
+tfsensor_reading_t reading_t;
 #endif
 
 extern void Read_Config(void);
@@ -100,9 +105,21 @@ void BSP_sensor_Read( sensor_t *sensor_data)
  	#if defined(LoRa_Sensor_Node)
 	
 	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_RESET);//Enable 5v power supply
-	
-	DelayMs(500+power_time);
 
+	IWDG_Refresh();	
+	DelayMs(500);
+	if(power_time!=0)
+	{
+		for(int i=0;i<=(int)(power_time/100);i++)
+		{
+			 DelayMs(100);
+       if((i%99==0)&&(i!=0))
+			 {
+					IWDG_Refresh();		 
+			 }				 
+		}
+	}
+	
 	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);	
 	HW_GetBatteryLevel( );	
 	AD_code1=HW_AdcReadChannel( ADC_Channel_Oil );  //PA0
@@ -127,7 +144,6 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 		{
 			float temp2,hum1;
 			HAL_I2C_MspInit(&I2cHandle1);
-			PPRINTF("\r\n");
 			temp2=SHT20_RT();//get temperature
 			hum1=SHT20_RH(); //get humidity
 			sensor_data->temp_sht=temp2;
@@ -136,11 +152,17 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 		else if(flags==2)
 		{			
 			HAL_I2C_MspInit(&I2cHandle2);			
-			PPRINTF("\r\n");
 			tran_SHT31data();		
 			sensor_data->temp_sht=sht31_tem;
 			sensor_data->hum_sht=sht31_hum;
 		}
+		else if(flags==3)
+		{		
+			bh1750flags=1;		
+			I2C_IoInit();
+			sensor_data->illuminance=bh1750_read();
+			I2C_DoInit();					
+		}		
 		#endif
 		}
 	 
@@ -148,20 +170,30 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	 {
 		 if(mode2_flag==1)
 		 {
-			HAL_I2C_MspInit(&I2cHandle3);			 
-			PPRINTF("\r\n");
-			ult=LidarLite()*10;	 
+			HAL_I2C_MspInit(&I2cHandle3);		
+			LidarLite_init();			 
+			sensor_data -> distance_mm=LidarLite();				 
+		 }
+		 else if(mode2_flag==2)
+		 {
+			GPIO_ULT_INPUT_Init();
+			GPIO_ULT_OUTPUT_Init();			 
+			sensor_data -> distance_mm=ULT_test();
+			GPIO_ULT_INPUT_DeInit();
+			GPIO_ULT_OUTPUT_DeInit();	
+		 }
+		 else if(mode2_flag==3)
+		 {
+			tfsensor_read_distance(&reading_t);	
+		  sensor_data -> distance_mm = reading_t.distance_mm;		
+			sensor_data -> distance_signal_strengh = reading_t.distance_signal_strengh;					
 		 }
 		 else
 		 {
-		 PPRINTF("\r\n");
-		 GPIO_ULT_INPUT_Init();
-		 GPIO_ULT_OUTPUT_Init();			 
-		 ult=ULT_test();
-		 GPIO_ULT_INPUT_DeInit();
-		 GPIO_ULT_OUTPUT_DeInit();			 
-		 }
-	 }
+			sensor_data -> distance_mm = 65535;		
+			sensor_data -> distance_signal_strengh = 65535;			
+		 }			 
+	  }
 
    else if(mode==4)
    {
@@ -171,7 +203,6 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	 
 	 else if(mode==5)
    {
-		PPRINTF("\r\n");
 		WEIGHT_SCK_Init();
 		WEIGHT_DOUT_Init();		 
 		Get_Weight();		
@@ -251,13 +282,6 @@ void  BSP_sensor_Init( void  )
   #if defined(LoRa_Sensor_Node)
 	
 	 pwr_control_IoInit();		
-
-	 Read_Config();
-
-  if(mode==0)
-	{
-		mode=1;
-	}	
 	
 	if((mode==1)||(mode==3))
 	{	 
@@ -278,7 +302,7 @@ void  BSP_sensor_Init( void  )
 	 if(HAL_I2C_Master_Transmit(&I2cHandle1,0x80,txdata1,1,1000) == HAL_OK)
 	 {
 		 flags=1;
-	   PRINTF(" Use Sensor is STH20\n\r");
+	   PRINTF(" Use Sensor is STH2x\n\r");
 	 }
 	 
 	 if(flags==0)
@@ -288,26 +312,38 @@ void  BSP_sensor_Init( void  )
 
 		 currentTime = TimerGetCurrentTime();		 
 	 	 while(HAL_I2C_Master_Transmit(&I2cHandle2,0x88,txdata2,2,1000) != HAL_OK) 
-		{
+		 {
 			if(TimerGetElapsedTime(currentTime) >= 500)
 			{
 			 flags=0;
 			 break;
 			}
-		}
+		 }
 	 if(HAL_I2C_Master_Transmit(&I2cHandle2,0x88,txdata2,2,1000) == HAL_OK)
 	 {
 		 flags=2;
-		 PRINTF("  Use Sensor is STH31\n\r");
+		 PRINTF("  Use Sensor is STH3x\n\r");
 	 }	 
    }
 	 
 	 if(flags==0)
 	 {
+		 float luxtemp;
 		 HAL_I2C_MspDeInit(&I2cHandle2);
-		 
+		 I2C_IoInit();
+		 luxtemp=bh1750_read();
+		 I2C_DoInit();
+		 if(luxtemp!=65535)
+		 {
+			flags=3;
+			PRINTF("  Use Sensor is BH1750\n\r");			 
+		 }
+	 }
+	 
+	 if(flags==0)
+	 {
 		 PRINTF("  No I2C device detected\n\r");
-	 }	
+	 }
 	 #endif
    }
 	 
@@ -315,30 +351,52 @@ void  BSP_sensor_Init( void  )
 	{	
 	  uint8_t dataByte[1]={0x00};		
 	  HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_RESET);//Enable 5v power supply	
-    IIC_init();
+    BSP_lidar_Init();
     waitbusy(); 	
     HAL_I2C_Mem_Write(&I2cHandle3,0xc4,0x00,1,dataByte,1,1000);	
 	  if(waitbusy()<9999)
-	 {
+	  {
      mode2_flag=1;		
-	   LidarLite_init();
      HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply				
 		 PRINTF("  Use Sensor is LIDAR_Lite_v3HP\n\r");
-	 }
+	  }		
 	  else
-	 {
-     HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply				 
-		 HAL_I2C_MspDeInit(&I2cHandle3);
-		 TIM2_Init();			 
-		 PRINTF("  Use Sensor is ultrasonic distance measurement\n\r");	
-	 }
+	  {		 
+		 HAL_I2C_MspDeInit(&I2cHandle3);	 
+		 TIM2_Init();
+		 GPIO_ULT_INPUT_Init();
+		 GPIO_ULT_OUTPUT_Init();	
+			
+		 if(HAL_GPIO_ReadPin(ULT_Echo_PORT, ULT_Echo_PIN)==RESET)
+	   {  
+			mode2_flag=2;	 			 
+			PRINTF("  Use Sensor is ultrasonic distance measurement\n\r");				 
+		 }	
+		 GPIO_ULT_INPUT_DeInit();
+		 GPIO_ULT_OUTPUT_DeInit();
+		 
+		 if(mode2_flag==0)
+		 {
+			__HAL_RCC_TIM2_CLK_DISABLE();			 
+			if(check_deceive()==1)
+			{
+				mode2_flag=3;
+				PRINTF("  Use Sensor is TF-series sensor\n\r");	
+			}	
+			else
+			{	
+		    PRINTF("  No distance measurement device detected\n\r");					
+			}	
+			HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply						
+		 }
+	  }
 	}
 	else if(mode==5)
 	{
 		WEIGHT_SCK_Init();
 		WEIGHT_DOUT_Init();
 		Get_Maopi();
-    HAL_Delay(500);
+    DelayMs(500);
 		Get_Maopi();		
 		PPRINTF("  Use Sensor is HX711\n\r");			
 	}

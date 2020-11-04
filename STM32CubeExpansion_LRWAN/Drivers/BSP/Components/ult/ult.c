@@ -47,7 +47,7 @@
   /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
 #include "ult.h"
-
+#include "delay.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
@@ -59,6 +59,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 TIM_HandleTypeDef htim2;
+extern bool debug_flags;
 
 void GPIO_ULT_INPUT_Init(void)
 {
@@ -89,15 +90,25 @@ void GPIO_ULT_OUTPUT_Init(void)
 void GPIO_ULT_INPUT_DeInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct={0};	
+	ULT_Echo_CLK_ENABLE();
 	
-  HW_GPIO_Init( ULT_Echo_PORT, ULT_Echo_PIN, &GPIO_InitStruct );
+  GPIO_InitStruct.Pin = ULT_Echo_PIN ;
+	GPIO_InitStruct.Mode  = GPIO_MODE_ANALOG;
+	GPIO_InitStruct.Pull  = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(ULT_Echo_PORT, &GPIO_InitStruct); 
 }
 
 void GPIO_ULT_OUTPUT_DeInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct={0};
+	ULT_TRIG_CLK_ENABLE();
 
-  HW_GPIO_Init( ULT_TRIG_PORT, ULT_TRIG_PIN, &GPIO_InitStruct );	
+  GPIO_InitStruct.Pin = ULT_TRIG_PIN ;
+	GPIO_InitStruct.Mode  = GPIO_MODE_ANALOG;
+	GPIO_InitStruct.Pull  = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(ULT_TRIG_PORT, &GPIO_InitStruct); 	
 }
 
 void TIM2_Init(void)
@@ -129,38 +140,49 @@ uint16_t ULT_test(void)
 	
 	if(ult_flags==0)
 	{
-	HAL_GPIO_WritePin(ULT_TRIG_PORT,ULT_TRIG_PIN,GPIO_PIN_SET);
-	HAL_Delay(1);	
-	HAL_GPIO_WritePin(ULT_TRIG_PORT,ULT_TRIG_PIN,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(ULT_TRIG_PORT,ULT_TRIG_PIN,GPIO_PIN_SET);
+		DelayMs(1);	
+		HAL_GPIO_WritePin(ULT_TRIG_PORT,ULT_TRIG_PIN,GPIO_PIN_RESET);
 	
-	while(!HAL_GPIO_ReadPin(ULT_Echo_PORT, ULT_Echo_PIN));
-	__HAL_TIM_SET_COUNTER(&htim2,0);
-	__HAL_TIM_ENABLE(&htim2);
-	while(HAL_GPIO_ReadPin(ULT_Echo_PORT, ULT_Echo_PIN));
-	time=__HAL_TIM_GetCounter(&htim2)+(int)((__HAL_TIM_GetCounter(&htim2))/33);
+		while(!HAL_GPIO_ReadPin(ULT_Echo_PORT, ULT_Echo_PIN));
+		__HAL_TIM_SET_COUNTER(&htim2,0);
+		__HAL_TIM_ENABLE(&htim2);
+		while(HAL_GPIO_ReadPin(ULT_Echo_PORT, ULT_Echo_PIN));
+		time=__HAL_TIM_GetCounter(&htim2)+(int)((__HAL_TIM_GetCounter(&htim2))/33);
 
-	__HAL_TIM_DISABLE(&htim2);
+		__HAL_TIM_DISABLE(&htim2);
 
 //	PPRINTF("TIME=%d\r\n",time);
-	distance=(170*(time*5/(float)1000)+5);
+		distance=(170*(time*5/(float)1000)+5);
 
-	if((distance<240)||(distance>6000))
-	{
-	PRINTF("Distance is out of range\r\n",distance);
-	distance=65535;
-	return distance;
-	}
+		if((distance<240)||(distance>6000))
+		{
+			if(debug_flags==1)
+			{			
+				PPRINTF("\r\n");				
+				PRINTF("Distance is out of range\r\n",distance);
+			}
+			distance=65535;
+			return distance;
+		}
+		else
+		{
+			if(debug_flags==1)
+			{			
+				PPRINTF("\r\n");				
+				PRINTF("Distance=%d mm\r\n",distance);
+			}
+			return distance;
+		}
+	}	
 	else
 	{
-	PRINTF("Distance=%d mm\r\n",distance);
-	return distance;
-	}
-	}
-	
-	else
-	{
-	PRINTF("ULT is not connect\r\n");
-	distance=4095;
-	return distance;
+		if(debug_flags==1)
+		{		
+			PPRINTF("\r\n");				
+			PRINTF("ULT is not connect\r\n");
+		}
+		distance=4095;
+		return distance;
 	}
 }

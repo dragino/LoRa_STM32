@@ -37,14 +37,12 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 // Definitions
 #define CHANNELS_MASK_SIZE              6
 
-#if defined ( REGION_CN470)
-uint8_t TXpower=0;
-uint8_t TXdr=0;
-uint8_t nbreq;
-#endif	
-
 extern LoRaMacParams_t LoRaMacParams;
-
+extern uint8_t payloadlens;
+extern bool DR_small;
+extern bool debug_flags;
+extern bool jr_flag;
+extern uint8_t jr_nb;
 // Global attributes
 /*!
  * LoRaMAC channels
@@ -278,7 +276,7 @@ PhyParam_t RegionCN470GetPhyParam( GetPhyParams_t* getPhy )
         case PHY_NB_JOIN_TRIALS:
         case PHY_DEF_NB_JOIN_TRIALS:
         {
-            phyParam.Value = 48;
+            phyParam.Value = 18;
             break;
         }
         default:
@@ -305,6 +303,7 @@ void RegionCN470InitDefaults( InitType_t type )
     {
         case INIT_TYPE_INIT:
         {
+					  jr_flag=1;
             // Channels
             // 125 kHz channels
             for( uint8_t i = 0; i < CN470_MAX_NB_CHANNELS; i++ )
@@ -328,14 +327,14 @@ void RegionCN470InitDefaults( InitType_t type )
             ChannelsDefaultMask[3] = 0x0000;
             ChannelsDefaultMask[4] = 0x0000;
             ChannelsDefaultMask[5] = 0x0000;
-
+            
 						uint8_t num,channel_num,k;
 						
 						channel_num=customize_set8channel_get();
 						
-						num=(customize_set8channel_get()%2==1)? 0:8;
+						num=(customize_set8channel_get()%12==11)? 0:8;
 						
-						if(channel_num>=1&&channel_num<=2)
+						if(channel_num>=11&&channel_num<=12)
 							k=5;
 						else 
 							k=6;
@@ -343,8 +342,14 @@ void RegionCN470InitDefaults( InitType_t type )
 						ChannelsDefaultMask[k]=0x00FF<<num;	
 						
 						if(k==6)
-						{ChannelsDefaultMask[5] = 0xFFFF;}
-						
+						{
+							ChannelsDefaultMask[5] = 0xFFFF;
+							jr_nb=16;
+						}
+						else
+						{
+							jr_nb=8;
+						}
             // Update the channels mask
             RegionCommonChanMaskCopy( ChannelsMask, ChannelsDefaultMask, 6 );
             break;
@@ -387,7 +392,7 @@ bool RegionCN470Verify( VerifyParams_t* verify, PhyAttribute_t phyAttribute )
         }
         case PHY_NB_JOIN_TRIALS:
         {
-            if( verify->NbJoinTrials < 48 )
+            if( verify->NbJoinTrials < 18 )
             {
                 return false;
             }
@@ -510,7 +515,8 @@ bool RegionCN470RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
     uint8_t maxPayload = 0;
     int8_t phyDr = 0;
     uint32_t frequency = rxConfig->Frequency;
-
+	  uint16_t rxfreq_a,rxfreq_b;
+	
     if( Radio.GetStatus( ) != RF_IDLE )
     {
         return false;
@@ -540,11 +546,19 @@ bool RegionCN470RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
     }
     Radio.SetMaxPayloadLength( MODEM_LORA, maxPayload + LORA_MAC_FRMPAYLOAD_OVERHEAD );
 
-		TimerTime_t ts = TimerGetCurrentTime(); 
-		PPRINTF("[%lu]", ts); 
-		PPRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
+		if(debug_flags==1)
+		{	
+			TimerTime_t ts = TimerGetCurrentTime(); 
+			PPRINTF("[%lu]", ts); 
+			PPRINTF( "RX on freq %d Hz at DR %d\r\n", frequency, dr );						
+		}
+		else
+		{
+			rxfreq_a=frequency/1000000;
+			rxfreq_b=(frequency%1000000)/1000;			
+			PPRINTF( "RX on freq %d.%d MHz at DR %d\r\n",rxfreq_a,rxfreq_b,dr );				
+		}
 		
-
     *datarate = (uint8_t) dr;
     return true;
 }
@@ -554,23 +568,29 @@ bool RegionCN470TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
     int8_t phyDr = DataratesCN470[txConfig->Datarate];
     int8_t txPowerLimited = LimitTxPower( txConfig->TxPower, Bands[Channels[txConfig->Channel].Band].TxMaxPower, txConfig->Datarate, ChannelsMask );
     int8_t phyTxPower = 0;
-
+	  uint16_t txfreq_a,txfreq_b;
+	
     // Calculate physical TX power
     phyTxPower = RegionCommonComputeTxPower( txPowerLimited, txConfig->MaxEirp, txConfig->AntennaGain );
-
-	  #if defined ( REGION_CN470)
-		TXpower=txConfig->TxPower;
-	  TXdr=txConfig->Datarate;
-		#endif
 
     // Setup the radio frequency
     Radio.SetChannel( Channels[txConfig->Channel].Frequency );
 
     Radio.SetTxConfig( MODEM_LORA, phyTxPower, 0, 0, phyDr, 1, 8, false, true, 0, 0, false, 3000 );
-		TimerTime_t ts = TimerGetCurrentTime(); 
-		PPRINTF("[%lu]", ts); 		
-    PPRINTF( "TX on freq %d Hz at DR %d\n\r", Channels[txConfig->Channel].Frequency, txConfig->Datarate );
 
+		if(debug_flags==1)
+		{		
+			TimerTime_t ts = TimerGetCurrentTime(); 
+			PPRINTF("[%lu]", ts); 	
+			PPRINTF( "TX on freq %d Hz at DR %d\r\n", Channels[txConfig->Channel].Frequency, txConfig->Datarate );			
+		}			
+		else
+		{
+			txfreq_a=Channels[txConfig->Channel].Frequency/1000000;
+			txfreq_b=(Channels[txConfig->Channel].Frequency%1000000)/1000;
+			PPRINTF( "TX on freq %d.%d MHz at DR %d\r\n",txfreq_a,txfreq_b,txConfig->Datarate );						
+    }
+		
     // Setup maximum payload lenght of the radio driver
     Radio.SetMaxPayloadLength( MODEM_LORA, txConfig->PktLen );
     // Get the time-on-air of the next tx frame
@@ -590,10 +610,6 @@ uint8_t RegionCN470LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     RegionCommonLinkAdrReqVerifyParams_t linkAdrVerifyParams;
-	  #if defined ( REGION_CN470 )
-		nbreq=LoRaMacParams.ChannelsNbRep;
-		#endif  
-
 	
     // Initialize local copy of channels mask
     RegionCommonChanMaskCopy( channelsMask, ChannelsMask, 6 );
@@ -670,7 +686,13 @@ uint8_t RegionCN470LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
         // Copy Mask
         RegionCommonChanMaskCopy( ChannelsMask, channelsMask, 6 );			
     }
-
+		
+		 if(((linkAdrParams.Datarate==0)||(linkAdrParams.Datarate==1)||(linkAdrParams.Datarate==2))&&(payloadlens>=51))
+		{
+			linkAdrParams.Datarate=3;
+			DR_small=1;	
+		}	
+		
     // Update status variables
     *drOut = linkAdrParams.Datarate;
     *txPowOut = linkAdrParams.TxPower;
@@ -729,29 +751,29 @@ int8_t RegionCN470AlternateDr( AlternateDrParams_t* alternateDr )
 {
     int8_t datarate = 0;
 
-    if( ( alternateDr->NbTrials % 48 ) == 0 )
+    if( alternateDr->NbTrials <= 3 )
     {
-        datarate = DR_0;
+        datarate = DR_5;
     }
-    else if( ( alternateDr->NbTrials % 32 ) == 0 )
-    {
-        datarate = DR_1;
-    }
-    else if( ( alternateDr->NbTrials % 24 ) == 0 )
-    {
-        datarate = DR_2;
-    }
-    else if( ( alternateDr->NbTrials % 16 ) == 0 )
-    {
-        datarate = DR_3;
-    }
-    else if( ( alternateDr->NbTrials % 8 ) == 0 )
+    else if( alternateDr->NbTrials <= 6 )
     {
         datarate = DR_4;
     }
+    else if( alternateDr->NbTrials <= 9 )
+    {
+        datarate = DR_3;
+    }
+    else if( alternateDr->NbTrials <= 12 )
+    {
+        datarate = DR_2;
+    }
+    else if( alternateDr->NbTrials <= 15  )
+    {
+        datarate = DR_1;
+    }
     else
     {
-        datarate = DR_5;
+        datarate = DR_0;
     }
     return datarate;
 }

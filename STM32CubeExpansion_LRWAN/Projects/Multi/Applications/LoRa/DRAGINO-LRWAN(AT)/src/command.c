@@ -50,6 +50,7 @@
 #include "hw.h"
 #include "command.h"
 #include "lora.h"
+#include "delay.h"
 
 /* comment the following to have help message */
 /* #define NO_HELP */
@@ -84,6 +85,8 @@ static const char *const ATError_description[] =
   "\r\nOK\r\n",                     /* AT_OK */
   "\r\nAT_ERROR\r\n",               /* AT_ERROR */
   "\r\nAT_PARAM_ERROR\r\n",         /* AT_PARAM_ERROR */
+  "\r\nERROR:Not in Range\r\n",     /* AT_PARAM_NOT in Range */	
+  "\r\nERROR:Run AT+FDR first\r\n", /* AT_PARAM_FDR */		
   "\r\nAT_BUSY_ERROR\r\n",          /* AT_BUSY_ERROR */
   "\r\nAT_TEST_PARAM_OVERFLOW\r\n", /* AT_TEST_PARAM_OVERFLOW */
   "\r\nAT_NO_NETWORK_JOINED\r\n",   /* AT_NO_NET_JOINED */
@@ -96,6 +99,17 @@ static const char *const ATError_description[] =
  */
 static const struct ATCommand_s ATCommand[] =
 {
+ {
+    .string = AT_DEBUG,
+    .size_string = sizeof(AT_DEBUG) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_DEBUG ":Set more info input\r\n",
+#endif
+    .get = at_return_error,
+    .set = at_return_error,
+    .run = at_DEBUG_run,
+  },
+	
   {
     .string = AT_RESET,
     .size_string = sizeof(AT_RESET) - 1,
@@ -439,7 +453,42 @@ static const struct ATCommand_s ATCommand[] =
     .set = at_return_error,
     .run = at_Receive,
   },
-  
+
+	#if defined ( REGION_AU915 ) || defined ( REGION_AS923 )	
+	{
+    .string = AT_DWELLT,
+    .size_string = sizeof(AT_DWELLT) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_DWELLT ": Get or set UplinkDwellTime\r\n",
+#endif
+    .get = at_DwellTime_get,
+    .set = at_DwellTime_set,
+    .run = at_return_error,
+  },
+#endif
+
+	{
+    .string = AT_RJTDC,
+    .size_string = sizeof(AT_RJTDC) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_RJTDC ": Get or set the ReJoin data transmission interval in min\r\n",
+#endif
+    .get = at_RJTDC_get,
+    .set = at_RJTDC_set,
+    .run = at_return_error,
+  },
+	
+	{
+    .string = AT_RPL,
+    .size_string = sizeof(AT_RPL) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_RPL ": Get or set response level\r\n",
+#endif
+    .get = at_RPL_get,
+    .set = at_RPL_set,
+    .run = at_return_error,
+  },
+	
   {
     .string = AT_VER,
     .size_string = sizeof(AT_VER) - 1,
@@ -494,7 +543,7 @@ static const struct ATCommand_s ATCommand[] =
     .set = at_return_error,
     .run = at_return_error,
   },
-	
+
 	{
     .string = AT_TDC,
     .size_string = sizeof(AT_TDC) - 1,
@@ -605,7 +654,7 @@ static const struct ATCommand_s ATCommand[] =
     .run = at_return_error,
 	},
 	
-	#if defined( REGION_US915 ) || defined( REGION_US915_HYBRID ) || defined ( REGION_AU915 ) || defined ( REGION_CN470 )
+	#if defined( REGION_US915 ) || defined ( REGION_AU915 ) || defined ( REGION_CN470 )
 	{
 	  .string = AT_CHE,
     .size_string = sizeof(AT_CHE) - 1,
@@ -626,7 +675,7 @@ static const struct ATCommand_s ATCommand[] =
 #endif
     .get = at_return_error,
     .set = at_return_error,
-    .run = at_return_error,
+    .run = at_CFG_run,
 	},
 
 		
@@ -756,21 +805,6 @@ static void parse_cmd(const char *cmd)
     {
       if (strncmp(cmd, ATCommand[i].string, ATCommand[i].size_string) == 0)
       {
-				if(strcmp(cmd,AT_CFG) == 0)
-			  {
-				  for (int j = 0; j< (sizeof(ATCommand) / sizeof(struct ATCommand_s)); j++)
-          {
-				    if((ATCommand[j].get)!=at_return_error)
-				    {
-              PPRINTF("AT%s=",ATCommand[j].string);
-			        ATCommand[j].get(( char *)cmd);						 
-				    }
-			    }
-			 status = AT_OK;
-			 break;
-			}
-      else
-			{
         Current_ATCommand = &(ATCommand[i]);
         /* point to the string after the command to parse it */
         cmd += Current_ATCommand->size_string;
@@ -806,7 +840,6 @@ static void parse_cmd(const char *cmd)
 
         /* we end the loop as the command was found */
         break;
-      }
 		 }
     }
   }
@@ -814,4 +847,19 @@ static void parse_cmd(const char *cmd)
   com_error(status);
 }
 
+uint8_t printf_all_config(void)
+{
+	char *cmd;
+	for (int j = 0; j< (sizeof(ATCommand) / sizeof(struct ATCommand_s)); j++)
+	{
+		if((ATCommand[j].get)!=at_return_error)
+		{
+			PPRINTF("AT%s=",ATCommand[j].string);
+			ATCommand[j].get(( char *)cmd);		
+			DelayMs(50);				
+		}
+	}
+	
+	return 1;
+}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

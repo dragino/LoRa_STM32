@@ -62,7 +62,7 @@
 #ifdef USE_SHT
 static int i=0,j=0;
 I2C_HandleTypeDef I2cHandle1;
-
+extern bool debug_flags;
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
 #define I2C_TIMING    0x10A13E56 /* 100 kHz with analog Filter ON, Rise Time 400ns, Fall Time 100ns */ 
@@ -159,7 +159,10 @@ float SHT20_RH(void)
 	{
 		i=0;
 	}
-  PPRINTF("Humidity =%0.1f\r\n",hum);
+  if(debug_flags==1)
+	{	
+		PPRINTF("Humidity =%0.1f\r\n",hum);
+	}
 	return hum;
 }
 
@@ -207,8 +210,12 @@ float SHT20_RT(void)
 	{
 		j=0;
 	}
-	PPRINTF("Temperature =%0.1f\r\n",tem);
-  return tem;
+  if(debug_flags==1)
+	{		
+		PPRINTF("\r\n");		
+		PPRINTF("Temperature =%0.1f\r\n",tem);
+	}
+	return tem;	
 }
 #endif
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

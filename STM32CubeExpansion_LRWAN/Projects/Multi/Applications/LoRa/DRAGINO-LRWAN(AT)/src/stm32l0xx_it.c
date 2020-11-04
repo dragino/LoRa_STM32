@@ -61,12 +61,15 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
 #include "stm32l0xx_it.h"
-#include "vcom.h"
 #include "iwdg.h"
 
 extern int exti_flag;
 extern uint8_t inmode;
-
+extern uint32_t COUNT;
+extern uint8_t mode;
+extern uint8_t switch_status;
+extern bool is_check_exit;
+extern bool joined_flags;
 /** @addtogroup STM32L1xx_HAL_Examples
   * @{
   */
@@ -206,6 +209,11 @@ void SysTick_Handler(void)
 {
 }*/
 
+void USART1_IRQHandler(void)
+{
+	tfmini_uart_IRQHandler();
+}
+
 void USARTX_IRQHandler( void )
 {
   vcom_IRQHandler();
@@ -261,15 +269,24 @@ void EXTI4_15_IRQHandler( void )
 //  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_14) != RESET) 
   { 
-	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);
-		HAL_NVIC_DisableIRQ(EXTI4_15_IRQn);		
-	 if(inmode!=0)
+	 if((inmode!=0)&&(joined_flags==1))
 	 {
-	 exti_flag=1;
+	  if((mode==6)&&((inmode==2)||(inmode==3)))
+		{
+			exti_flag=1;
+			COUNT++;
+		}
+		else if(mode!=6)
+		{
+			exti_flag=1;	
+			if(is_check_exit==0)
+			{
+				switch_status=HAL_GPIO_ReadPin(GPIO_EXTI_PORT,GPIO_EXTI_PIN);	
+			}				
+		}
 	 }
 	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);
    HAL_GPIO_EXTI_Callback(GPIO_PIN_14);		
-	 HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
   }
 
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_15 );

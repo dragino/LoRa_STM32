@@ -67,7 +67,7 @@
  
 #include "hw.h"
 
-void IIC_init(void);
+void BSP_lidar_Init(void);
 void LidarLite_init(void);
 uint16_t LidarLite(void);
 uint16_t waitbusy(void);

@@ -49,6 +49,9 @@
 #include "delay.h"
 #include "LoRaMac.h"
 
+extern bool ser_ack;
+extern bool address_flags;
+extern bool debug_flags;
 /*
  * Local types definition
  */
@@ -1620,10 +1623,25 @@ void SX1276OnDio0Irq( void )
                     if( ( RadioEvents != NULL ) && ( RadioEvents->RxDone != NULL ) )
                     {
                         RadioEvents->RxDone( RxTxBuffer, SX1276.Settings.LoRaPacketHandler.Size, SX1276.Settings.LoRaPacketHandler.RssiValue, SX1276.Settings.LoRaPacketHandler.SnrValue );
- 												TimerTime_t ts = TimerGetCurrentTime(); 
-												PPRINTF("[%lu]", ts); 
-												PPRINTF("rxDone\r\n" );
-												PPRINTF("Rssi= %d\r\n",SX1276.Settings.LoRaPacketHandler.RssiValue);
+												if(address_flags==0)
+												{
+													if(debug_flags==1)
+												  {
+													TimerTime_t ts = TimerGetCurrentTime(); 
+													PPRINTF("[%lu]", ts); 
+													}
+													if(ser_ack==1)
+													{
+														PPRINTF("rxDone(ACK)\r\n" );
+														ser_ack=0;
+													}
+													else
+													{
+														PPRINTF("rxDone\r\n" );
+													}
+													PPRINTF("Rssi= %d\r\n",SX1276.Settings.LoRaPacketHandler.RssiValue);
+												}
+												address_flags=0;												
                     }
                 }
                 break;
@@ -1646,8 +1664,11 @@ void SX1276OnDio0Irq( void )
                 if( ( RadioEvents != NULL ) && ( RadioEvents->TxDone != NULL ) )
                 {
                     RadioEvents->TxDone( );
+									  if(debug_flags==1)
+									  {
 										TimerTime_t ts = TimerGetCurrentTime(); 
-										PPRINTF("[%lu]", ts); 									
+										PPRINTF("[%lu]", ts); 
+										}											
                     PPRINTF( "txDone\r\n" );
                 }
                 break;
@@ -1711,8 +1732,11 @@ void SX1276OnDio1Irq( void )
                 if( ( RadioEvents != NULL ) && ( RadioEvents->RxTimeout != NULL ) )
                 {
                     RadioEvents->RxTimeout( );
+										if(debug_flags==1)
+									  {									
 										TimerTime_t ts = TimerGetCurrentTime(); 
-										PPRINTF("[%lu]", ts); 									
+										PPRINTF("[%lu]", ts); 	
+										}											
                     PPRINTF( "rxTimeOut\r\n" );
                 }
                 break;

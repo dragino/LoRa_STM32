@@ -553,6 +553,11 @@
  */
 typedef enum ePhyAttribute
 {
+		  /*!
+     * Frequency. It is available
+     * to perform a verification with RegionVerify().
+     */
+    PHY_FREQUENCY,	
     /*!
      * Minimum RX datarate.
      */
@@ -711,7 +716,10 @@ typedef enum eInitType
     /*!
      * Restores default channels only.
      */
-    INIT_TYPE_RESTORE
+    INIT_TYPE_RESTORE,
+	
+	  INIT_TYPE_REJOIN
+	
 }InitType_t;
 
 typedef enum eChannelsMask
@@ -802,6 +810,11 @@ typedef struct sSetBandTxDoneParams
  */
 typedef union uVerifyParams
 {
+	    /*!
+     * Channel frequency to verify
+     */
+    uint32_t Frequency;
+		
     /*!
      * TX power to verify.
      */

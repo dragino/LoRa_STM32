@@ -37,14 +37,10 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 // Definitions
 #define CHANNELS_MASK_SIZE              1
 
-#if defined ( REGION_EU433 )
-uint8_t TXpower=0;
-uint8_t TXdr=0;
-uint8_t nbreq;
-#endif	
-
 extern LoRaMacParams_t LoRaMacParams;
-
+extern uint8_t payloadlens;
+extern bool DR_small;
+extern bool debug_flags;
 // Global attributes
 /*!
  * LoRaMAC channels
@@ -300,7 +296,7 @@ PhyParam_t RegionEU433GetPhyParam( GetPhyParams_t* getPhy )
         case PHY_NB_JOIN_TRIALS:
         case PHY_DEF_NB_JOIN_TRIALS:
         {
-            phyParam.Value = 48;
+            phyParam.Value = 18;
             break;
         }
         default:
@@ -395,7 +391,7 @@ bool RegionEU433Verify( VerifyParams_t* verify, PhyAttribute_t phyAttribute )
         }
         case PHY_NB_JOIN_TRIALS:
         {
-            if( verify->NbJoinTrials < 48 )
+            if( verify->NbJoinTrials < 18 )
             {
                 return false;
             }
@@ -569,7 +565,8 @@ bool RegionEU433RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
     uint8_t maxPayload = 0;
     int8_t phyDr = 0;
     uint32_t frequency = rxConfig->Frequency;
-
+	  uint16_t rxfreq_a,rxfreq_b;
+	
     if( Radio.GetStatus( ) != RF_IDLE )
     {
         return false;
@@ -613,10 +610,18 @@ bool RegionEU433RxConfig( RxConfigParams_t* rxConfig, int8_t* datarate )
     }
     Radio.SetMaxPayloadLength( modem, maxPayload + LORA_MAC_FRMPAYLOAD_OVERHEAD );
 
-		TimerTime_t ts = TimerGetCurrentTime(); 
-		PPRINTF("[%lu]", ts); 
-		PPRINTF( "RX on freq %d Hz at DR %d\n\r", frequency, dr );
-		
+		if(debug_flags==1)
+		{	
+			TimerTime_t ts = TimerGetCurrentTime(); 
+			PPRINTF("[%lu]", ts); 
+			PPRINTF( "RX on freq %d Hz at DR %d\r\n", frequency, dr );						
+		}
+		else
+		{
+			rxfreq_a=frequency/1000000;
+			rxfreq_b=(frequency%1000000)/1000;			
+			PPRINTF( "RX on freq %d.%d MHz at DR %d\r\n",rxfreq_a,rxfreq_b,dr );				
+		}
 
     *datarate = (uint8_t) dr;
     return true;
@@ -629,15 +634,10 @@ bool RegionEU433TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
     int8_t txPowerLimited = LimitTxPower( txConfig->TxPower, Bands[Channels[txConfig->Channel].Band].TxMaxPower, txConfig->Datarate, ChannelsMask );
     uint32_t bandwidth = GetBandwidth( txConfig->Datarate );
     int8_t phyTxPower = 0;
-
+	  uint16_t txfreq_a,txfreq_b;
+	
     // Calculate physical TX power
     phyTxPower = RegionCommonComputeTxPower( txPowerLimited, txConfig->MaxEirp, txConfig->AntennaGain );
-
-	  #if defined ( REGION_EU433 )
-		TXpower=txConfig->TxPower;
-	  TXdr=txConfig->Datarate;
-		#endif
-
 	
     // Setup the radio frequency
     Radio.SetChannel( Channels[txConfig->Channel].Frequency );
@@ -652,10 +652,19 @@ bool RegionEU433TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
         modem = MODEM_LORA;
         Radio.SetTxConfig( modem, phyTxPower, 0, bandwidth, phyDr, 1, 8, false, true, 0, 0, false, 3000 );
     }
-		TimerTime_t ts = TimerGetCurrentTime(); 
-		PPRINTF("[%lu]", ts); 		
-    PPRINTF( "TX on freq %d Hz at DR %d\n\r", Channels[txConfig->Channel].Frequency, txConfig->Datarate );
-
+		if(debug_flags==1)
+		{		
+			TimerTime_t ts = TimerGetCurrentTime(); 
+			PPRINTF("[%lu]", ts); 	
+			PPRINTF( "TX on freq %d Hz at DR %d\r\n", Channels[txConfig->Channel].Frequency, txConfig->Datarate );			
+		}			
+		else
+		{
+			txfreq_a=Channels[txConfig->Channel].Frequency/1000000;
+			txfreq_b=(Channels[txConfig->Channel].Frequency%1000000)/1000;
+			PPRINTF( "TX on freq %d.%d MHz at DR %d\r\n",txfreq_a,txfreq_b,txConfig->Datarate );						
+    }
+		
     // Setup maximum payload lenght of the radio driver
     Radio.SetMaxPayloadLength( modem, txConfig->PktLen );
     // Get the time-on-air of the next tx frame
@@ -675,9 +684,6 @@ uint8_t RegionEU433LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
     RegionCommonLinkAdrReqVerifyParams_t linkAdrVerifyParams;
-	  #if defined ( REGION_EU433 )
-		nbreq=LoRaMacParams.ChannelsNbRep;
-		#endif  
 
     while( bytesProcessed < linkAdrReq->PayloadSize )
     {
@@ -762,7 +768,13 @@ uint8_t RegionEU433LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
         // Update the channels mask
         ChannelsMask[0] = chMask;
     }
-
+		
+		 if(((linkAdrParams.Datarate==0)||(linkAdrParams.Datarate==1)||(linkAdrParams.Datarate==2))&&(payloadlens>=51))
+		{
+			linkAdrParams.Datarate=3;
+			DR_small=1;			
+		}	
+		
     // Update status variables
     *drOut = linkAdrParams.Datarate;
     *txPowOut = linkAdrParams.TxPower;
@@ -884,29 +896,29 @@ int8_t RegionEU433AlternateDr( AlternateDrParams_t* alternateDr )
 {
     int8_t datarate = 0;
 
-    if( ( alternateDr->NbTrials % 48 ) == 0 )
+    if( alternateDr->NbTrials <= 3 )
     {
-        datarate = DR_0;
+        datarate = DR_5;
     }
-    else if( ( alternateDr->NbTrials % 32 ) == 0 )
-    {
-        datarate = DR_1;
-    }
-    else if( ( alternateDr->NbTrials % 24 ) == 0 )
-    {
-        datarate = DR_2;
-    }
-    else if( ( alternateDr->NbTrials % 16 ) == 0 )
-    {
-        datarate = DR_3;
-    }
-    else if( ( alternateDr->NbTrials % 8 ) == 0 )
+    else if( alternateDr->NbTrials <= 6 )
     {
         datarate = DR_4;
     }
+    else if( alternateDr->NbTrials <= 9 )
+    {
+        datarate = DR_3;
+    }
+    else if( alternateDr->NbTrials <= 12 )
+    {
+        datarate = DR_2;
+    }
+    else if( alternateDr->NbTrials <= 15  )
+    {
+        datarate = DR_1;
+    }
     else
     {
-        datarate = DR_5;
+        datarate = DR_0;
     }
     return datarate;
 }

@@ -58,6 +58,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* I2C handler declaration */
+extern bool debug_flags;
 I2C_HandleTypeDef I2cHandle3;
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
@@ -72,7 +73,7 @@ I2C_HandleTypeDef I2cHandle3;
 /* Exported functions ---------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-void IIC_init(void)
+void BSP_lidar_Init(void)
 {
   /*##-1- Configure the I2C peripheral ######################################*/
   I2cHandle3.Instance              = I2Cx;
@@ -96,7 +97,7 @@ void IIC_init(void)
   /* Infinite loop */
 }
 
-void LidarLite_init(void)
+void LidarLite_init(void) //Default mode, balanced performance
 {
     uint8_t sigCountMax[1]={0x80};
     uint8_t acqConfigReg[1]={0x08};
@@ -123,24 +124,36 @@ uint16_t LidarLite(void)
     HAL_I2C_Mem_Write(&I2cHandle3,0xc4,0x00,1,dataByte,1,1000);	
 		if(waitbusy()<9999)
 		{		
-    HAL_I2C_Mem_Read(&I2cHandle3,0xc5,0x0f,1,rxdata1,1,1000);
-    HAL_I2C_Mem_Read(&I2cHandle3,0xc5,0x10,1,rxdata2,1,1000);
-	  distance=(rxdata1[0]<<8)+rxdata2[0];
-		if(distance>4000)
-		{
-	  PRINTF("Distance is out of range\r\n",distance);
-	  distance=65535;			
-	  return distance;			
+			HAL_I2C_Mem_Read(&I2cHandle3,0xc5,0x0f,1,rxdata1,1,1000);
+			HAL_I2C_Mem_Read(&I2cHandle3,0xc5,0x10,1,rxdata2,1,1000);
+			distance=(rxdata1[0]<<8)+rxdata2[0];
+			if(distance>4000)
+			{
+				if(debug_flags==1)
+				{			
+					PPRINTF("\r\n");					
+					PRINTF("Distance is out of range\r\n",distance);
+				}
+				distance=65535;			
+				return distance;			
+			}
+			else
+			{
+				if(debug_flags==1)
+				{			
+					PPRINTF("\r\n");					
+					PRINTF("Distance =%dcm\r\n",distance);
+				}
+				return distance*10;	
+			}			
 		}
 		else
 		{
-    PRINTF("Distance =%dcm\r\n",distance);
-	  return distance;	
-		}			
-		}
-		else
-		{
-	   PRINTF("lidar_lite is not connect\r\n");
+			if(debug_flags==1)
+			{			
+				PPRINTF("\r\n");					
+				PRINTF("lidar_lite is not connect\r\n");
+			}
 	   distance=4095;
 	   return distance;			
 		}
@@ -154,12 +167,12 @@ uint16_t waitbusy(void)
   {
    if (busyCounter > 9999)
    {
-	return busyCounter;			 
+		return busyCounter;			 
    }
-	HAL_I2C_Mem_Read(&I2cHandle3,0xc5,0x01,1,busy,1,1000);
-	busy[0] &=0x01;
-	busyCounter++;
- }
+	 HAL_I2C_Mem_Read(&I2cHandle3,0xc5,0x01,1,busy,1,1000);
+	 busy[0] &=0x01;
+	 busyCounter++;
+  }
 	return busyCounter;
 }
 

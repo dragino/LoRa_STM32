@@ -1607,7 +1607,11 @@ typedef enum eLoRaMacStatus
      * Service not started - the specified region is not supported
      * or not activated with preprocessor definitions.
      */
-    LORAMAC_STATUS_REGION_NOT_SUPPORTED
+    LORAMAC_STATUS_REGION_NOT_SUPPORTED,
+		
+	  LORAMAC_STATUS_PARAMETER_NOT_in_Range,
+		
+	  LORAMAC_STATUS_PARAMETER_is_used	
 }LoRaMacStatus_t;
 
 /*!

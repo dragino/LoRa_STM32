@@ -78,6 +78,8 @@ void CMD_Init(void);
  */
 void CMD_Process(void);
 
+uint8_t printf_all_config(void);
+
 #ifdef __cplusplus
 }
 #endif

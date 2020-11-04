@@ -61,6 +61,12 @@
 #define AU915_RX_MAX_DATARATE                       DR_13
 
 /*!
+ * The minimum datarate which is used when the
+ * dwell time is limited.
+ */
+#define AU915_DWELL_LIMIT_DATARATE                  DR_2
+
+/*!
  * Default datarate used by the node
  */
 #define AU915_DEFAULT_DATARATE                      DR_2
@@ -83,7 +89,7 @@
 /*!
  * Minimal Tx output power that can be used by the node
  */
-#define AU915_MIN_TX_POWER                          TX_POWER_10
+#define AU915_MIN_TX_POWER                          TX_POWER_14
 
 /*!
  * Maximal Tx output power that can be used by the node
@@ -94,6 +100,16 @@
  * Default Tx output power used by the node
  */
 #define AU915_DEFAULT_TX_POWER                      TX_POWER_0
+
+/*!
+ * Default uplink dwell time configuration
+ */
+#define AU915_DEFAULT_UPLINK_DWELL_TIME             1
+
+/*!
+ * Default downlink dwell time configuration
+ */
+#define AU915_DEFAULT_DOWNLINK_DWELL_TIME           0
 
 /*!
  * Default Max EIRP
@@ -224,6 +240,14 @@ static const int8_t DatarateOffsetsAU915[7][6] =
  * Maximum payload with respect to the datarate index. Cannot operate with repeater.
  */
 static const uint8_t MaxPayloadOfDatarateAU915[] = { 51, 51, 51, 115, 242, 242, 242, 0, 53, 129, 242, 242, 242, 242, 0, 0 };
+
+/*!
+ * Maximum payload with respect to the datarate index.
+ * The table is valid for the dwell time configuration of 1 for uplinks.
+ */
+static const uint8_t MaxPayloadOfDatarateDwell0AU915[] = { 51, 51, 51, 115, 242, 242, 242, 0, 53, 129, 242, 242, 242, 242 };
+
+static const uint8_t MaxPayloadOfDatarateDwell1AU915[] = { 0, 0, 11, 53, 125, 242, 242, 0, 53, 129, 242, 242, 242, 242 };
 
 /*!
  * Maximum payload with respect to the datarate index. Can operate with repeater.

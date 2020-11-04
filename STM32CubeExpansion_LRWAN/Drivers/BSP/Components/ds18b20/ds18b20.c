@@ -47,6 +47,7 @@
   /* Includes ------------------------------------------------------------------*/
 #include "hw.h"
 #include "ds18b20.h"
+#include "delay.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 void DS18B20_delay(uint16_t time)
@@ -525,7 +526,7 @@ float DS18B20_GetTemp_SkipRom (uint8_t num)
         DS18B20_SkipRom(num);
         DS18B20_WriteByte(0X44,num);                                
         
-        HAL_Delay(750);
+        DelayMs(750);
 	
         DS18B20_SkipRom (num);
         DS18B20_WriteByte(0XBE,num);                                
@@ -538,7 +539,7 @@ float DS18B20_GetTemp_SkipRom (uint8_t num)
 		    DS18B20_SkipRom(num);
         DS18B20_WriteByte(0X44,num);                                
         
-        HAL_Delay(750);
+        DelayMs(750);
 	
         DS18B20_SkipRom (num);
         DS18B20_WriteByte(0XBE,num); 

@@ -1,13 +1,13 @@
- /******************************************************************************
-  * @file    vcom.h
+/******************************************************************************
+  * @file    tfsensor.h
   * @author  MCD Application Team
-  * @version V1.1.4
-  * @date    10-July-2018
-  * @brief   Header for vcom.c module
+  * @version V1.1.2
+  * @date    30-Novermber-2018
+  * @brief   contains all hardware driver
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -43,98 +43,42 @@
   *
   ******************************************************************************
   */
+
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __VCOM_H__
-#define __VCOM_H__
+#ifndef __TFSENSOR_H__
+#define __TFSENSOR_H__
 
 #ifdef __cplusplus
-extern "C" {
+ extern "C" {
 #endif
-
 /* Includes ------------------------------------------------------------------*/
-#include "hw_conf.h"
-#include <stdint.h>
-#include "trace.h"
-
-	
 /* Exported types ------------------------------------------------------------*/
+
 /* Exported constants --------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/
+/* Exported macros -----------------------------------------------------------*/
+/* Exported functions ------------------------------------------------------- */ 
+/**
+ * @brief  initialises the 
+ *
+ * @note
+ * @retval None
+ */
+ 
+#include "hw.h"
+ 
+typedef struct{
+  int distance_mm;
+	int distance_signal_strengh;
+	int temperature;
+} tfsensor_reading_t; 
 
-/* Exported functions ------------------------------------------------------- */
-/** 
-* @brief  init vcom 
-* @param  callback when Tx buffer has been sent
-* @return None
-*/
-void vcom_Init(  void (*Txcb)(void) ); 
-  
-/** 
-* @brief  init receiver of vcom 
-* @param  callback when Rx char is received
-* @return None
-*/
-void vcom_ReceiveInit(  void (*RxCb)(uint8_t *rxChar) ); 
-
-/** 
-* @brief  send buffer @p_data of size size to vcom in dma mode
-* @param  p_data data to be sent
-* @param  szie of buffer p_data to be sent
-* @return None
-*/
-void vcom_Trace(  uint8_t *p_data, uint16_t size );
-
-   /** 
-* @brief  DeInit the VCOM.
-* @param  None
-* @return None
-*/
-void vcom_DeInit(void);
-
-   /** 
-* @brief  Init the VCOM IOs.
-* @param  None
-* @return None
-*/
-void vcom_IoInit(void);
-  
-/** 
-* @brief  DeInit the VCOM IOs.
-* @param  None
-* @return None
-*/
-void vcom_IoDeInit(void);
-
-/** 
-* @brief  last byte has been sent on the uart line
-* @param  None
-* @return None
-*/
-void vcom_IRQHandler(void);
-
-/** 
-* @brief  last byte has been sent from memeory to uart data register
-* @param  None
-* @return None
-*/
-void vcom_DMA_TX_IRQHandler(void);
-void uart1_IoInit(void);
-void uart1_init_uart1(void);
-void tfmini_uart_IRQHandler(void);
-void uart1_IoDeInit(void);
-void at_tfmini_data_receive(uint8_t rxdatatemp[],uint16_t delayvalue);
-#if 1
-#define PPRINTF(...)     do{ } while( 0!= TraceSend(__VA_ARGS__) ) //Polling Mode
-
-#define PRINTF(...)     do{  TraceSend(__VA_ARGS__); }while(0)
-#else
-#define PRINTF(...)
-#endif
-
+void BSP_tfsensor_Init(void);
+uint8_t check_deceive(void);
+void tfsensor_read_distance(tfsensor_reading_t*);
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __VCOM_H__*/
-
+#endif /* __BSP_H__ */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

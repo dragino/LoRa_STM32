@@ -77,7 +77,7 @@ void iwdg_init(void)
 
   /*##-2- Get the LSI frequency: TIM21 is used to measure the LSI frequency ###*/
   uwLsiFreq = GetLSIFrequency();
-//  PRINTF("Freq=%d\r",uwLsiFreq);
+//  PRINTF("LSI=%d\r",uwLsiFreq);
   /*##-3- Configure & Start the IWDG peripheral #########################################*/
   /* Set counter reload value to obtain 25 sec. IWDG TimeOut.
      IWDG counter clock Frequency = uwLsiFreq

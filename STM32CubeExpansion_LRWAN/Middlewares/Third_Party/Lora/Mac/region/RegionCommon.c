@@ -31,8 +31,8 @@ Maintainer: Miguel Luis ( Semtech ), Gregory Cristian ( Semtech ) and Daniel Jae
 
 
 #define BACKOFF_DC_1_HOUR       100
-#define BACKOFF_DC_10_HOURS     1000
-#define BACKOFF_DC_24_HOURS     10000
+#define BACKOFF_DC_10_HOURS     100
+#define BACKOFF_DC_24_HOURS     100
 
 
 

@@ -63,7 +63,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "bsp.h"
 #include "vcom.h"
 #include "pwr_out.h"
-
+#include "lora.h"
 /*!
  *  \brief Unique Devices IDs register set ( STM32L0xxx )
  */
@@ -138,8 +138,8 @@ void HW_Init( void )
     HW_RTC_Init( );
     
     TraceInit( );
-		
- 		vcom_init_uart1();
+
+	  Read_Config();
     
     BSP_sensor_Init( );
 

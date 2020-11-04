@@ -67,6 +67,9 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 #include "lora.h"
 #include "lora-test.h"
 #include "timeServer.h"
+#include "delay.h"
+
+extern TimerEvent_t TxTimer;
 
 /* Private typedef -----------------------------------------------------------*/
 typedef struct ComplianceTest_s
@@ -75,7 +78,7 @@ typedef struct ComplianceTest_s
     uint8_t State;
     LoraConfirm_t IsTxConfirmed;
     uint8_t DataBufferSize;
-    uint8_t DataBuffer[64];
+    uint8_t DataBuffer[242];
     uint16_t DownLinkCounter;
     bool LinkCheck;
     uint8_t DemodMargin;
@@ -83,7 +86,7 @@ typedef struct ComplianceTest_s
 }ComplianceTest_t;
 
 /* Private define ------------------------------------------------------------*/
-#define TEST_TX_DUTYCYCLE 5000
+#define TEST_TX_DUTYCYCLE 6000
 /* Private variables ---------------------------------------------------------*/
 
 /*!
@@ -215,16 +218,16 @@ void certif_rx( McpsIndication_t *mcpsIndication, MlmeReqJoin_t* JoinParameters)
           mibReq.Param.AdrEnable = true;
           LoRaMacMibSetRequestConfirm( &mibReq );
 
-  #if defined( REGION_EU868 )
+#if defined( REGION_EU868 ) || defined( REGION_RU864 ) || defined( REGION_CN779 ) || defined( REGION_EU433 )
           LoRaMacTestSetDutyCycleOn( false );
   #endif
 
-         
+        TimerStop(&TxTimer); 
         TimerInit( &CertifTxNextPacketTimer, OnCertifTxNextPacketTimerEvent );
         TimerSetValue( &CertifTxNextPacketTimer,  TEST_TX_DUTYCYCLE); 
-        
-        /*confirm test mode activation  ASAP XLO?*/
-        certif_tx( );
+        TimerStart( &CertifTxNextPacketTimer);
+//        /*confirm test mode activation  ASAP XLO?*/
+//        certif_tx( );
       }
   }
 
@@ -243,7 +246,7 @@ void certif_rx( McpsIndication_t *mcpsIndication, MlmeReqJoin_t* JoinParameters)
           mibReq.Type = MIB_ADR;
           mibReq.Param.AdrEnable = AdrEnableInit;
           LoRaMacMibSetRequestConfirm( &mibReq );
-  #if defined( REGION_EU868 )
+#if defined( REGION_EU868 ) || defined( REGION_RU864 ) || defined( REGION_CN779 ) || defined( REGION_EU433 )
           LoRaMacTestSetDutyCycleOn( true );
   #endif
           
@@ -277,7 +280,10 @@ void certif_rx( McpsIndication_t *mcpsIndication, MlmeReqJoin_t* JoinParameters)
           break;
         }      
         case 6: // (ix)
-        {
+        {										
+					TimerStop( &CertifTxNextPacketTimer );
+					DelayMs(500);
+					
             MlmeReq_t mlmeReq;
 
             // Disable TestMode and revert back to normal operation
@@ -325,8 +331,13 @@ void certif_rx( McpsIndication_t *mcpsIndication, MlmeReqJoin_t* JoinParameters)
   
     if ( certifParam.Running == false )
     {
-      /*cerification test stops*/
+//			PPRINTF("cerification test stops\r");
+			      /*cerification test stops*/
       TimerStop( &CertifTxNextPacketTimer );
+			if(mcpsIndication->Buffer[0]==0x00)
+			{
+				TimerStart(&TxTimer); 
+			}
     }
 }
 
@@ -334,9 +345,9 @@ void certif_rx( McpsIndication_t *mcpsIndication, MlmeReqJoin_t* JoinParameters)
  * \brief Function executed on TxNextPacket Timeout event
  */
 static void OnCertifTxNextPacketTimerEvent( void )
-{
+{	  
+	  PPRINTF("On Certif tx next packet\r");
     certif_tx( );
-
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

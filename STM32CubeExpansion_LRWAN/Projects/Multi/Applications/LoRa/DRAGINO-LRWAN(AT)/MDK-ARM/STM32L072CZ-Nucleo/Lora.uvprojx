@@ -338,7 +338,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>STM32L072xx, USE_STM32L0XX_NUCLEO,USE_HAL_DRIVER, USE_SHT,REGION_EU868</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\inc;..\..\..\..\..\..\..\Drivers\BSP\STM32L0xx_Nucleo;..\..\..\..\..\..\..\Drivers\STM32L0xx_HAL_Driver\Inc;..\..\..\..\..\..\..\Drivers\CMSIS\Device\ST\STM32L0xx\Include;..\..\..\..\..\..\..\Drivers\CMSIS\Include;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Crypto;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Phy;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Core;..\..\..\..\..\..\..\Drivers\BSP\Components\Common;..\..\..\..\..\..\..\Drivers\BSP\Components\sx1276;..\..\..\..\..\..\..\Drivers\BSP\sx1276mb1las;..\..\..\..\..\..\..\Drivers\BSP\Components\flash_eraseprogram;..\..\..\..\..\..\..\Drivers\BSP\Components\ds18b20;..\..\..\..\..\..\..\Drivers\BSP\Components\gpio_exti;..\..\..\..\..\..\..\Drivers\BSP\Components\oil_float;..\..\..\..\..\..\..\Drivers\BSP\Components\sht20;..\..\..\..\..\..\..\Drivers\BSP\Components\pwr_out;..\..\..\..\..\..\..\Drivers\BSP\Components\sht31;..\..\..\..\..\..\..\Drivers\BSP\Components\ult;..\..\..\..\..\..\..\Drivers\BSP\Components\lidar_lite_v3hp;..\..\..\..\..\..\..\Drivers\BSP\Components\weight;..\..\..\..\..\..\..\Drivers\BSP\Components\iwdg</IncludePath>
+              <IncludePath>..\..\inc;..\..\..\..\..\..\..\Drivers\BSP\STM32L0xx_Nucleo;..\..\..\..\..\..\..\Drivers\STM32L0xx_HAL_Driver\Inc;..\..\..\..\..\..\..\Drivers\CMSIS\Device\ST\STM32L0xx\Include;..\..\..\..\..\..\..\Drivers\CMSIS\Include;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Crypto;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Phy;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Core;..\..\..\..\..\..\..\Drivers\BSP\Components\Common;..\..\..\..\..\..\..\Drivers\BSP\Components\sx1276;..\..\..\..\..\..\..\Drivers\BSP\sx1276mb1las;..\..\..\..\..\..\..\Drivers\BSP\Components\flash_eraseprogram;..\..\..\..\..\..\..\Drivers\BSP\Components\ds18b20;..\..\..\..\..\..\..\Drivers\BSP\Components\gpio_exti;..\..\..\..\..\..\..\Drivers\BSP\Components\oil_float;..\..\..\..\..\..\..\Drivers\BSP\Components\sht20;..\..\..\..\..\..\..\Drivers\BSP\Components\pwr_out;..\..\..\..\..\..\..\Drivers\BSP\Components\sht31;..\..\..\..\..\..\..\Drivers\BSP\Components\ult;..\..\..\..\..\..\..\Drivers\BSP\Components\lidar_lite_v3hp;..\..\..\..\..\..\..\Drivers\BSP\Components\weight;..\..\..\..\..\..\..\Drivers\BSP\Components\iwdg;..\..\..\..\..\..\..\Drivers\BSP\Components\bh1750;..\..\..\..\..\..\..\Drivers\BSP\Components\tfsensor</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -383,19 +383,24 @@
           <GroupName>Drivers/BSP/Components</GroupName>
           <Files>
             <File>
-              <FileName>sx1276.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\sx1276\sx1276.c</FilePath>
-            </File>
-            <File>
               <FileName>flash_eraseprogram.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\flash_eraseprogram\flash_eraseprogram.c</FilePath>
             </File>
             <File>
-              <FileName>ds18b20.c</FileName>
+              <FileName>iwdg.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\ds18b20\ds18b20.c</FilePath>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\iwdg\iwdg.c</FilePath>
+            </File>
+            <File>
+              <FileName>sx1276.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\sx1276\sx1276.c</FilePath>
+            </File>
+            <File>
+              <FileName>pwr_out.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\pwr_out\pwr_out.c</FilePath>
             </File>
             <File>
               <FileName>gpio_exti.c</FileName>
@@ -408,14 +413,14 @@
               <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\oil_float\oil_float.c</FilePath>
             </File>
             <File>
+              <FileName>ds18b20.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\ds18b20\ds18b20.c</FilePath>
+            </File>
+            <File>
               <FileName>sht20.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\sht20\sht20.c</FilePath>
-            </File>
-            <File>
-              <FileName>pwr_out.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\pwr_out\pwr_out.c</FilePath>
             </File>
             <File>
               <FileName>sht31.c</FileName>
@@ -423,9 +428,9 @@
               <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\sht31\sht31.c</FilePath>
             </File>
             <File>
-              <FileName>ult.c</FileName>
+              <FileName>bh1750.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\ult\ult.c</FilePath>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\bh1750\bh1750.c</FilePath>
             </File>
             <File>
               <FileName>lidar_lite_v3hp.c</FileName>
@@ -433,14 +438,19 @@
               <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\lidar_lite_v3hp\lidar_lite_v3hp.c</FilePath>
             </File>
             <File>
+              <FileName>tfsensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\tfsensor\tfsensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>ult.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\ult\ult.c</FilePath>
+            </File>
+            <File>
               <FileName>weight.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\weight\weight.c</FilePath>
-            </File>
-            <File>
-              <FileName>iwdg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\iwdg\iwdg.c</FilePath>
             </File>
           </Files>
         </Group>

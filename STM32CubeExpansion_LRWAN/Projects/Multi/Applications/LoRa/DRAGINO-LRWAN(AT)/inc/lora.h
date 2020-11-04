@@ -232,7 +232,7 @@ typedef struct sLoRaMainCallback
  * @retval none
  */
 void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam );
-
+void fdr_config(void);
 /**
  * @brief run Lora classA state Machine 
  * @param [IN] none
@@ -460,6 +460,8 @@ void store_data(uint8_t size,uint8_t *data1,uint32_t data2);
 void read_data(uint8_t size,uint8_t *data1,uint32_t data3,uint32_t data4,uint32_t data5,uint32_t data6);	 
 void Read_Config(void);
 void key_printf(void);
+uint16_t string_touint(void);
+void new_firmware_update(void);
 
 uint32_t customize_freq1_get(void);
 

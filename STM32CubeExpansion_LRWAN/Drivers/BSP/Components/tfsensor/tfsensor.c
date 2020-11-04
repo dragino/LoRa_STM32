@@ -1,13 +1,13 @@
  /******************************************************************************
-  * @file    ogpio_exti.c
+  * @file    tfsensor.c
   * @author  MCD Application Team
   * @version V1.1.2
-  * @date    01-June-2017
+  * @date    30-Novermber-2018
   * @brief   manages the sensors on the application
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -45,9 +45,10 @@
   */
   
   /* Includes ------------------------------------------------------------------*/
-#include "hw.h"
-#include "gpio_exti.h"
 
+#include "tfsensor.h"
+#include "timeServer.h"
+#include "delay.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -58,71 +59,92 @@
 /* Exported functions ---------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-void  GPIO_EXTI_FALLINGInit( void  )
-{
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-	GPIO_EXTI_CLK_ENABLE();
-  	
-	GPIO_InitStruct.Mode =GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Pin = GPIO_EXTI_PIN;
+/* I2C handler declaration */
+bool flags_command_check=0;
+uint8_t rxdatacheck[7]={0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+extern bool debug_flags;
+extern UART_HandleTypeDef UartHandle1;
+extern uint8_t aRxBuffer[1];
 
-  HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
-	
-	/* Enable and set EXTI lines 4 to 15 Interrupt to the lowest priority */
-  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+void BSP_tfsensor_Init(void)
+{
+	uint8_t txdisoutput[5]={0x5A,0x05,0x07,0x00,0x66};   
+	uint8_t txlowpower[6] ={0x5A,0x06,0x35,0x01,0x00,0x96};  //1HZ
+	uint8_t txsave[4]     ={0x5A,0x04,0x11,0x6f};
+
+  uart1_init_uart1();
+	uart1_IoInit();	
+  HAL_UART_Transmit(&UartHandle1, txdisoutput, 5, 0xFFFF);	
+	DelayMs(50);
+  HAL_UART_Transmit(&UartHandle1, txlowpower, 6, 0xFFFF);
+	DelayMs(50);	
+  HAL_UART_Transmit(&UartHandle1, txsave, 4, 0xFFFF);		
+	DelayMs(50);
+	HAL_UART_Receive_IT(&UartHandle1, (uint8_t *)aRxBuffer,1);	
+	DelayMs(500); 
 }
 
-void  GPIO_EXTI_RISINGInit( void  )
+uint8_t check_deceive(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-	GPIO_EXTI_CLK_ENABLE();
-  	
-	GPIO_InitStruct.Mode =GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Pin = GPIO_EXTI_PIN;
-
-  HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
+	uint8_t temp_flag=0;
+	uint8_t txID[4]={0x5A,0x04,0x01,0x5f};
 	
-	/* Enable and set EXTI lines 4 to 15 Interrupt to the lowest priority */
-  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+	BSP_tfsensor_Init();
+
+	HAL_UART_Transmit(&UartHandle1, txID, 4, 0xFFFF);	
+	flags_command_check=1;	
+	HAL_UART_Receive_IT(&UartHandle1, (uint8_t *)aRxBuffer,1);	
+  DelayMs(100);	
+	flags_command_check=0; 
+	
+	for(uint8_t i=0;i<7;i++)
+  {
+		if(rxdatacheck[i]!=0x00)
+		{
+			temp_flag=1;
+			break;
+		}
+	}
+	
+	if(temp_flag==1)
+	{	
+		return 1;
+	}
+	uart1_IoDeInit();	
+	
+	return 0;
 }
 
-void  GPIO_EXTI_RISING_FALLINGInit( void  )
+void tfsensor_read_distance(tfsensor_reading_t *tfsensor_reading)
 {
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-	GPIO_EXTI_CLK_ENABLE();
-  	
-	GPIO_InitStruct.Mode =GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Pin = GPIO_EXTI_PIN;
+  uint8_t rxdata[7] ={0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-  HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
+	uart1_IoInit();
+	at_tfmini_data_receive(rxdata,2000);		
+  uart1_IoDeInit();
 	
-	/* Enable and set EXTI lines 4 to 15 Interrupt to the lowest priority */
-  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+	if ((rxdata[0] == 0x00)&&(rxdata[1] == 0x00))
+	{
+		tfsensor_reading->distance_mm = 4095;
+		tfsensor_reading->distance_signal_strengh = 4095;		
+		if(debug_flags==1)
+		{			
+			PPRINTF("\r\n");					
+			PPRINTF("Reading out of LIDAR range \r\n");	
+		}			
+	} 
+	else 
+	{	
+		tfsensor_reading->distance_mm = (uint16_t)(((rxdata[1]<<8)+rxdata[0])*10);
+		tfsensor_reading->distance_signal_strengh = (uint16_t)((rxdata[3]<<8)+rxdata[2]);
+		tfsensor_reading->temperature = (int)((rxdata[5]*256+rxdata[4])/8-256);
+		if(debug_flags==1)
+		{			
+			PPRINTF("\r\n");		
+			PPRINTF("Dist:%dcm,Strength:%d,Temp:%d\r\n",tfsensor_reading->distance_mm/10,tfsensor_reading->distance_signal_strengh,tfsensor_reading->temperature);	
+		}
+	}
 }
 
-void  GPIO_EXTI_IoDeInit( void  )
-{
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-	
-  HW_GPIO_Init( GPIO_EXTI_PORT, GPIO_EXTI_PIN, &GPIO_InitStruct );
-}
-
-void GPIO_INPUT_IoInit(void)
-{
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-	GPIO_INPUT_CLK_ENABLE();
-	
-	GPIO_InitStruct.Pin = GPIO_INPUT_PIN1;
-	GPIO_InitStruct.Mode =GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-
-  HW_GPIO_Init( GPIO_INPUT_PORT, GPIO_INPUT_PIN1, &GPIO_InitStruct );
-}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

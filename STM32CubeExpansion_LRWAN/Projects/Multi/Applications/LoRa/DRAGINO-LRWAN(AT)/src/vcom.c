@@ -47,6 +47,7 @@
 #include "hw.h"
 #include "vcom.h"
 #include "timeServer.h"
+#include "delay.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -56,12 +57,18 @@
 UART_HandleTypeDef UartHandle;
 UART_HandleTypeDef UartHandle1;
 
+bool flags_command=0;
 uint8_t charRx;
+uint8_t num=0;
+uint8_t num_check=0;
+uint8_t num_check2=0;
 uint8_t aRxBuffer[1];
-
-__IO ITStatus ischarreceive_uart1=RESET;
-
+uint8_t response[50]={0x00};
+uint8_t responsetemp[1]={0x00};
+uint8_t responsecheck[1]={0x00};
 //uint8_t uartprintf_flag=0;
+extern bool flags_command_check;
+extern uint8_t rxdatacheck[7];
 
 static void (*TxCpltCallback) (void);
 
@@ -102,7 +109,6 @@ void vcom_Trace(  uint8_t *p_data, uint16_t size )
     HAL_UART_Transmit_DMA(&UartHandle,p_data, size);
 }
 
-
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
   /* buffer transmission complete*/
@@ -142,9 +148,25 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
    HAL_UART_Receive_IT(UartHandle, &charRx,1);
   }
 	 else	if(UartHandle->Instance==USART1)
-	{
-  	ischarreceive_uart1 = SET;
-		HAL_UART_Receive_IT(&UartHandle1, (uint8_t *)aRxBuffer,1);
+	{			
+		while(HAL_UART_Receive_IT(&UartHandle1, (uint8_t *)aRxBuffer,1)!=HAL_OK)
+		{
+			UartHandle1.RxState = HAL_UART_STATE_READY;
+			__HAL_UNLOCK(&UartHandle1);
+		}
+		responsetemp[0]=aRxBuffer[0];	
+		if(flags_command==1)	
+		{
+	    response[num++]= responsetemp[0];
+		}
+		else if(flags_command_check==1)
+		{
+			rxdatacheck[num_check++]= responsetemp[0];
+			if(num_check==8)
+			{
+				flags_command_check=0;
+			}
+		}	
 	}
 }
 
@@ -158,7 +180,7 @@ void vcom_IRQHandler(void)
   HAL_UART_IRQHandler(&UartHandle);
 }
 
-void ULT_uart_IRQHandler(void)
+void tfmini_uart_IRQHandler(void)
 {
 	HAL_UART_IRQHandler(&UartHandle1);
 }
@@ -224,44 +246,11 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
  }
 	else if(huart->Instance==USART1)
 	{
-		GPIO_InitTypeDef  GPIO_InitStruct={0};
-	__HAL_RCC_GPIOA_CLK_ENABLE();	
-	__HAL_RCC_USART1_CLK_ENABLE();
-	
-	GPIO_InitStruct.Pin       = GPIO_PIN_9;
-  GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull      = GPIO_NOPULL;
-  GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF4_USART1;
-
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /* UART RX GPIO pin configuration  */
-  GPIO_InitStruct.Pin = GPIO_PIN_10;
-  GPIO_InitStruct.Alternate = GPIO_AF4_USART1;
-
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-	HAL_NVIC_SetPriority(USART1_IRQn, 2, 1);
-  HAL_NVIC_EnableIRQ(USART1_IRQn);
+		__HAL_RCC_USART1_CLK_ENABLE();
+		uart1_IoDeInit();	
+	  HAL_NVIC_SetPriority(USART1_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);		
  }
-}
-
-void vcom_init_uart1(void)
-{
-	UartHandle1.Instance        = USART1;
-
-  UartHandle1.Init.BaudRate   = 9600;
-  UartHandle1.Init.WordLength = UART_WORDLENGTH_8B;
-  UartHandle1.Init.StopBits   = UART_STOPBITS_1;
-  UartHandle1.Init.Parity     = UART_PARITY_NONE;
-  UartHandle1.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
-  UartHandle1.Init.Mode       = UART_MODE_TX_RX;
-	
-	if(HAL_UART_Init(&UartHandle1) != HAL_OK)
-  {
-    Error_Handler();
-  }
 }
 
 void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
@@ -309,6 +298,23 @@ void vcom_IoInit(void)
   HAL_GPIO_Init(USARTX_RX_GPIO_PORT, &GPIO_InitStruct);
 }
 
+void uart1_init_uart1(void)
+{
+	UartHandle1.Instance        = USART1;
+
+  UartHandle1.Init.BaudRate   = 115200;
+  UartHandle1.Init.WordLength = UART_WORDLENGTH_8B;
+  UartHandle1.Init.StopBits   = UART_STOPBITS_1;
+  UartHandle1.Init.Parity     = UART_PARITY_NONE;
+  UartHandle1.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
+  UartHandle1.Init.Mode       = UART_MODE_TX_RX;
+	
+	if(HAL_UART_Init(&UartHandle1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
 void uart1_IoInit(void)
 {
   GPIO_InitTypeDef  GPIO_InitStruct={0};
@@ -319,13 +325,13 @@ void uart1_IoInit(void)
   GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull      = GPIO_NOPULL;
   GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
-  GPIO_InitStruct.Alternate = USARTX_TX_AF;
+  GPIO_InitStruct.Alternate = GPIO_AF4_USART1;
 
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* UART RX GPIO pin configuration  */
   GPIO_InitStruct.Pin = GPIO_PIN_10;
-  GPIO_InitStruct.Alternate = USARTX_RX_AF;
+  GPIO_InitStruct.Alternate = GPIO_AF4_USART1;
 
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
@@ -344,5 +350,66 @@ void vcom_IoDeInit(void)
   
   GPIO_InitStructure.Pin =  USARTX_RX_PIN ;
   HAL_GPIO_Init(  USARTX_RX_GPIO_PORT, &GPIO_InitStructure ); 
+}
+
+void uart1_IoDeInit(void)
+{
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	
+  GPIO_InitTypeDef  GPIO_InitStruct;
+  GPIO_InitStruct.Pin = GPIO_PIN_9 ;
+	GPIO_InitStruct.Mode  = GPIO_MODE_ANALOG;
+	GPIO_InitStruct.Pull  = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct); 
+	
+  GPIO_InitTypeDef  GPIO_InitStruct2;
+  GPIO_InitStruct2.Pin = GPIO_PIN_10 ;
+	GPIO_InitStruct2.Mode  = GPIO_MODE_ANALOG;
+	GPIO_InitStruct2.Pull  = GPIO_NOPULL;
+	GPIO_InitStruct2.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct2); 
+}
+
+void at_tfmini_data_receive(uint8_t rxdatatemp[],uint16_t delayvalue)
+{
+	uint8_t responsetemp[1];	
+	uint8_t begin=0,datanumber=0;
+	uint8_t txenoutput[5] ={0x5A,0x05,0x07,0x01,0x67};		  
+	
+  HAL_UART_Transmit(&UartHandle1,txenoutput, 5, 0xFFFF);	
+	flags_command=1;
+	HAL_UART_Receive_IT(&UartHandle1, (uint8_t *)aRxBuffer,1); 
+	DelayMs(delayvalue);		
+	flags_command=0;
+	num=0;
+	
+	for(uint8_t number=0;number<sizeof(response);number++)
+	{
+		if(begin==1)
+		{
+			rxdatatemp[datanumber++]=response[number];
+			if(datanumber==7)
+			{
+				begin=2;
+			}
+		}		
+		if((responsetemp[0]==0x59)&&(begin==0))
+		{
+			if(response[number]==0x59)
+			{
+				begin=1;
+			}
+			else
+			{
+				responsetemp[0]=0x00;
+			}
+		}	
+		else if(response[number]==0x59&&(begin==0))
+		{
+			responsetemp[0]=0x59;
+		}
+		response[number]=0x00;
+	}
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
