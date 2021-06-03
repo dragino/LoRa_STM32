@@ -89,7 +89,7 @@ uint8_t DS18B20_ReadByte(uint8_t num);
 void DS18B20_WriteBit(uint8_t dat,uint8_t num);
 void DS18B20_WriteByte(uint8_t dat,uint8_t num);
 void DS18B20_SkipRom(uint8_t num);
-float DS18B20_GetTemp_SkipRom (uint8_t num);
+float DS18B20_GetTemp_SkipRom (uint8_t num, bool *success);
 #ifdef __cplusplus
 }
 #endif

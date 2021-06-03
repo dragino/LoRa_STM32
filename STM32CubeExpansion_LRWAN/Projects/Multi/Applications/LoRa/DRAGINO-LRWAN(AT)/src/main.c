@@ -438,10 +438,13 @@ static void Send( void )
 	{		
 		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 		AppData.Buff[i++] =batteryLevel_mV & 0xFF;
-	
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10);
-	
+		if(sensor_data.temp1_ok){
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+		}else{
+			AppData.Buff[i++]=0x80;
+			AppData.Buff[i++]=0x00;
+		}
 		AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
 		AppData.Buff[i++] =(int)sensor_data.oil;
 
@@ -479,8 +482,13 @@ static void Send( void )
 		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 		AppData.Buff[i++] =batteryLevel_mV & 0xFF;
 	
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+		if(sensor_data.temp1_ok){
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+		}else{
+			AppData.Buff[i++]=0x80;
+			AppData.Buff[i++]=0x00;
+		}
 	
 		AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
 		AppData.Buff[i++] =(int)sensor_data.oil;
@@ -556,8 +564,13 @@ static void Send( void )
 		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 		AppData.Buff[i++] =batteryLevel_mV & 0xFF;
 	
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+		if(sensor_data.temp1_ok){
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+		}else{
+			AppData.Buff[i++]=0x80;
+			AppData.Buff[i++]=0x00;
+		}
 	
 		AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
 		AppData.Buff[i++] =(int)sensor_data.oil;
@@ -572,11 +585,20 @@ static void Send( void )
 			switch_status=HAL_GPIO_ReadPin(GPIO_EXTI_PORT,GPIO_EXTI_PIN);				
 			AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x0C;
 		}
-
-		AppData.Buff[i++]=(int)(sensor_data.temp2*10)>>8;     //DS18B20
-		AppData.Buff[i++]=(int)(sensor_data.temp2*10);
-		AppData.Buff[i++]=(int)(sensor_data.temp3*10)>>8;     //DS18B20
-		AppData.Buff[i++]=(int)(sensor_data.temp3*10);
+		if(sensor_data.temp2_ok){
+			AppData.Buff[i++]=(int)(sensor_data.temp2*10)>>8;     //DS18B20
+			AppData.Buff[i++]=(int)(sensor_data.temp2*10);
+		}else{
+			AppData.Buff[i++]=0x80;
+			AppData.Buff[i++]=0x00;
+		}
+		if(sensor_data.temp3_ok){
+			AppData.Buff[i++]=(int)(sensor_data.temp3*10)>>8;     //DS18B20
+			AppData.Buff[i++]=(int)(sensor_data.temp3*10);
+		}else{
+			AppData.Buff[i++]=0x80;
+			AppData.Buff[i++]=0x00;
+		}
 	
 	}	
 	
@@ -584,9 +606,13 @@ static void Send( void )
 	{
 		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 		AppData.Buff[i++] =batteryLevel_mV & 0xFF;
-	
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+		if(sensor_data.temp1_ok){
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+		}else{
+			AppData.Buff[i++]=0x80;
+			AppData.Buff[i++]=0x00;
+		}
 	
 		AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
 		AppData.Buff[i++] =(int)sensor_data.oil;
@@ -613,8 +639,13 @@ static void Send( void )
 		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 		AppData.Buff[i++] =batteryLevel_mV & 0xFF;
 		
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
-		AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+		if(sensor_data.temp1_ok){
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10)>>8;     //DS18B20
+			AppData.Buff[i++]=(int)(sensor_data.temp1*10);
+		}else{
+			AppData.Buff[i++]=0x80;
+			AppData.Buff[i++]=0x00;
+		}
 	
 		AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
 		AppData.Buff[i++] =(int)sensor_data.oil;

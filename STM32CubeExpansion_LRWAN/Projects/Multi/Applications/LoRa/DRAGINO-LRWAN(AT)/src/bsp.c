@@ -130,7 +130,7 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	
 	sensor_data->in1=HAL_GPIO_ReadPin(GPIO_INPUT_PORT,GPIO_INPUT_PIN1);
 
-	sensor_data->temp1=DS18B20_GetTemp_SkipRom(1);
+	sensor_data->temp1=DS18B20_GetTemp_SkipRom(1, &sensor_data->temp1_ok);
 	
 	 if((mode==1)||(mode==3))
 	 {		
@@ -197,8 +197,8 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 
    else if(mode==4)
    {
-		sensor_data->temp2=DS18B20_GetTemp_SkipRom(2);
-		sensor_data->temp3=DS18B20_GetTemp_SkipRom(3);	 
+		sensor_data->temp2=DS18B20_GetTemp_SkipRom(2, &sensor_data->temp2_ok);
+		sensor_data->temp3=DS18B20_GetTemp_SkipRom(3, &sensor_data->temp3_ok);	 
 	 }	
 	 
 	 else if(mode==5)
