@@ -48,7 +48,6 @@
 // Definitions
 #define CHANNELS_MASK_SIZE              1
 
-extern uint8_t joinrx2_dr;
 extern LoRaMacParams_t LoRaMacParams;
 extern uint8_t payloadlens;
 extern bool DR_small;
@@ -296,14 +295,7 @@ PhyParam_t RegionEU868GetPhyParam( GetPhyParams_t* getPhy )
         }
         case PHY_DEF_RX2_DR:
         {
-					  if(joinrx2_dr==0)
-						{
-							phyParam.Value = EU868_RX_WND_2_DR;
-						}
-						else
-						{
-							phyParam.Value = joinrx2_dr;
-						}
+						phyParam.Value = EU868_RX_WND_2_DR;
             break;
         }
         case PHY_CHANNELS_MASK:

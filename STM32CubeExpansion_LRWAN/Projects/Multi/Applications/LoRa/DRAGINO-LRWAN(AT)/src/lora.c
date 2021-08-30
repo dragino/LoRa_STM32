@@ -83,7 +83,6 @@ uint16_t fire_version=0;
 uint16_t fire_frequcy=0;
 uint8_t mode;
 uint8_t inmode;
-uint8_t joinrx2_dr;
 bool rx2_flags=0;
 bool fdr_flags=0;
 
@@ -1170,8 +1169,7 @@ void Read_Config(void)
   if((rx2_flags==0)||(lora_config.otaa==LORA_DISABLE))
   {		
 	mib.Type = MIB_RX2_CHANNEL;
-	mib.Param.Rx2Channel.Datarate=r_config[3];
-	joinrx2_dr=r_config[3];				
+	mib.Param.Rx2Channel.Datarate=r_config[3];		
 	LoRaMacMibSetRequestConfirm( &mib );
   }
   else if(rx2_flags==1)
@@ -1287,6 +1285,7 @@ void new_firmware_update(void)
 		update_flags[0]=(fire_frequcy<<16)| fire_version;
 		EEPROM_program(EEPROM_USER_Firmware_FLAGS,update_flags,1);//store hardversion
 		FLASH_erase(0x8018F80);//page 799
+	  FLASH_program_on_addr(0x8018F80,0x12);			
 		FLASH_erase(FLASH_USER_START_ADDR_CONFIG);
 		NVIC_SystemReset();		
 	}		
