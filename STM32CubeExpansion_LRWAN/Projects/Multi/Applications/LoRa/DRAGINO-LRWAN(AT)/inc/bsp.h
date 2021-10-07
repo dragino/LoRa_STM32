@@ -66,6 +66,8 @@ Maintainer: Miguel Luis and Gregory Cristian
  extern "C" {
 #endif
 /* Includes ------------------------------------------------------------------*/
+#include <stdbool.h>
+
 /* Exported types ------------------------------------------------------------*/
 
 typedef struct{
@@ -73,10 +75,13 @@ typedef struct{
   int   in1;/*GPIO Digital Input 0 or 1*/
 	
 	float temp1;//DS18B20-1
+	bool temp1_ok;//DS18B20-1
 
 	float temp2;//DS18B20-2
+	bool temp2_ok;//DS18B20-2
 
 	float temp3;//DS18B20-3
+	bool temp3_ok;//DS18B20-3
 	
 	float oil;  //oil float
 

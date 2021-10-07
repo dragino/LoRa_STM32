@@ -515,13 +515,27 @@ void DS18B20_SkipRom(uint8_t num)
         DS18B20_Presence(num);                 
         DS18B20_WriteByte(0XCC,num);       
 }
-
-float DS18B20_GetTemp_SkipRom (uint8_t num)
+unsigned char DS18B20_crc8(const unsigned char * data, const unsigned int size)
 {
-        uint8_t tpmsb, tplsb;
+    unsigned char crc = 0;
+    for ( unsigned int i = 0; i < size; ++i )
+    {
+        unsigned char inbyte = data[i];
+        for ( unsigned char j = 0; j < 8; ++j )
+        {
+            unsigned char mix = (crc ^ inbyte) & 0x01;
+            crc >>= 1;
+            if ( mix ) crc ^= 0x8C;
+            inbyte >>= 1;
+        }
+    }
+    return crc;
+}
+float DS18B20_GetTemp_SkipRom (uint8_t num, bool *success)
+{
         short s_tem;
         float f_tem;
-        
+        uint8_t scratchpad[9];
         
         DS18B20_SkipRom(num);
         DS18B20_WriteByte(0X44,num);                                
@@ -531,32 +545,51 @@ float DS18B20_GetTemp_SkipRom (uint8_t num)
         DS18B20_SkipRom (num);
         DS18B20_WriteByte(0XBE,num);                                
         
-        tplsb = DS18B20_ReadByte(num);                 
-        tpmsb = DS18B20_ReadByte(num); 
+        scratchpad[0] = DS18B20_ReadByte(num);     // LSB             
+        scratchpad[1] = DS18B20_ReadByte(num);     // MSB
         
-        if((tpmsb==5)&&(tplsb==80))     //1360= 00000101 01010000,tpmsb=00000101=5,tplsb=01010000=80;  
+        if((scratchpad[0]==5)&&(scratchpad[1]==80))     //1360= 00000101 01010000,tpmsb=00000101=5,tplsb=01010000=80;  
         {
-		    DS18B20_SkipRom(num);
-        DS18B20_WriteByte(0X44,num);                                
-        
-        DelayMs(750);
-	
-        DS18B20_SkipRom (num);
-        DS18B20_WriteByte(0XBE,num); 
+					// The power-on reset value of the temperature register is 00000101 01010000, so read it again
+					DS18B20_SkipRom(num);
+					DS18B20_WriteByte(0X44,num);                                
 					
-        tplsb = DS18B20_ReadByte(num);                 
-        tpmsb = DS18B20_ReadByte(num);
+					DelayMs(750);
+		
+					DS18B20_SkipRom (num);
+					DS18B20_WriteByte(0XBE,num); 
+						
+					scratchpad[0] = DS18B20_ReadByte(num);     // LSB             
+					scratchpad[1] = DS18B20_ReadByte(num);     // MSB
 				}
 				
-        s_tem = tpmsb<<8;
-        s_tem = s_tem | tplsb;
+				// Receive the rest of the scratchpad
+				scratchpad[2] = DS18B20_ReadByte(num);// User byte 1
+				scratchpad[3] = DS18B20_ReadByte(num);// User byte 2
+				scratchpad[4] = DS18B20_ReadByte(num);// Configuration register
+				scratchpad[5] = DS18B20_ReadByte(num);// Reserved FFh
+				scratchpad[6] = DS18B20_ReadByte(num);// Reserved 
+				scratchpad[7] = DS18B20_ReadByte(num);// Reserved 10h
+				scratchpad[8] = DS18B20_ReadByte(num);// CRC 
+				
+				// output scratchpad for debugging purposes
+				//PPRINTF("Scratchpad contents: %02x%02x%02x%02x%02x%02x%02x%02x%02x\r\n", 
+				//	scratchpad[0], scratchpad[1], scratchpad[2], scratchpad[3],
+				//	scratchpad[4], scratchpad[5], scratchpad[6], scratchpad[7],
+				//	scratchpad[8]);
+				
+				// calculate CRC and match it against reported one
+				(*success) = DS18B20_crc8(scratchpad, 8) == scratchpad[8]; // Reserved FFh
+				
+        s_tem = scratchpad[1]<<8;
+        s_tem = s_tem | scratchpad[0];
         
         if( s_tem < 0 )                
                 f_tem = (~s_tem+1) * -0.0625;        
         else
                 f_tem = s_tem * 0.0625;
         
-//				PPRINTF("temp is %f\r\n",f_tem);
+				//PPRINTF("temp is %f, status %i\r\n",f_tem, (*success));
         return f_tem;         
 }
 /*******END OF FILE********/
