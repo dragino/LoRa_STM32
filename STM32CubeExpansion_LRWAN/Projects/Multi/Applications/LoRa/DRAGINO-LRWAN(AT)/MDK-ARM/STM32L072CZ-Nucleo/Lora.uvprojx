@@ -10,13 +10,13 @@
       <TargetName>sx1276mb1las</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32L072CZTx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32L0xx_DFP.2.0.0</PackID>
+          <PackID>Keil.STM32L0xx_DFP.2.2.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00005000) IROM(0x08000000,0x00030000) CPUTYPE("Cortex-M0+") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -134,7 +134,7 @@
             <RunIndependent>1</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4103</DriverSelection>
+            <DriverSelection>4101</DriverSelection>
           </Flash1>
           <bUseTDR>0</bUseTDR>
           <Flash2>STLink\ST-LINKIII-KEIL_SWO.dll</Flash2>
@@ -185,6 +185,7 @@
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
             <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -336,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--C99</MiscControls>
-              <Define>STM32L072xx, USE_STM32L0XX_NUCLEO,USE_HAL_DRIVER, USE_SHT,REGION_EU868</Define>
+              <Define>STM32L072xx, USE_STM32L0XX_NUCLEO,USE_HAL_DRIVER, USE_SHT,REGION_AU915</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\inc;..\..\..\..\..\..\..\Drivers\BSP\STM32L0xx_Nucleo;..\..\..\..\..\..\..\Drivers\STM32L0xx_HAL_Driver\Inc;..\..\..\..\..\..\..\Drivers\CMSIS\Device\ST\STM32L0xx\Include;..\..\..\..\..\..\..\Drivers\CMSIS\Include;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Crypto;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Phy;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Core;..\..\..\..\..\..\..\Drivers\BSP\Components\Common;..\..\..\..\..\..\..\Drivers\BSP\Components\sx1276;..\..\..\..\..\..\..\Drivers\BSP\sx1276mb1las;..\..\..\..\..\..\..\Drivers\BSP\Components\flash_eraseprogram;..\..\..\..\..\..\..\Drivers\BSP\Components\ds18b20;..\..\..\..\..\..\..\Drivers\BSP\Components\gpio_exti;..\..\..\..\..\..\..\Drivers\BSP\Components\oil_float;..\..\..\..\..\..\..\Drivers\BSP\Components\sht20;..\..\..\..\..\..\..\Drivers\BSP\Components\pwr_out;..\..\..\..\..\..\..\Drivers\BSP\Components\sht31;..\..\..\..\..\..\..\Drivers\BSP\Components\ult;..\..\..\..\..\..\..\Drivers\BSP\Components\lidar_lite_v3hp;..\..\..\..\..\..\..\Drivers\BSP\Components\weight;..\..\..\..\..\..\..\Drivers\BSP\Components\iwdg;..\..\..\..\..\..\..\Drivers\BSP\Components\bh1750;..\..\..\..\..\..\..\Drivers\BSP\Components\tfsensor</IncludePath>
+              <IncludePath>..\..\inc;..\..\..\..\..\..\..\Drivers\BSP\STM32L0xx_Nucleo;..\..\..\..\..\..\..\Drivers\STM32L0xx_HAL_Driver\Inc;..\..\..\..\..\..\..\Drivers\CMSIS\Device\ST\STM32L0xx\Include;..\..\..\..\..\..\..\Drivers\CMSIS\Include;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Crypto;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Phy;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Utilities;..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Core;..\..\..\..\..\..\..\Drivers\BSP\Components\Common;..\..\..\..\..\..\..\Drivers\BSP\Components\sx1276;..\..\..\..\..\..\..\Drivers\BSP\sx1276mb1las;..\..\..\..\..\..\..\Drivers\BSP\Components\flash_eraseprogram;..\..\..\..\..\..\..\Drivers\BSP\Components\ds18b20;..\..\..\..\..\..\..\Drivers\BSP\Components\gpio_exti;..\..\..\..\..\..\..\Drivers\BSP\Components\oil_float;..\..\..\..\..\..\..\Drivers\BSP\Components\sht20;..\..\..\..\..\..\..\Drivers\BSP\Components\pwr_out;..\..\..\..\..\..\..\Drivers\BSP\Components\sht31;..\..\..\..\..\..\..\Drivers\BSP\Components\ult;..\..\..\..\..\..\..\Drivers\BSP\Components\lidar_lite_v3hp;..\..\..\..\..\..\..\Drivers\BSP\Components\weight;..\..\..\..\..\..\..\Drivers\BSP\Components\iwdg;..\..\..\..\..\..\..\Drivers\BSP\Components\bh1750;..\..\..\..\..\..\..\Drivers\BSP\Components\tfsensor;..\..\..\..\..\..\..\Drivers\BSP\Components\lubcos;..\..\..\..\..\..\..\Drivers\BSP\Components\float_encode;..\..\..\..\..\..\..\Drivers\BSP\Components\opcom;..\..\..\..\..\..\..\Drivers\BSP\Components\digital_inputs</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -351,7 +352,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <uClangAs>0</uClangAs>
+            <ClangAsOpt>4</ClangAsOpt>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -451,6 +452,26 @@
               <FileName>weight.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\weight\weight.c</FilePath>
+            </File>
+            <File>
+              <FileName>digital_inputs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\digital_inputs\digital_inputs.c</FilePath>
+            </File>
+            <File>
+              <FileName>float_encode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\float_encode\float_encode.c</FilePath>
+            </File>
+            <File>
+              <FileName>opcom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\opcom\opcom.c</FilePath>
+            </File>
+            <File>
+              <FileName>lubcos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Drivers\BSP\Components\lubcos\lubcos.c</FilePath>
             </File>
           </Files>
         </Group>

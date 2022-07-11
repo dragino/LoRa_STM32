@@ -67,6 +67,9 @@
 #include "iwdg.h"
 #include "bh1750.h"
 #include "tfsensor.h"
+#include "digital_inputs.h"
+#include "lubcos.h"
+#include "opcom.h"
 #endif
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -93,6 +96,13 @@ extern I2C_HandleTypeDef I2cHandle1;
 extern I2C_HandleTypeDef I2cHandle2;
 extern I2C_HandleTypeDef I2cHandle3;
 tfsensor_reading_t reading_t;
+
+
+#define FFFF 65535 // 65535(base10) = FFFF(base16)
+lubcos_serial_reading_t lubcos_reading = {FFFF, FFFF, FFFF, FFFF, FFFF, FFFF, FFFF, FFFF, FFFF};
+opcom_serial_reading_t opcom_reading = {FFFF, FFFF, FFFF, FFFF, FFFF, FFFF};
+
+
 #endif
 
 extern void Read_Config(void);
@@ -218,6 +228,63 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 	   AD_code3=HW_AdcReadChannel( ADC_Channel_IN4 );	//PA4
 	   sensor_data->ADC_2=AD_code3*batteryLevel_mV/4095;  			
 	 }	 
+
+		// Artur Gussi de Oliveira - Preddata - 20020218
+	 // LubCos
+	 if(mode==7)
+	 {
+		 
+		 lubcos_read_serial(&lubcos_reading);
+
+		 sensor_data->temperatura      = lubcos_reading.temperatura;
+		 sensor_data->nivel            = lubcos_reading.nivel;
+		 sensor_data->permissividade   = lubcos_reading.permissividade;
+		 sensor_data->permissividade40 = lubcos_reading.permissividade40;
+		 sensor_data->umidade          = lubcos_reading.umidade;
+		 sensor_data->umidade20        = lubcos_reading.umidade20;
+		 sensor_data->oage             = lubcos_reading.oage;
+		 sensor_data->ap               = lubcos_reading.ap;
+		 sensor_data->horario          = lubcos_reading.horario;
+		 
+		 
+		 GPIOB_INPUT_PULLUP_PIN_IoInit( GPIO_PIN_6 );
+		 GPIOB_INPUT_PULLUP_PIN_IoInit( GPIO_PIN_7 );
+		 GPIOB_INPUT_PULLUP_PIN_IoInit( GPIO_PIN_3 );
+		 
+		 bool DI1	= HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_6);
+		 bool DI2	= HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_7);
+		 bool DI3	= HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_3);
+		 
+		 // Entradas com pull-up ativas da "0". Inverte para dar resultado 1
+		 sensor_data->in1 = (!DI3)<<2 | (!DI2)<<1 | (!DI1);
+	 }
+	 
+	 // OPCom
+	 if(mode==8)
+	 {
+		 
+		 opcom_read_serial(&opcom_reading);
+		 
+		 sensor_data->horario	= opcom_reading.horario;
+		 sensor_data->findex	= opcom_reading.findex;
+		 sensor_data->v_4um		= opcom_reading.v_4um;
+		 sensor_data->v_6um		= opcom_reading.v_6um;
+		 sensor_data->v_14um	= opcom_reading.v_14um;
+		 sensor_data->v_21um	= opcom_reading.v_21um;
+		 
+		 
+		 GPIOB_INPUT_PULLUP_PIN_IoInit( GPIO_PIN_6 );
+		 GPIOB_INPUT_PULLUP_PIN_IoInit( GPIO_PIN_7 );
+		 GPIOB_INPUT_PULLUP_PIN_IoInit( GPIO_PIN_3 );
+		 
+		 bool DI1	= HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_6);
+		 bool DI2	= HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_7);
+		 bool DI3	= HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_3);
+		 
+		 // Entradas com pull-up ativas da "0". Inverte para dar resultado 1
+		 sensor_data->in1 = (!DI3)<<2 | (!DI2)<<1 | (!DI1);
+	 } 
+	 
 	 
 	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);//Disable 5v power supply
 	 
@@ -419,8 +486,24 @@ void  BSP_sensor_Init( void  )
 	  break;
 	}
 	
+	 // Artur Gussi de Oliveira - Preddata - 20020218
+	//LubCos
+	if(mode == 7)
+	{
+		uart1_init_lubcos();
+		PPRINTF("  Use Sensor is LubCos\n\r");
+	}
+	//OPCom
+	else if(mode == 8)
+	{
+		uart1_init_opcom();
+		PPRINTF("  Use Sensor is OPCom\n\r");
+	}
+	else
+	{
 	 GPIO_INPUT_IoInit();
 	 BSP_oil_float_Init();
+	}
 	
 	#endif
 }

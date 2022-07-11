@@ -1,27 +1,13 @@
-/*
- / _____)             _              | |
-( (____  _____ ____ _| |_ _____  ____| |__
- \____ \| ___ |    (_   _) ___ |/ ___)  _ \
- _____) ) ____| | | || |_| ____( (___| | | |
-(______/|_____)_|_|_| \__)_____)\____)_| |_|
-    (C)2013 Semtech
-
-Description: contains all hardware driver
-
-License: Revised BSD License, see LICENSE.TXT file include in the project
-
-Maintainer: Miguel Luis and Gregory Cristian
-*/
- /******************************************************************************
-  * @file    bsp.h
-  * @author  MCD Application Team
-  * @version V1.1.4
-  * @date    08-January-2018
+/******************************************************************************
+  * @file    lucos.h
+  * @author  Preddata
+  * @version V1.1.0
+  * @date    2022-02-21
   * @brief   contains all hardware driver
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -59,8 +45,8 @@ Maintainer: Miguel Luis and Gregory Cristian
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __BSP_H__
-#define __BSP_H__
+#ifndef __LUBCOS_H__
+#define __LUBCOS_H__
 
 #ifdef __cplusplus
  extern "C" {
@@ -68,78 +54,40 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 
-typedef struct{
-	
-  int   in1;/*GPIO Digital Input 0 or 1*/
-	
-	float temp1;//DS18B20-1
-
-	float temp2;//DS18B20-2
-
-	float temp3;//DS18B20-3
-	
-	float oil;  //oil float
-
-	float ADC_1; //ADC1
-	
-	float ADC_2;  //ADC2	
-
-	float temp_sht;
-	
-	float hum_sht;
-	
-	float illuminance;	
-	
-  int distance_mm;
-	
-	int distance_signal_strengh;
-	
-  /**more may be added*/
-	
-	/* lubcos */
-	float horario; 					//Time
-	float nivel; 						//L
-	float temperatura; 			//T
-	float umidade; 					//RH
-	float umidade20; 				//RH20
-	float permissividade; 	//P
-	float permissividade40; //P40
-	float oage; 						//OAge
-	float ap; 							//AP
-	
-	/* opcom */
-	//float horario; //Time (ja tem no lubcos)
-	float v_4um; 		//ISO4um
-	float v_6um; 		//ISO6um
-	float v_14um; 	//ISO14um
-	float v_21um; 	//ISO21um
-	float findex; 	//FIndex
-} sensor_t;
-
-
 /* Exported constants --------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/
 /* Exported macros -----------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */ 
 /**
- * @brief  initialises the sensor
+ * @brief  initialises the 
  *
  * @note
  * @retval None
  */
-void  BSP_sensor_Init( void  );
+ 
+#include "hw.h"
 
-/**
- * @brief  sensor  read. 
- *
- * @note none
- * @retval sensor_data
- */
-void BSP_sensor_Read( sensor_t *sensor_data);
+typedef struct {
+	float horario; //Time
+	float nivel; //L
+	float temperatura; //T
+	float umidade; //RH
+	float umidade20; //RH20
+	float permissividade; //P
+	float permissividade40; //P40
+	float oage; //OAge
+	float ap; //AP
+} lubcos_serial_reading_t;
+
+
+void lubcos_read_serial(lubcos_serial_reading_t*);
+void lubcos_GPIO_INPUTS_IoInit(void);
+void uart1_init_lubcos(void);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __BSP_H__ */
+#endif /* __LUBCOS_H__ */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

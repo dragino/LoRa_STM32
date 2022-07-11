@@ -60,6 +60,9 @@
 #include "iwdg.h"
 #include "delay.h"
 
+#include "digital_inputs.h"
+#include "float_encode.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
@@ -125,6 +128,8 @@ bool MAC_COMMAND_ANS_status=0;
 bool uplink_data_status=0;
 uint8_t response_level=0;
 uint16_t REJOIN_TX_DUTYCYCLE=20;//min
+
+uint8_t interrupcao_flag=0;
 
 void send_exti(void);
 extern bool bh1750flags;
@@ -196,6 +201,21 @@ static  LoRaParam_t LoRaParamInit= {LORAWAN_ADR_STATE,
                                     LORAWAN_DEFAULT_DATA_RATE,  
                                     LORAWAN_PUBLIC_NETWORK,
                                     JOINREQ_NBTRIALS};
+
+/*!   DEFINIDO NO LoRaMac.c
+ * LoRaMac internal states
+ */
+enum eLoRaMacState
+{
+    LORAMAC_IDLE          = 0x00000000,
+    LORAMAC_TX_RUNNING    = 0x00000001,
+    LORAMAC_RX            = 0x00000002,
+    LORAMAC_ACK_REQ       = 0x00000004,
+    LORAMAC_ACK_RETRY     = 0x00000008,
+    LORAMAC_TX_DELAYED    = 0x00000010,
+    LORAMAC_TX_CONFIG     = 0x00000020,
+    LORAMAC_RX_ABORT      = 0x00000040,
+};	
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -627,10 +647,178 @@ static void Send( void )
 		AppData.Buff[i++] =	(int)(COUNT);  	
 	}
 	
+	else if(mode==7)
+	{	
+		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
+		AppData.Buff[i++] =batteryLevel_mV & 0xFF;
+				
+		int nivel; //L
+		int temperatura; //T
+		int umidade; //RH
+		int umidade20; //RH20
+		int permissividade; //P
+		int permissividade40; //P40
+		int oage; //OAge
+		int ap; //AP
+		int horario; //Time
+		
+		// Tramsformacao de float para inteiro em representacao de pontoFlutuante
+		nivel = calculaPontoFlutuante(sensor_data.nivel);
+		temperatura = calculaPontoFlutuante(sensor_data.temperatura);
+		umidade = calculaPontoFlutuante(sensor_data.umidade);
+		umidade20 = calculaPontoFlutuante(sensor_data.umidade20);
+		permissividade = calculaPontoFlutuante(sensor_data.permissividade);
+		permissividade40 = calculaPontoFlutuante(sensor_data.permissividade40);
+		oage = calculaPontoFlutuante(sensor_data.oage);
+		ap = calculaPontoFlutuante(sensor_data.ap);
+		horario = calculaPontoFlutuante(sensor_data.horario);
+		//PPRINTF("h: %i\r\np: %i\r\noage: %i\r\n", horario, permissividade, oage);
+	
+		AppData.Buff[i++]=(nivel)>>8;
+		AppData.Buff[i++]=(nivel) & 0xFF;
+		
+		AppData.Buff[i++]=(temperatura)>>8;
+		AppData.Buff[i++]=(temperatura) & 0xFF;	
+		
+		AppData.Buff[i++]=(umidade)>>8;
+		AppData.Buff[i++]=(umidade) & 0xFF;
+		
+		AppData.Buff[i++]=(umidade20)>>8;
+		AppData.Buff[i++]=(umidade20) & 0xFF;
+		
+		AppData.Buff[i++]=1;
+		
+		
+		// Enviando primeira mensagem
+		AppData.BuffSize = i;
+		payloadlens=i;
+		LORA_send( &AppData, lora_config_reqack_get());
+		
+		// Espera ate Lora ser liberado para nova mensagem
+		while ( LoRaMacState != LORAMAC_IDLE )
+    {
+       lora_config_reqack_get();
+    }
+
+		// Voltando ao tamanho do buffer normal (-8 eh o numero de casas que o i++ aconteceu)
+		int stopLoop = i;
+		for(int j=i; j>stopLoop-11; j--)
+    {
+			AppData.Buff[i--] = 0;
+		}
+				
+		AppData.Buff[i++]=(permissividade)>>8;
+		AppData.Buff[i++]=(permissividade) & 0xFF;
+		
+		AppData.Buff[i++]=(permissividade40)>>8;
+		AppData.Buff[i++]=(permissividade40) & 0xFF;
+		
+		AppData.Buff[i++]=(oage)>>8;
+		AppData.Buff[i++]=(oage) & 0xFF;
+		
+		AppData.Buff[i++]=(ap)>>8;
+		AppData.Buff[i++]=(ap) & 0xFF;
+		
+		AppData.Buff[i++]=(horario)>>8;
+		AppData.Buff[i++]=(horario) & 0xFF;
+		
+		// Primeiro caractere as 3 entradas digitais e no segundo caractere o numero da mensagem
+		AppData.Buff[i++] = (sensor_data.in1<<4 | 2);
+	}
+	
+	else if(mode==8)
+	{	
+		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
+		AppData.Buff[i++] =batteryLevel_mV & 0xFF;
+		
+		int horario; //Time (ja tem no lubcos)
+		int v_4um; 		//ISO4um
+		int v_6um; 		//ISO6um
+		int v_14um; 	//ISO14um
+		int v_21um; 	//ISO21um
+		int findex; 	//FIndex
+		
+		// Tramsformacao de float para inteiro em representacao de pontoFlutuante
+		horario = calculaPontoFlutuante(sensor_data.horario);
+		v_4um		= calculaPontoFlutuante(sensor_data.v_4um);
+		v_6um		= calculaPontoFlutuante(sensor_data.v_6um);
+		v_14um	= calculaPontoFlutuante(sensor_data.v_14um);
+		v_21um	= calculaPontoFlutuante(sensor_data.v_21um);
+		findex	= calculaPontoFlutuante(sensor_data.findex);
+		//PPRINTF("%f\r\n%f\r\n%f\r\n%f\r\n%f\r\n%f\r\n", sensor_data.horario, sensor_data.v_4um, sensor_data.v_6um, sensor_data.v_14um, sensor_data.v_21um, sensor_data.findex);
+		//PPRINTF("%i\r\n%i\r\n%i\r\n%i\r\n%i\r\n%i\r\n", horario, v_4um, v_6um, v_14um, v_21um, findex);
+		
+		AppData.Buff[i++]=(horario)>>8;
+		AppData.Buff[i++]=(horario) & 0xFF;
+		
+		AppData.Buff[i++]=(v_4um)>>8;
+		AppData.Buff[i++]=(v_4um) & 0xFF;	
+		
+		AppData.Buff[i++]=(v_6um)>>8;
+		AppData.Buff[i++]=(v_6um) & 0xFF;
+		
+		AppData.Buff[i++]=(v_14um)>>8;
+		AppData.Buff[i++]=(v_14um) & 0xFF;
+		
+		AppData.Buff[i++]=1;
+		
+		// Enviando primeira mensagem
+		AppData.BuffSize = i;
+		payloadlens=i;
+		LORA_send( &AppData, lora_config_reqack_get());
+		
+		// Espera ate Lora ser liberado para nova mensagem
+		while ( LoRaMacState != LORAMAC_IDLE )
+    {
+       lora_config_reqack_get();
+    }
+
+		// Voltando ao tamanho do buffer normal (-8 eh o numero de casas que o i++ aconteceu)
+		int stopLoop = i;
+		for(int j=i; j>stopLoop-11; j--)
+    {
+			AppData.Buff[i--] = 0;
+		}
+				
+		AppData.Buff[i++]=(v_21um)>>8;
+		AppData.Buff[i++]=(v_21um) & 0xFF;
+		
+		AppData.Buff[i++]=(findex)>>8;
+		AppData.Buff[i++]=(findex) & 0xFF;
+		
+		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=0xFF;
+		
+		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=0xFF;
+		
+		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=0xFF;
+		
+		
+		// Primeiro caractere as 3 entradas digitais e no segundo caractere o numero da mensagem
+		AppData.Buff[i++] = (sensor_data.in1<<4 | 2);	
+	}
+	
+	
+	// Enviando mensagem LoRa em todos os modos
 	AppData.BuffSize = i;
 	payloadlens=i;
   LORA_send( &AppData, lora_config_reqack_get());
 	#endif
+	
+	if (mode == 7 || mode == 8)
+	{
+		// Espera ate Lora ser liberado para nova mensagem
+		while ( LoRaMacState != LORAMAC_IDLE )
+    {
+       lora_config_reqack_get();
+    }
+		
+		// ativa interrupcao
+		GPIOB_EXTI_FALLINGEDGE_PULLUP_PIN_Init( GPIO_PIN_6 );
+		interrupcao_flag = 0;
+	}
 	
 }
 

@@ -70,6 +70,10 @@ extern uint8_t mode;
 extern uint8_t switch_status;
 extern bool is_check_exit;
 extern bool joined_flags;
+
+extern uint8_t interrupcao_flag;
+extern bool uplink_data_status;
+
 /** @addtogroup STM32L1xx_HAL_Examples
   * @{
   */
@@ -250,6 +254,17 @@ void EXTI4_15_IRQHandler( void )
   
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_5 );
 
+	// Interrupcao no pino 6
+  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_6) != RESET) 
+	{
+		if (interrupcao_flag == 0)
+		{
+			// Altera flag pra fazer loop apenas uma vez
+			interrupcao_flag = 1;
+			//zera tempo do main loop
+			uplink_data_status=1;
+		}
+	}
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_6 );
   
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_7 );
