@@ -1499,19 +1499,20 @@ ATEerror_t at_symbtimeout2LSB_set(const char *param)
 
 ATEerror_t at_MOD_set(const char *param)
 { 
+	extern int MAX_WORK_MODE;
 	int workmode;
 	if (tiny_sscanf(param, "%d", &workmode) != 1)
   {
     return AT_PARAM_ERROR;
   }
-	if ((workmode>=1)&&(workmode<=6))
+	if ((workmode>=1)&&(workmode<=MAX_WORK_MODE))
   {
     mode=workmode;	
   	PPRINTF("Attention:Take effect after ATZ\r\n");			
 	}
 	else
 	{
-		PPRINTF("Mode of range is 1 to 6\r\n");	
+		PPRINTF("Mode of range is 1 to %i\r\n", MAX_WORK_MODE);	
     return AT_PARAM_ERROR;
 	}
 	

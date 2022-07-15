@@ -68,20 +68,15 @@
 #include "hw.h"
 
 typedef struct {
-	float horario; //Time
-	float nivel; //L
-	float temperatura; //T
-	float umidade; //RH
-	float umidade20; //RH20
-	float permissividade; //P
-	float permissividade40; //P40
-	float oage; //OAge
-	float ap; //AP
+	float horario;						//Time
+	float temperatura;				//T
+	float temperatura_sensor; //PCBT
+	float umidade_relativa;		//RH
+	float umidade_absoluta;		//AH
 } lubcos_serial_reading_t;
 
 
 void lubcos_read_serial(lubcos_serial_reading_t*);
-void lubcos_GPIO_INPUTS_IoInit(void);
 void uart1_init_lubcos(void);
 
 

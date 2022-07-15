@@ -97,15 +97,11 @@ typedef struct{
   /**more may be added*/
 	
 	/* lubcos */
-	float horario; 					//Time
-	float nivel; 						//L
-	float temperatura; 			//T
-	float umidade; 					//RH
-	float umidade20; 				//RH20
-	float permissividade; 	//P
-	float permissividade40; //P40
-	float oage; 						//OAge
-	float ap; 							//AP
+	float horario;						//Time
+	float temperatura;				//T
+	float temperatura_sensor; //PCBT
+	float umidade_relativa;		//RH
+	float umidade_absoluta;		//AH
 	
 	/* opcom */
 	//float horario; //Time (ja tem no lubcos)

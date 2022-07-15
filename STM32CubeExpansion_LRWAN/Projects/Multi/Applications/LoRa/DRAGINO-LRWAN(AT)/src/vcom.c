@@ -464,32 +464,16 @@ void at_lubcos_data_receive(lubcos_serial_reading_t *lubcos_reading, uint16_t de
 			// Compara somente quando encontra :
 			if ( response[number] == 0x3A )
 			{
-			
+				
 				// 1 letra como parametro
-				if ( number > 2 )
+				if ( number > 1 )
 				{
-						
-						// Procurando ;L: (nivel)
-						if( response[number-2] == 0x3B  &&  response[number-1]  == 0x4C  &&  response[number] == 0x3A )
+						// Procurando T: (temperatura)
+						if(response[number-1]  == 0x54  &&  response[number] == 0x3A )
 						{
 								char rxdatatemp[20] = {0x00};
 								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
-								while (response[number+1] != 0x5B)
-								{
-										rxdatatemp[interator++] = response[++number];
-								}
-								// Transforma de string para float
-								lubcos_reading->nivel = atof(rxdatatemp);
-						}
-						
-						
-						// Procurando ;T: (temperatura)
-						if( response[number-2] == 0x3B  &&  response[number-1]  == 0x54  &&  response[number] == 0x3A )
-						{
-								char rxdatatemp[20] = {0x00};
-								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
+								// Enquanto o proximo caractere for diferente de [
 								while (response[number+1] != 0x5B)
 								{
 										rxdatatemp[interator++] = response[++number];
@@ -497,55 +481,41 @@ void at_lubcos_data_receive(lubcos_serial_reading_t *lubcos_reading, uint16_t de
 								// Transforma de string para float
 								lubcos_reading->temperatura = atof(rxdatatemp);
 						}
-						
-						
-						// Procurando ;P: (permissividade)
-						if( response[number-2] == 0x3B  &&  response[number-1]  == 0x50  &&  response[number] == 0x3A )
-						{
-								char rxdatatemp[20] = {0x00};
-								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
-								while (response[number+1] != 0x5B)
-								{
-										rxdatatemp[interator++] = response[++number];
-								}
-								// Transforma de string para float
-								lubcos_reading->permissividade = atof(rxdatatemp);
-						}
+
 				}
 				
 				
 				// 2 letras como parametro
-				if ( number > 3 )
+				if ( number > 2 )
 				{
-						// Procurando ;RH: (umidade)
-						if( response[number-3] == 0x3B  &&  response[number-2] == 0x52  &&  response[number-1] == 0x48  &&  response[number] == 0x3A )
+						// Procurando RH: (umidade relativa)
+						if( response[number-2] == 0x52  &&  response[number-1] == 0x48  &&  response[number] == 0x3A )
 						{
 								char rxdatatemp[20] = {0x00};
 								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
+								// Enquanto o proximo caractere for diferente de [
 								while (response[number+1] != 0x5B)
 								{
 										rxdatatemp[interator++] = response[++number];
 								}
 								// Transforma de string para float
-								lubcos_reading->umidade = atof(rxdatatemp);		
+								lubcos_reading->umidade_relativa = atof(rxdatatemp);		
 						}
 						
-						
-						// Procurando ;AP: (ap)
-						if( response[number-3] == 0x3B  &&  response[number-2] == 0x41  &&  response[number-1] == 0x50  &&  response[number] == 0x3A )
+						// Procurando AH: (umidade absoluta)
+						if( response[number-2] == 0x41  &&  response[number-1] == 0x48  &&  response[number] == 0x3A )
 						{
 								char rxdatatemp[20] = {0x00};
 								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
+								// Enquanto o proximo caractere for diferente de [
 								while (response[number+1] != 0x5B)
 								{
 										rxdatatemp[interator++] = response[++number];
 								}
 								// Transforma de string para float
-								lubcos_reading->ap = atof(rxdatatemp);
+								lubcos_reading->umidade_absoluta = atof(rxdatatemp);		
 						}
+						
 				}
 				
 				// 3 letras como parametro
@@ -556,7 +526,7 @@ void at_lubcos_data_receive(lubcos_serial_reading_t *lubcos_reading, uint16_t de
 						{
 								char rxdatatemp[20] = {0x00};
 								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
+								// Enquanto o proximo caractere for diferente de [
 								while (response[number+1] != 0x5B)
 								{
 										rxdatatemp[interator++] = response[++number];
@@ -565,55 +535,21 @@ void at_lubcos_data_receive(lubcos_serial_reading_t *lubcos_reading, uint16_t de
 								lubcos_reading->horario = atof(rxdatatemp);		
 						}
 						
+						// Procurando PCBT: (temperatura do sensor)
+						if( response[number-4] == 0x50  &&  response[number-3] == 0x43  &&  response[number-2] == 0x42  &&  response[number-1] == 0x54  &&  response[number] == 0x3A )
+						{
+								char rxdatatemp[20] = {0x00};
+								uint8_t interator = 0;
+								// Enquanto o proximo caractere for diferente de [
+								while (response[number+1] != 0x5B)
+								{
+										rxdatatemp[interator++] = response[++number];
+								}
+								// Transforma de string para float
+								lubcos_reading->temperatura_sensor = atof(rxdatatemp);		
+						}
+				}
 
-						// Procurando ;P40: (permissividade a  40º)
-						if( response[number-4] == 0x3B  &&  response[number-3] == 0x50  &&  response[number-2] == 0x34  &&  response[number-1] == 0x30  &&  response[number] == 0x3A )
-						{
-								char rxdatatemp[20] = {0x00};
-								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
-								while (response[number+1] != 0x5B)
-								{
-										rxdatatemp[interator++] = response[++number];
-								}
-								// Transforma de string para float
-								lubcos_reading->permissividade40 = atof(rxdatatemp);		
-						}
-				}
-				
-				
-				// 4 letras como parametro
-				if ( number > 5 )
-				{
-						// Procurando ;RH20: (umidade a 20º)
-						if( response[number-5]  == 0x3B  &&  response[number-4] == 0x52  &&  response[number-3] == 0x48  &&  response[number-2] == 0x32  &&  response[number-1] == 0x30  &&  response[number] == 0x3A )
-						{
-								char rxdatatemp[20] = {0x00};
-								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
-								while (response[number+1] != 0x5B)
-								{
-										rxdatatemp[interator++] = response[++number];
-								}
-								// Transforma de string para float
-								lubcos_reading->umidade20 = atof(rxdatatemp);	
-						}
-						
-						
-						// Procurando ;OAge: (oage)
-						if( response[number-5]  == 0x3B  &&  response[number-4] == 0x4F  &&  response[number-3] == 0x41  &&  response[number-2] == 0x67  &&  response[number-1] == 0x65  &&  response[number] == 0x3A )
-						{
-								char rxdatatemp[20] = {0x00};
-								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
-								while (response[number+1] != 0x5B)
-								{
-										rxdatatemp[interator++] = response[++number];
-								}
-								// Transforma de string para float
-								lubcos_reading->oage = atof(rxdatatemp);		
-						}
-				}
 			}
 	}
 
@@ -649,7 +585,7 @@ void at_opcom_data_receive(opcom_serial_reading_t *opcom_reading, uint16_t delay
 						{
 								char rxdatatemp[20] = {0x00};
 								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
+								// Enquanto o proximo caractere for diferente de [
 								while (response[number+1] != 0x5B)
 								{
 										rxdatatemp[interator++] = response[++number];
@@ -669,7 +605,7 @@ void at_opcom_data_receive(opcom_serial_reading_t *opcom_reading, uint16_t delay
 						{
 								char rxdatatemp[20] = {0x00};
 								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
+								// Enquanto o proximo caractere for diferente de [
 								while (response[number+1] != 0x5B)
 								{
 										rxdatatemp[interator++] = response[++number];
@@ -684,7 +620,7 @@ void at_opcom_data_receive(opcom_serial_reading_t *opcom_reading, uint16_t delay
 						{
 								char rxdatatemp[20] = {0x00};
 								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
+								// Enquanto o proximo caractere for diferente de [
 								while (response[number+1] != 0x5B)
 								{
 										rxdatatemp[interator++] = response[++number];
@@ -716,7 +652,7 @@ void at_opcom_data_receive(opcom_serial_reading_t *opcom_reading, uint16_t delay
 						{
 								char rxdatatemp[20] = {0x00};
 								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
+								// Enquanto o proximo caractere for diferente de [
 								while (response[number+1] != 0x5B)
 								{
 										rxdatatemp[interator++] = response[++number];
@@ -731,7 +667,7 @@ void at_opcom_data_receive(opcom_serial_reading_t *opcom_reading, uint16_t delay
 						{
 								char rxdatatemp[20] = {0x00};
 								uint8_t interator = 0;
-								// Enquanto o proximo caractere for diferente de ;
+								// Enquanto o proximo caractere for diferente de [
 								while (response[number+1] != 0x5B)
 								{
 										rxdatatemp[interator++] = response[++number];

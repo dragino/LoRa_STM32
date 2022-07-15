@@ -94,35 +94,3 @@ void uart1_init_lubcos(void)
   }
 }
 
-void lubcos_GPIO_INPUTS_IoInit(void)
-{
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	
-	GPIO_InitTypeDef GPIO_InitStruct1={0};
-	GPIO_InitTypeDef GPIO_InitStruct2={0};
-	GPIO_InitTypeDef GPIO_InitStruct3={0};
-
-	
-	//PB6
-	GPIO_InitStruct1.Pin = GPIO_PIN_6;
-	GPIO_InitStruct1.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct1.Pull = GPIO_PULLUP;
-  GPIO_InitStruct1.Speed = GPIO_SPEED_HIGH;
-  HW_GPIO_Init( GPIOB, GPIO_PIN_6, &GPIO_InitStruct1 );
-	
-	
-	//PB7
-	GPIO_InitStruct2.Pin = GPIO_PIN_7;
-	GPIO_InitStruct2.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct2.Pull = GPIO_PULLUP;
-  GPIO_InitStruct2.Speed = GPIO_SPEED_HIGH;
-  HW_GPIO_Init( GPIOB, GPIO_PIN_7, &GPIO_InitStruct2 );
-	
-	
-	//PB3
-	GPIO_InitStruct3.Pin = GPIO_PIN_3;
-	GPIO_InitStruct3.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct3.Pull = GPIO_PULLUP;
-  GPIO_InitStruct3.Speed = GPIO_SPEED_HIGH;
-  HW_GPIO_Init( GPIOB, GPIO_PIN_3, &GPIO_InitStruct3 );
-}

@@ -652,41 +652,33 @@ static void Send( void )
 		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 		AppData.Buff[i++] =batteryLevel_mV & 0xFF;
 				
-		int nivel; //L
-		int temperatura; //T
-		int umidade; //RH
-		int umidade20; //RH20
-		int permissividade; //P
-		int permissividade40; //P40
-		int oage; //OAge
-		int ap; //AP
-		int horario; //Time
+		int horario;						//Time
+		int temperatura;				//T
+		int temperatura_sensor; //PCBT
+		int umidade_relativa;		//RH
+		int umidade_absoluta;		//AH
 		
 		// Tramsformacao de float para inteiro em representacao de pontoFlutuante
-		nivel = calculaPontoFlutuante(sensor_data.nivel);
-		temperatura = calculaPontoFlutuante(sensor_data.temperatura);
-		umidade = calculaPontoFlutuante(sensor_data.umidade);
-		umidade20 = calculaPontoFlutuante(sensor_data.umidade20);
-		permissividade = calculaPontoFlutuante(sensor_data.permissividade);
-		permissividade40 = calculaPontoFlutuante(sensor_data.permissividade40);
-		oage = calculaPontoFlutuante(sensor_data.oage);
-		ap = calculaPontoFlutuante(sensor_data.ap);
-		horario = calculaPontoFlutuante(sensor_data.horario);
-		//PPRINTF("h: %i\r\np: %i\r\noage: %i\r\n", horario, permissividade, oage);
+		horario							= calculaPontoFlutuante(sensor_data.horario);
+		temperatura					= calculaPontoFlutuante(sensor_data.temperatura);
+		temperatura_sensor	= calculaPontoFlutuante(sensor_data.temperatura_sensor);
+		umidade_relativa		= calculaPontoFlutuante(sensor_data.umidade_relativa);
+		umidade_absoluta		= calculaPontoFlutuante(sensor_data.umidade_absoluta);
+		//PPRINTF("%i\r\n%i\r\n%i\r\n%i\r\n%i\r\n",horario, temperatura, temperatura_sensor, umidade_relativa, umidade_absoluta);
 	
-		AppData.Buff[i++]=(nivel)>>8;
-		AppData.Buff[i++]=(nivel) & 0xFF;
+		AppData.Buff[i++]=(horario)>>8;
+		AppData.Buff[i++]=(horario) & 0xFF;
 		
 		AppData.Buff[i++]=(temperatura)>>8;
 		AppData.Buff[i++]=(temperatura) & 0xFF;	
 		
-		AppData.Buff[i++]=(umidade)>>8;
-		AppData.Buff[i++]=(umidade) & 0xFF;
+		AppData.Buff[i++]=(temperatura_sensor)>>8;
+		AppData.Buff[i++]=(temperatura_sensor) & 0xFF;
 		
-		AppData.Buff[i++]=(umidade20)>>8;
-		AppData.Buff[i++]=(umidade20) & 0xFF;
+		AppData.Buff[i++]=(umidade_relativa)>>8;
+		AppData.Buff[i++]=(umidade_relativa) & 0xFF;
 		
-		AppData.Buff[i++]=1;
+		AppData.Buff[i++] = (sensor_data.in1<<4 | 1);
 		
 		
 		// Enviando primeira mensagem
@@ -707,23 +699,23 @@ static void Send( void )
 			AppData.Buff[i--] = 0;
 		}
 				
-		AppData.Buff[i++]=(permissividade)>>8;
-		AppData.Buff[i++]=(permissividade) & 0xFF;
+		AppData.Buff[i++]=(umidade_absoluta)>>8;
+		AppData.Buff[i++]=(umidade_absoluta) & 0xFF;
 		
-		AppData.Buff[i++]=(permissividade40)>>8;
-		AppData.Buff[i++]=(permissividade40) & 0xFF;
+		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=0xFF;
 		
-		AppData.Buff[i++]=(oage)>>8;
-		AppData.Buff[i++]=(oage) & 0xFF;
+		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=0xFF;
 		
-		AppData.Buff[i++]=(ap)>>8;
-		AppData.Buff[i++]=(ap) & 0xFF;
+		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=0xFF;
 		
-		AppData.Buff[i++]=(horario)>>8;
-		AppData.Buff[i++]=(horario) & 0xFF;
+		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=0xFF;
 		
 		// Primeiro caractere as 3 entradas digitais e no segundo caractere o numero da mensagem
-		AppData.Buff[i++] = (sensor_data.in1<<4 | 2);
+		AppData.Buff[i++] = 2;
 	}
 	
 	else if(mode==8)

@@ -90,6 +90,9 @@ uint8_t flags=0;
 //static GPIO_InitTypeDef  GPIO_InitStruct;
 extern uint16_t batteryLevel_mV;
 
+// Maximo modo de operacao
+int MAX_WORK_MODE = 8;
+
 #ifdef USE_SHT
 extern float sht31_tem,sht31_hum;
 extern I2C_HandleTypeDef I2cHandle1;
@@ -99,7 +102,7 @@ tfsensor_reading_t reading_t;
 
 
 #define FFFF 65535 // 65535(base10) = FFFF(base16)
-lubcos_serial_reading_t lubcos_reading = {FFFF, FFFF, FFFF, FFFF, FFFF, FFFF, FFFF, FFFF, FFFF};
+lubcos_serial_reading_t lubcos_reading = {FFFF, FFFF, FFFF, FFFF, FFFF};
 opcom_serial_reading_t opcom_reading = {FFFF, FFFF, FFFF, FFFF, FFFF, FFFF};
 
 
@@ -236,16 +239,12 @@ void BSP_sensor_Read( sensor_t *sensor_data)
 		 
 		 lubcos_read_serial(&lubcos_reading);
 
-		 sensor_data->temperatura      = lubcos_reading.temperatura;
-		 sensor_data->nivel            = lubcos_reading.nivel;
-		 sensor_data->permissividade   = lubcos_reading.permissividade;
-		 sensor_data->permissividade40 = lubcos_reading.permissividade40;
-		 sensor_data->umidade          = lubcos_reading.umidade;
-		 sensor_data->umidade20        = lubcos_reading.umidade20;
-		 sensor_data->oage             = lubcos_reading.oage;
-		 sensor_data->ap               = lubcos_reading.ap;
-		 sensor_data->horario          = lubcos_reading.horario;
-		 
+		 sensor_data->horario							= lubcos_reading.horario;
+		 sensor_data->temperatura					= lubcos_reading.temperatura;
+		 sensor_data->temperatura_sensor	= lubcos_reading.temperatura_sensor;
+		 sensor_data->umidade_relativa		= lubcos_reading.umidade_relativa;
+		 sensor_data->umidade_absoluta		= lubcos_reading.umidade_absoluta;
+
 		 
 		 GPIOB_INPUT_PULLUP_PIN_IoInit( GPIO_PIN_6 );
 		 GPIOB_INPUT_PULLUP_PIN_IoInit( GPIO_PIN_7 );
