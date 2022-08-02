@@ -68,8 +68,11 @@ void GPIO_ULT_INPUT_Init(void);
 void GPIO_ULT_OUTPUT_Init(void);
 void GPIO_ULT_INPUT_DeInit(void);
 void GPIO_ULT_OUTPUT_DeInit(void);
-void TIM2_Init(void);
+void TIM3_Init(void);
 uint16_t ULT_test(void);
+void ult_test_temp(uint16_t ultdata[]);
+void ADC_Dxpd(uint16_t adc_nums[]);
+uint16_t ADC_Average(uint16_t adc_nums[]);
 
 #ifdef __cplusplus
  extern "C" {

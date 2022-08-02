@@ -50,9 +50,7 @@
 
 uint32_t HX711_Buffer=0;
 uint32_t Weight_Maopi=0;
-int32_t Weight_Shiwu=0;
 float GapValue=400.0;
-extern bool debug_flags;
 
 void WEIGHT_SCK_Init(void)
 {
@@ -85,15 +83,23 @@ void WEIGHT_DOUT_Init(void)
 void WEIGHT_SCK_DeInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct={0};	
-	
-	HW_GPIO_Init(WEIGHT_SCK_PORT,WEIGHT_SCK_PIN,&GPIO_InitStruct);	
+  WEIGHT_SCK_CLK_ENABLE();
+
+	GPIO_InitStruct.Pin = WEIGHT_SCK_PIN;			
+	GPIO_InitStruct.Mode  = GPIO_MODE_ANALOG;
+	GPIO_InitStruct.Pull  = GPIO_NOPULL;
+  HAL_GPIO_Init(WEIGHT_SCK_PORT, &GPIO_InitStruct); 
 }
 
 void WEIGHT_DOUT_DeInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct={0};	
-	
-	HW_GPIO_Init(WEIGHT_DOUT_PORT,WEIGHT_DOUT_PIN,&GPIO_InitStruct);			
+	WEIGHT_DOUT_CLK_ENABLE();
+
+	GPIO_InitStruct.Pin = WEIGHT_DOUT_PIN;			
+	GPIO_InitStruct.Mode  = GPIO_MODE_ANALOG;
+	GPIO_InitStruct.Pull  = GPIO_NOPULL;
+  HAL_GPIO_Init(WEIGHT_DOUT_PORT, &GPIO_InitStruct); 		
 }
 
 uint32_t HX711_Read(void)	
@@ -122,8 +128,10 @@ void Get_Maopi(void)
 	Weight_Maopi = HX711_Read();	
 } 
 
-void Get_Weight(void)
+int32_t Get_Weight(void)
 {
+	int32_t Weight_Shiwu=0;
+	
 	HX711_Buffer = HX711_Read();
 	if(HX711_Buffer != Weight_Maopi)			
 	{
@@ -131,18 +139,11 @@ void Get_Weight(void)
 		Weight_Shiwu = Weight_Shiwu - Weight_Maopi;				
 	
 		Weight_Shiwu = (int32_t)((float)Weight_Shiwu/GapValue); 	
-		if((Weight_Shiwu<-5000)||(Weight_Shiwu>5000))
-		{
-			Weight_Shiwu =0;
-		}
 	}
 	else
 	{
 		Weight_Shiwu =0;
 	}
-	if(debug_flags==1)
-	{		
-	PPRINTF("\r\n");		
-	PPRINTF("Weight is %d g\r\n",Weight_Shiwu);
-	}
+
+	return Weight_Shiwu;
 }

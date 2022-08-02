@@ -144,16 +144,16 @@ static const struct ATCommand_s ATCommand[] =
     .run = at_return_error,
   },
 #endif
-  
+
 #ifndef NO_KEY_ADDR_EUI
   {
-    .string = AT_DADDR,
-    .size_string = sizeof(AT_DADDR) - 1,
+    .string = AT_APPEUI,
+    .size_string = sizeof(AT_APPEUI) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_DADDR ": Get or Set the Device Address\r\n",
+    .help_string = "AT"AT_APPEUI ": Get or Set the Application EUI\r\n",
 #endif
-    .get = at_DevAddr_get,
-    .set = at_DevAddr_set,
+    .get = at_AppEUI_get,
+    .set = at_AppEUI_set,
     .run = at_return_error,
   },
 #endif
@@ -167,6 +167,19 @@ static const struct ATCommand_s ATCommand[] =
 #endif
     .get = at_AppKey_get,
     .set = at_AppKey_set,
+    .run = at_return_error,
+  },
+#endif
+  
+#ifndef NO_KEY_ADDR_EUI
+  {
+    .string = AT_DADDR,
+    .size_string = sizeof(AT_DADDR) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_DADDR ": Get or Set the Device Address\r\n",
+#endif
+    .get = at_DevAddr_get,
+    .set = at_DevAddr_set,
     .run = at_return_error,
   },
 #endif
@@ -196,20 +209,7 @@ static const struct ATCommand_s ATCommand[] =
     .run = at_return_error,
   },
 #endif
-  
-#ifndef NO_KEY_ADDR_EUI
-  {
-    .string = AT_APPEUI,
-    .size_string = sizeof(AT_APPEUI) - 1,
-#ifndef NO_HELP
-    .help_string = "AT"AT_APPEUI ": Get or Set the Application EUI\r\n",
-#endif
-    .get = at_AppEUI_get,
-    .set = at_AppEUI_set,
-    .run = at_return_error,
-  },
-#endif
-  
+
   {
     .string = AT_ADR,
     .size_string = sizeof(AT_ADR) - 1,
@@ -588,11 +588,22 @@ static const struct ATCommand_s ATCommand[] =
     .run = at_return_error,
 	 },
 	
+	{
+	  .string = AT_DECRYPT,
+    .size_string = sizeof(AT_DECRYPT) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_DECRYPT ": Get or Set the Decrypt the uplink payload(0:Disable,1:Enable)\r\n",
+#endif
+    .get = at_decrypt_get,
+    .set = at_decrypt_set,
+    .run = at_return_error,
+	 },
+	
 		{
 	  .string = AT_MOD,
     .size_string = sizeof(AT_MOD) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_MOD ":Get or Set the work mode(1:IIC mode,2:Distance mode,3:3ADC mode,4:3DS18B20 mode,5:weight mode)\r\n",
+    .help_string = "AT"AT_MOD ":Get or Set the work mode\r\n",
 #endif
     .get = at_MOD_get,
     .set = at_MOD_set,
@@ -600,13 +611,35 @@ static const struct ATCommand_s ATCommand[] =
 	},
 
 		{
-	  .string = AT_INTMOD,
-    .size_string = sizeof(AT_INTMOD) - 1,
+	  .string = AT_INTMOD1,
+    .size_string = sizeof(AT_INTMOD1) - 1,
 #ifndef NO_HELP
-    .help_string = "AT"AT_INTMOD ":Get or Set the trigger interrupt mode(0:Disable,1:falling or rising,2:falling,3:rising)\r\n",
+    .help_string = "AT"AT_INTMOD1 ":Get or Set the trigger interrupt mode for PB14(0:Disable,1:falling or rising,2:falling,3:rising)\r\n",
 #endif
-    .get = at_INTMOD_get,
-    .set = at_INTMOD_set,
+    .get = at_INTMOD1_get,
+    .set = at_INTMOD1_set,
+    .run = at_return_error,
+	},
+
+		{
+	  .string = AT_INTMOD2,
+    .size_string = sizeof(AT_INTMOD2) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_INTMOD2 ":Get or Set the trigger interrupt mode for PB15(0:Disable,1:falling or rising,2:falling,3:rising)\r\n",
+#endif
+    .get = at_INTMOD2_get,
+    .set = at_INTMOD2_set,
+    .run = at_return_error,
+	},
+		
+		{
+	  .string = AT_INTMOD3,
+    .size_string = sizeof(AT_INTMOD3) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_INTMOD3 ":Get or Set the trigger interrupt mode for PA4(0:Disable,1:falling or rising,2:falling,3:rising)\r\n",
+#endif
+    .get = at_INTMOD3_get,
+    .set = at_INTMOD3_set,
     .run = at_return_error,
 	},
 
@@ -642,7 +675,18 @@ static const struct ATCommand_s ATCommand[] =
     .set = at_5Vtime_set,
     .run = at_return_error,
 	},
-				
+
+		{
+	  .string = AT_SETCNT,
+    .size_string = sizeof(AT_SETCNT) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_SETCNT ": Get or set the count at present\r\n",
+#endif
+    .get = at_return_error,
+    .set = at_SETCNT_set,
+    .run = at_return_error,
+	},	
+		
 	{
 	  .string = AT_CHS,
     .size_string = sizeof(AT_CHS) - 1,
@@ -666,7 +710,73 @@ static const struct ATCommand_s ATCommand[] =
     .run = at_return_error,
 	},
 	#endif	
+
+	{
+	  .string = AT_GETSENSORVALUE,
+    .size_string = sizeof(AT_GETSENSORVALUE) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_GETSENSORVALUE ": Returns the current sensor value\r\n",
+#endif
+    .get = at_return_error,
+    .set = at_getsensorvaule_set,
+    .run = at_return_error,
+	},
 	
+	{
+    .string = AT_DDETECT,
+    .size_string = sizeof(AT_DDETECT) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_DDETECT ": Get or set the downlink detection\r\n",
+#endif
+    .get = at_downlink_detect_get,
+    .set = at_downlink_detect_set,
+    .run = at_return_error,
+  },
+	
+	{
+    .string = AT_SETMAXNBTRANS,
+    .size_string = sizeof(AT_SETMAXNBTRANS) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_SETMAXNBTRANS ": Get or set the max nbtrans in LinkADR\r\n",
+#endif
+    .get = at_setmaxnbtrans_get,
+    .set = at_setmaxnbtrans_set,
+    .run = at_return_error,
+  },
+
+		{
+	  .string = AT_DISFCNTCHECK,
+    .size_string = sizeof(AT_DISFCNTCHECK) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_DISFCNTCHECK ": Get or set the Downlink Frame Check(0:Enable,1:Disable)\r\n",
+#endif
+    .get = at_disdownlinkcheck_get,
+    .set = at_disdownlinkcheck_set,
+    .run = at_return_error,
+	},	
+
+		{
+	  .string = AT_DISMACANS,
+    .size_string = sizeof(AT_DISMACANS) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_DISMACANS ": Get or set the MAC ANS switch(0:Enable,1:Disable)\r\n",
+#endif
+    .get = at_dismac_answer_get,
+    .set = at_dismac_answer_set,
+    .run = at_return_error,
+	},	
+
+		{
+	  .string = AT_RXDATEST,
+    .size_string = sizeof(AT_RXDATEST) - 1,
+#ifndef NO_HELP
+    .help_string = "AT"AT_RXDATEST ": Set the downlink data detection\r\n",
+#endif
+    .get = at_return_error,
+    .set = at_rxdata_test,
+    .run = at_return_error,
+	},	
+		
 	{
 	  .string = AT_CFG,
     .size_string = sizeof(AT_CFG) - 1,
@@ -677,8 +787,6 @@ static const struct ATCommand_s ATCommand[] =
     .set = at_return_error,
     .run = at_CFG_run,
 	},
-
-		
 };
 
 
@@ -768,6 +876,7 @@ static void com_error(ATEerror_t error_type)
 
 static void parse_cmd(const char *cmd)
 {
+	uint8_t store_config_status=1;
   ATEerror_t status = AT_OK;
   const struct ATCommand_s *Current_ATCommand;
   int i;
@@ -823,8 +932,33 @@ static void parse_cmd(const char *cmd)
             else
             {
               status = Current_ATCommand->set(cmd + 1);
-							Store_Config();
-							Store_key();
+							cmd=Current_ATCommand->string;
+							
+							if((strcmp(cmd,AT_DEUI)==0)||(strcmp(cmd,AT_APPEUI)==0)||(strcmp(cmd,AT_APPKEY)==0)
+								||(strcmp(cmd,AT_DADDR)==0)||(strcmp(cmd,AT_NWKSKEY)==0)||(strcmp(cmd,AT_APPSKEY)==0))
+							{
+								store_config_status=2;
+							}
+	
+							if((strcmp(cmd,AT_SENDB)==0)||(strcmp(cmd,AT_SEND)==0)||(strcmp(cmd,AT_RXDATEST)==0)||(strcmp(cmd,AT_SETCNT)==0)||(strcmp(cmd,AT_GETSENSORVALUE)==0))
+							{
+								store_config_status=0;
+							}
+							
+							if(store_config_status>0)
+							{
+								if(status==AT_OK)
+								{
+									if(store_config_status==1)
+									{
+										EEPROM_Store_Config();
+									}
+									else if(store_config_status==2)
+									{
+										EEPROM_Store_key();
+									}
+								}
+							}
             }
             break;
           case '?':
@@ -856,7 +990,7 @@ uint8_t printf_all_config(void)
 		{
 			PPRINTF("AT%s=",ATCommand[j].string);
 			ATCommand[j].get(( char *)cmd);		
-			DelayMs(50);				
+			HAL_Delay(50);				
 		}
 	}
 	

@@ -127,11 +127,21 @@ typedef enum eATEerror
 #define AT_CFG        "+CFG"
 #define AT_RX1WTO     "+RX1WTO"
 #define AT_RX2WTO     "+RX2WTO"
+#define AT_DECRYPT    "+DECRYPT"
 #define AT_MOD        "+MOD"
-#define AT_INTMOD     "+INTMOD"
+#define AT_INTMOD1    "+INTMOD1"
+#define AT_INTMOD2    "+INTMOD2"
+#define AT_INTMOD3    "+INTMOD3"
 #define AT_WEIGRE     "+WEIGRE"
 #define AT_WEIGAP     "+WEIGAP"
 #define AT_5VT        "+5VT"
+#define AT_SETCNT     "+SETCNT"
+#define AT_DDETECT    "+DDETECT"
+#define AT_SETMAXNBTRANS    "+SETMAXNBTRANS"
+#define AT_GETSENSORVALUE   "+GETSENSORVALUE"
+#define AT_DISFCNTCHECK 		"+DISFCNTCHECK"
+#define AT_DISMACANS 	   	  "+DISMACANS"
+#define AT_RXDATEST  			  "+RXDATEST"
 
 /* Exported functions ------------------------------------------------------- */
 void weightreset(void);
@@ -640,6 +650,10 @@ ATEerror_t at_application_port_get(const char *param);
  * @param  String parameter
  * @retval AT_OK
  */
+	
+ATEerror_t at_decrypt_set(const char *param);
+
+ATEerror_t at_decrypt_get(const char *param);
 
 ATEerror_t at_CFG_run(const char *param);
  
@@ -671,9 +685,17 @@ ATEerror_t at_MOD_set(const char *param);
 
 ATEerror_t at_MOD_get(const char *param);
 
-ATEerror_t at_INTMOD_set(const char *param);
+ATEerror_t at_INTMOD1_set(const char *param);
 
-ATEerror_t at_INTMOD_get(const char *param);
+ATEerror_t at_INTMOD1_get(const char *param);
+
+ATEerror_t at_INTMOD2_set(const char *param);
+
+ATEerror_t at_INTMOD2_get(const char *param);
+
+ATEerror_t at_INTMOD3_set(const char *param);
+
+ATEerror_t at_INTMOD3_get(const char *param);
 
 ATEerror_t at_weightreset(const char *param);
 
@@ -684,6 +706,28 @@ ATEerror_t at_weight_GapValue_get(const char *param);
 ATEerror_t at_5Vtime_set(const char *param);
 
 ATEerror_t at_5Vtime_get(const char *param);
+
+ATEerror_t at_SETCNT_set(const char *param);
+
+ATEerror_t at_getsensorvaule_set(const char *param);
+
+ATEerror_t at_downlink_detect_set(const char *param);
+
+ATEerror_t at_downlink_detect_get(const char *param);
+
+ATEerror_t at_setmaxnbtrans_set(const char *param);
+
+ATEerror_t at_setmaxnbtrans_get(const char *param);
+
+ATEerror_t at_disdownlinkcheck_set(const char *param);
+
+ATEerror_t at_disdownlinkcheck_get(const char *param);
+
+ATEerror_t at_dismac_answer_set(const char *param);
+
+ATEerror_t at_dismac_answer_get(const char *param);
+
+ATEerror_t at_rxdata_test(const char *param);
 
 #ifdef __cplusplus
 }

@@ -77,13 +77,21 @@
 #define Firm_FQ 0x000a
 #elif defined( REGION_US915 )
 #define Firm_FQ 0x000b
+#elif defined( REGION_MA869 )
+#define Firm_FQ 0x000c
+#else
+#define Firm_FQ 0x00ff
 #endif
 
+uint8_t RX2DR_setting_status;
 uint16_t fire_version=0;
 uint16_t fire_frequcy=0;
+uint32_t Automatic_join_network[1]={0x11};
 uint8_t mode;
-uint8_t inmode;
-bool rx2_flags=0;
+uint8_t decrypt_flag=0;
+uint8_t inmode,inmode2,inmode3;
+bool down_check=0;
+bool mac_response_flag=0;
 bool fdr_flags=0;
 
 extern float GapValue;
@@ -95,14 +103,25 @@ extern uint8_t symbtime2_value;
 extern uint8_t flag2;
 extern uint8_t rx_flags;
 extern uint32_t rx1_de,rx2_de;
+extern uint16_t power_time;
 
 extern uint16_t REJOIN_TX_DUTYCYCLE;
 extern uint8_t response_level;
 extern bool rejoin_status;
 extern bool JoinReq_NbTrails_over;
+extern bool joined_flags;
 extern bool unconfirmed_downlink_data_ans_status,confirmed_downlink_data_ans_status;
 
-extern uint16_t power_time;
+extern uint8_t downlink_detect_switch;
+extern uint16_t downlink_detect_timeout;
+extern uint8_t LoRaMacState_error_times;
+
+extern uint8_t confirmed_uplink_counter_retransmission_increment_switch;
+extern uint8_t confirmed_uplink_retransmission_nbtrials;
+
+extern uint8_t LinkADR_NbTrans_uplink_counter_retransmission_increment_switch;
+extern uint8_t LinkADR_NbTrans_retransmission_nbtrials;
+extern uint16_t unconfirmed_uplink_change_to_confirmed_uplink_timeout;
 
 static uint8_t config_count=0;
 static uint8_t key_count=0;
@@ -237,7 +256,7 @@ static LoRaMacPrimitives_t LoRaMacPrimitives;
 static LoRaMacCallback_t LoRaMacCallbacks;
 static MibRequestConfirm_t mibReq;
 
-static LoRaMainCallback_t *LoRaMainCallbacks;
+LoRaMainCallback_t *LoRaMainCallbacks;
 /*!
  * \brief   MCPS-Confirm event function
  *
@@ -421,7 +440,7 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   DevAddr = randr( 0, 0x01FFFFFF );
 #endif
 	
-	Read_Config();
+	EEPROM_Read_Config();
 	
 	#if defined(LoRa_Sensor_Node) || defined(AT_Data_Send)
 	
@@ -466,6 +485,8 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_RU864 );
 #elif defined( REGION_KZ865 )
   LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_KZ865 );			
+#elif defined( REGION_MA869 )
+  LoRaMacInitialization( &LoRaMacPrimitives, &LoRaMacCallbacks, LORAMAC_REGION_MA869 );		
 #else
     #error "Please define a region in the compiler options."
 #endif
@@ -484,24 +505,23 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
 
   lora_config.TxDatarate = LoRaParamInit->TxDatarate;
 	
-	  if(FLASH_read(0x8018F80)==0x00)	//page799
-		{
-			fdr_config();
-			FLASH_program_on_addr(0x8018F80,0x11);		
-      PRINTF("Please set the parameters or reset Device to apply change\n\r");				
-		}
-		else if(FLASH_read(0x8018F80)==0x12)
-		{
-			fdr_config();			
-			FLASH_erase(0x8018F80);//page 799					
-			FLASH_program_on_addr(0x8018F80,0x11);	
-			NVIC_SystemReset();			
-		}
-    else 
-		{					
-			Read_Config();
-			LORA_Join();
-		}
+	if(*(__IO uint32_t *)DATA_EEPROM_BASE==0x00) //AT+FDR
+	{
+		fdr_config();
+		EEPROM_program(DATA_EEPROM_BASE,Automatic_join_network,1);		
+    PRINTF("Please set the parameters or reset Device to apply change\n\r");				
+	}
+	else if(*(__IO uint32_t *)DATA_EEPROM_BASE==0x12) //newfire or downlink FDR  
+	{
+		fdr_config();					
+		EEPROM_program(DATA_EEPROM_BASE,Automatic_join_network,1);	
+		NVIC_SystemReset();			
+	}
+  else 
+	{					
+		EEPROM_Read_Config();
+		LORA_Join();
+	}
 }
 
 void fdr_config(void)
@@ -528,20 +548,37 @@ void fdr_config(void)
 	#endif	
 				
 	mode=1;			
-	inmode=2;					
+	inmode=2;		
+	inmode2=2;		
+	inmode3=2;					
 	APP_TX_DUTYCYCLE=300000;
 	REJOIN_TX_DUTYCYCLE=20;//min	
 	GapValue=400.0;
+	power_time=500;
 
+	downlink_detect_switch=1;
+	unconfirmed_uplink_change_to_confirmed_uplink_timeout=1440;
+	downlink_detect_timeout=2880;
+	confirmed_uplink_retransmission_nbtrials=7;
+	confirmed_uplink_counter_retransmission_increment_switch=0;			
+	LinkADR_NbTrans_uplink_counter_retransmission_increment_switch=0;
+	LinkADR_NbTrans_retransmission_nbtrials=1;					
+		
 	fdr_flags=1;	
-	Store_Config();
-	Read_Config();	
+	EEPROM_Store_Config();
+	EEPROM_Read_Config();	
 }
 
 void region_printf(void)
 {
 #if defined( REGION_AS923 )
-  PPRINTF("AS923\n\r");
+	#ifdef AS923_2
+  PPRINTF("AS923_2\n\r");
+	#elif AS923_4
+	PPRINTF("AS923_4\n\r");
+	#else
+	PPRINTF("AS923\n\r");
+	#endif	
 #elif defined( REGION_AU915 )
   PPRINTF("AU915\n\r");
 #elif defined( REGION_CN470 )
@@ -562,6 +599,8 @@ void region_printf(void)
   PPRINTF("RU864\n\r");
 #elif defined( REGION_KZ865 )
   PPRINTF("KZ865\n\r");			
+#elif defined( REGION_MA869 )
+  PPRINTF("MA869\n\r");	
 #else
     #error "Please define a region in the compiler options."
 #endif
@@ -583,6 +622,7 @@ void key_printf(void)
 
 void LORA_Join( void)
 {
+	joined_flags=0;
   if (lora_config.otaa == LORA_ENABLE)
   {
     MlmeReq_t mlmeReq;
@@ -646,6 +686,7 @@ LoraErrorStatus LORA_send(lora_AppData_t* AppData, LoraConfirm_t IsTxConfirmed)
     McpsReq_t mcpsReq;
     LoRaMacTxInfo_t txInfo;
   
+	  LoRaMacState_error_times=0;
     /*if certification test are on going, application data is not sent*/
     if (certif_running() == true)
     {
@@ -676,7 +717,14 @@ LoraErrorStatus LORA_send(lora_AppData_t* AppData, LoraConfirm_t IsTxConfirmed)
             mcpsReq.Req.Confirmed.fPort = AppData->Port;
             mcpsReq.Req.Confirmed.fBufferSize = AppData->BuffSize;
             mcpsReq.Req.Confirmed.fBuffer = AppData->Buff;
-            mcpsReq.Req.Confirmed.NbTrials = 8;
+					  if(lora_config_reqack_get()==LORAWAN_UNCONFIRMED_MSG)
+						{
+							  mcpsReq.Req.Confirmed.NbTrials =1;
+						}
+						else
+						{						
+                mcpsReq.Req.Confirmed.NbTrials = confirmed_uplink_retransmission_nbtrials+1;
+						}
             mcpsReq.Req.Confirmed.Datarate = lora_config_tx_datarate_get() ;
         }
     }
@@ -980,7 +1028,7 @@ void read_data(uint8_t size,uint8_t *data1,uint32_t data3,uint32_t data4,uint32_
 		default:break;					
 		}
 }
-void Store_key(void)
+void EEPROM_Store_key(void)
 {
 	store_data(8,lora_config.DevEui,0);
 	store_data(1,0,lora_config.DevAddr);
@@ -989,13 +1037,32 @@ void Store_key(void)
 	store_data(16,lora_config.AppSKey,0);
 	store_data(8,lora_config.AppEui,0);
 	
-	FLASH_erase(FLASH_USER_START_ADDR_KEY);//Page802 
-	FLASH_program(FLASH_USER_START_ADDR_KEY,s_key,key_count);//store key
+	EEPROM_program(EEPROM_USER_START_ADDR_KEY,s_key,key_count);//store key
 	
 	key_count=0;
 }
 
-void Store_Config(void)
+void Flash_Read_key(void)
+{
+  uint32_t start_address=0,r_key[17];
+	
+	start_address=FLASH_USER_START_ADDR_KEY;
+	/* read key*/
+	for(int i=0;i<17;i++)
+	{
+	  r_key[i]=FLASH_read(start_address);
+		start_address+=4;
+	}
+	
+	read_data(8 ,lora_config.DevEui,r_key[0],r_key[1],0,0);
+	lora_config.DevAddr=r_key[2];
+	read_data(16,lora_config.AppKey,r_key[3],r_key[4],r_key[5],r_key[6]);
+	read_data(16,lora_config.NwkSKey,r_key[7],r_key[8],r_key[9],r_key[10]);
+	read_data(16,lora_config.AppSKey,r_key[11],r_key[12],r_key[13],r_key[14]);
+	read_data(8 ,lora_config.AppEui,r_key[15],r_key[16],0,0);
+}
+
+void EEPROM_Store_Config(void)
 {
 	uint32_t combination_data1=0,combination_data2=0;
 	
@@ -1042,11 +1109,21 @@ void Store_Config(void)
 	{PRINTF("LORAMAC STATUS ERROR\n\r");}
 	s_config[config_count++]=mib.Param.Rx2Channel.Frequency;
 	
-	mib.Type = MIB_RX2_CHANNEL;
-  status = LoRaMacMibGetRequestConfirm(&mib);
-	if(status!=LORAMAC_STATUS_OK)
-	{PRINTF("LORAMAC STATUS ERROR\n\r");}
-	s_config[config_count++]=mib.Param.Rx2Channel.Datarate;
+	if(RX2DR_setting_status==1)
+	{
+		RX2DR_setting_status=0;
+		mib.Type = MIB_RX2_CHANNEL;
+		status = LoRaMacMibGetRequestConfirm(&mib);
+		if(status!=LORAMAC_STATUS_OK)
+		{PRINTF("LORAMAC STATUS ERROR\n\r");}
+		s_config[config_count++]=mib.Param.Rx2Channel.Datarate;
+  }
+	else
+	{
+		mib.Type = MIB_RX2_DEFAULT_CHANNEL;
+		status = LoRaMacMibGetRequestConfirm(&mib);
+		s_config[config_count++]=mib.Param.Rx2DefaultChannel.Datarate;
+	}	
 
 	mib.Type = MIB_RECEIVE_DELAY_1;
   status = LoRaMacMibGetRequestConfirm(&mib);
@@ -1080,7 +1157,7 @@ void Store_Config(void)
 	
 	s_config[config_count++]=APP_TX_DUTYCYCLE;
 	
-	s_config[config_count++]=(dwelltime<<8)|lora_config.application_port;
+	s_config[config_count++]=(down_check<<24)|(decrypt_flag<<16)|(dwelltime<<8)|lora_config.application_port;
 	
 	s_config[config_count++]=customize_config.freq1;
 	
@@ -1091,18 +1168,25 @@ void Store_Config(void)
 	s_config[config_count++]=(mode<<24)|(inmode<<16)|power_time;
 
 	s_config[config_count++]=GapValue*10;
+
+	s_config[config_count++]=(mac_response_flag<<16) | (inmode3<<8) | inmode2;
 	
-	FLASH_erase(FLASH_USER_START_ADDR_CONFIG);//Page800 
-	FLASH_program(FLASH_USER_START_ADDR_CONFIG,s_config,config_count);//store config
+	s_config[config_count++]=downlink_detect_switch<<16|downlink_detect_timeout;
+	
+	s_config[config_count++]=confirmed_uplink_retransmission_nbtrials<<24|confirmed_uplink_counter_retransmission_increment_switch<<16|LinkADR_NbTrans_retransmission_nbtrials<<8|LinkADR_NbTrans_uplink_counter_retransmission_increment_switch;
+	
+	s_config[config_count++]=unconfirmed_uplink_change_to_confirmed_uplink_timeout;	
+	
+	EEPROM_program(EEPROM_USER_START_ADDR_CONFIG,s_config,config_count);//store config
 	
 	config_count=0;
 }
 
-void Read_Config(void)
+void EEPROM_Read_Config(void)
 {
-	uint32_t star_address=0,r_config[16],r_key[17];
+	uint32_t star_address=0,r_config[20],r_key[17];
 	
-	star_address=FLASH_USER_START_ADDR_KEY;
+	star_address=EEPROM_USER_START_ADDR_KEY;
 	/* read key*/
 	for(int i=0;i<17;i++)
 	{
@@ -1118,8 +1202,8 @@ void Read_Config(void)
 	read_data(8 ,lora_config.AppEui,r_key[15],r_key[16],0,0);
 	
 	
-	star_address=FLASH_USER_START_ADDR_CONFIG;
-	for(int i=0;i<16;i++)
+	star_address=EEPROM_USER_START_ADDR_CONFIG;
+	for(int i=0;i<20;i++)
 	{
 	  r_config[i]=FLASH_read(star_address);
 		star_address+=4;
@@ -1166,44 +1250,17 @@ void Read_Config(void)
 	mib.Param.Rx2Channel.Frequency=r_config[2];
 	LoRaMacMibSetRequestConfirm( &mib );
 	
-  if((rx2_flags==0)||(lora_config.otaa==LORA_DISABLE))
-  {		
 	mib.Type = MIB_RX2_CHANNEL;
-	mib.Param.Rx2Channel.Datarate=r_config[3];		
+	mib.Param.Rx2Channel.Datarate=r_config[3];	
 	LoRaMacMibSetRequestConfirm( &mib );
-  }
-  else if(rx2_flags==1)
-	{
-	mib.Type = MIB_RX2_CHANNEL;
-	mib.Param.Rx2Channel.Datarate=rx_flags;
-	LoRaMacMibSetRequestConfirm( &mib );
-	}
-	
-  if((rx2_flags==0)||(lora_config.otaa==LORA_DISABLE))
-  {		
+		
 	mib.Type = MIB_RECEIVE_DELAY_1;
 	mib.Param.ReceiveDelay1=r_config[4];
 	LoRaMacMibSetRequestConfirm( &mib );
-  }
-  else if(rx2_flags==1)
-	{
-	mib.Type = MIB_RECEIVE_DELAY_1;
-	mib.Param.ReceiveDelay1=rx1_de;
-	LoRaMacMibSetRequestConfirm( &mib );		
-  }
-
-  if((rx2_flags==0)||(lora_config.otaa==LORA_DISABLE))
-  {			
+	
 	mib.Type = MIB_RECEIVE_DELAY_2;
 	mib.Param.ReceiveDelay2=r_config[5];
 	LoRaMacMibSetRequestConfirm( &mib );
-  }
-  else if(rx2_flags==1)
-	{
-	mib.Type = MIB_RECEIVE_DELAY_2;
-	mib.Param.ReceiveDelay2=rx2_de;
-	LoRaMacMibSetRequestConfirm( &mib );		
-  }
 	
 	mib.Type = MIB_JOIN_ACCEPT_DELAY_1;
 	mib.Param.JoinAcceptDelay1=r_config[6];
@@ -1219,6 +1276,10 @@ void Read_Config(void)
 	
 	APP_TX_DUTYCYCLE=r_config[9];
 
+	down_check=(r_config[10]>>24)&0xFF;
+	
+	decrypt_flag=(r_config[10]>>16)&0xFF;
+	
 	dwelltime=(r_config[10]>>8)&0xFF;
 	
 	lora_config.application_port=r_config[10]&0xFF;
@@ -1246,6 +1307,25 @@ void Read_Config(void)
 	power_time=(r_config[14])&0xFFFF;	
 	
 	GapValue=(float)(r_config[15]/10);
+	
+	mac_response_flag=(r_config[16]>>16)&0xFF;
+	
+	inmode3=(r_config[16]>>8)&0xFF;
+	
+	inmode2=r_config[16]&0xFF;
+	
+	downlink_detect_switch=r_config[17]>>16&0xFF;
+	
+	downlink_detect_timeout=r_config[17]&0xFFFF;
+	
+	confirmed_uplink_retransmission_nbtrials=r_config[18]>>24&0xFF;
+	
+	confirmed_uplink_counter_retransmission_increment_switch=r_config[18]>>16&0xFF;
+	
+	LinkADR_NbTrans_retransmission_nbtrials=r_config[18]>>8&0xFF;
+	LinkADR_NbTrans_uplink_counter_retransmission_increment_switch=r_config[18]&0xFF;
+	
+	unconfirmed_uplink_change_to_confirmed_uplink_timeout=r_config[19]&0xFFFF;
 }
 
 uint16_t string_touint(void)
@@ -1270,11 +1350,12 @@ uint16_t string_touint(void)
 
 void new_firmware_update(void)
 {
+	uint32_t Automatic_newfdr_network[1]={0x12};
 	uint32_t update_flags[1];
 	uint16_t be_fre,be_ver;
 	uint32_t start_address=0,r_config[1];
 	start_address=EEPROM_USER_Firmware_FLAGS;
-	r_config[0]=*(__IO uint32_t *)start_address;
+	r_config[0]=FLASH_read(start_address);
 	be_fre=r_config[0]>>16;
 	be_ver=r_config[0]&0xFFFF;		
 	fire_frequcy=Firm_FQ;
@@ -1284,9 +1365,10 @@ void new_firmware_update(void)
 	{		
 		update_flags[0]=(fire_frequcy<<16)| fire_version;
 		EEPROM_program(EEPROM_USER_Firmware_FLAGS,update_flags,1);//store hardversion
-		FLASH_erase(0x8018F80);//page 799
-	  FLASH_program_on_addr(0x8018F80,0x12);			
-		FLASH_erase(FLASH_USER_START_ADDR_CONFIG);
+		EEPROM_erase_one_address(DATA_EEPROM_BASE);  
+		EEPROM_erase_lora_config();	
+		EEPROM_program(DATA_EEPROM_BASE,Automatic_newfdr_network,1);
+    HAL_Delay(50);		
 		NVIC_SystemReset();		
 	}		
 }

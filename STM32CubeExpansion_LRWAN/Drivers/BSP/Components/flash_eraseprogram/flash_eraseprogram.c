@@ -83,12 +83,13 @@ void EEPROM_program(uint32_t add, uint32_t *data, uint8_t count)
 		if(HAL_FLASHEx_DATAEEPROM_Program(FLASH_TYPEPROGRAMDATA_WORD,Address,data[i])== HAL_OK)
 		{
 			Address = Address + 4;
-				i++;
+			i++;
 		}
 		else
 		{
 			RESTORE_PRIMASK();
       PRINTF("error in EEPROM Write error\r");
+			break;
 		}
   }
 	HAL_FLASHEx_DATAEEPROM_Lock();
@@ -112,11 +113,8 @@ void  FLASH_erase(uint32_t page_address)
       user can call function 'HAL_FLASH_GetError()'
     */
 		
-    while (1)
-    {
-      /* indicate error in Erase operation */
-      PRINTF("error in Erase operation\n\r");
-    }
+    /* indicate error in Erase operation */
+    PRINTF("error in Erase operation\n\r");
   }
 /* Lock the Flash to disable the flash control register access (recommended
      to protect the FLASH memory against possible unwanted operation) *********/
@@ -141,10 +139,7 @@ void  FLASH_program(uint32_t add, uint32_t *data, uint8_t count)
     else
     {
       /* Error occurred while writing data in Flash memory.*/
-      while (1)
-      {
-        PRINTF("error in Write operation\n\r");
-      }
+      PRINTF("error in Write operation\n\r");
     }
   }
 
@@ -167,10 +162,7 @@ void  FLASH_program_on_addr(uint32_t addr,uint32_t data)
     else
     {
       /* Error occurred while writing data in Flash memory.*/
-      while (1)
-      {
-        PRINTF("error in Write operation\n\r");
-      }
+      PRINTF("error in Write operation\n\r");
     }
 
   /* Lock the Flash to disable the flash control register access (recommended
@@ -183,4 +175,48 @@ uint32_t FLASH_read(uint32_t Address)
 		return data32;
 }
 
+void EEPROM_erase_one_address(uint32_t address)
+{
+	BACKUP_PRIMASK();
+	
+	DISABLE_IRQ( );
+	
+	HAL_FLASHEx_DATAEEPROM_Unlock();
+	
+	if(HAL_FLASHEx_DATAEEPROM_Erase(address)!=HAL_OK)
+	{
+		RESTORE_PRIMASK();
+    PRINTF("error in EEPROM Erase operation\n\r");
+	}
+	
+	HAL_FLASHEx_DATAEEPROM_Lock();
+	
+	RESTORE_PRIMASK();
+}
+
+void EEPROM_erase_lora_config(void)
+{
+	uint32_t address;
+	
+	address=EEPROM_USER_START_ADDR_CONFIG;
+	
+	BACKUP_PRIMASK();
+	
+	DISABLE_IRQ( );
+	
+	HAL_FLASHEx_DATAEEPROM_Unlock();
+	while(address<EEPROM_USER_END_ADDR_CONFIG)
+	{
+		if(HAL_FLASHEx_DATAEEPROM_Erase(address)!=HAL_OK)
+		{
+			RESTORE_PRIMASK();
+			PRINTF("error in EEPROM Erase operation\n\r");
+		}
+		address = address + 4;
+  }
+	
+	HAL_FLASHEx_DATAEEPROM_Lock();
+	
+	RESTORE_PRIMASK();
+}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

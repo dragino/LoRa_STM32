@@ -79,6 +79,7 @@ Maintainer: Miguel Luis and Gregory Cristian
  * @retval None
  */
 void  BSP_oil_float_Init( void );
+void  BSP_oil_float_DeInit( void );
 
 #ifdef __cplusplus
 }

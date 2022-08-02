@@ -58,7 +58,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 
 #define IRQ_HIGH_PRIORITY  0
 
-
+extern bool joined_led_end;
 /*!
  * Flag used to set the RF switch control pins in low power mode when the radio is not active.
  */
@@ -260,6 +260,11 @@ void SX1276SetAntSwLowPower( bool status )
         else
         {
             SX1276AntSwDeInit( );
+					  if(joined_led_end==1)
+	          {
+							HW_GPIO_Write( RADIO_ANT_SWITCH_PORT, RADIO_ANT_SWITCH_PIN, 1);
+							joined_led_end=0;
+	          }
         }
     }
 }

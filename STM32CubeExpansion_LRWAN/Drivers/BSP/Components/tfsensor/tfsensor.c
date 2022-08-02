@@ -62,55 +62,48 @@
 /* I2C handler declaration */
 bool flags_command_check=0;
 uint8_t rxdatacheck[7]={0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-extern bool debug_flags;
 extern UART_HandleTypeDef UartHandle1;
 extern uint8_t aRxBuffer[1];
 
 void BSP_tfsensor_Init(void)
 {
 	uint8_t txdisoutput[5]={0x5A,0x05,0x07,0x00,0x66};   
-	uint8_t txlowpower[6] ={0x5A,0x06,0x35,0x01,0x00,0x96};  //1HZ
-	uint8_t txsave[4]     ={0x5A,0x04,0x11,0x6f};
+	uint8_t txlowpower[6] ={0x5A,0x06,0x03,0x01,0x00,0x64};  //1HZ
 
   uart1_init_uart1();
 	uart1_IoInit();	
-  HAL_UART_Transmit(&UartHandle1, txdisoutput, 5, 0xFFFF);	
-	DelayMs(50);
-  HAL_UART_Transmit(&UartHandle1, txlowpower, 6, 0xFFFF);
-	DelayMs(50);	
-  HAL_UART_Transmit(&UartHandle1, txsave, 4, 0xFFFF);		
-	DelayMs(50);
 	HAL_UART_Receive_IT(&UartHandle1, (uint8_t *)aRxBuffer,1);	
-	DelayMs(500); 
+	HAL_Delay(1000); 
+  HAL_UART_Transmit(&UartHandle1, txdisoutput, 5, 0xFFFF);	
+	HAL_Delay(50);
+  HAL_UART_Transmit(&UartHandle1, txlowpower, 6, 0xFFFF);
+	HAL_Delay(50);	
 }
 
 uint8_t check_deceive(void)
 {
 	uint8_t temp_flag=0;
-	uint8_t txID[4]={0x5A,0x04,0x01,0x5f};
+	uint8_t txsave[4]     ={0x5A,0x04,0x11,0x6f};
 	
 	BSP_tfsensor_Init();
 
-	HAL_UART_Transmit(&UartHandle1, txID, 4, 0xFFFF);	
+	HAL_UART_Transmit(&UartHandle1, txsave, 4, 0xFFFF);	
 	flags_command_check=1;	
 	HAL_UART_Receive_IT(&UartHandle1, (uint8_t *)aRxBuffer,1);	
-  DelayMs(100);	
+  HAL_Delay(500);	
 	flags_command_check=0; 
 	
-	for(uint8_t i=0;i<7;i++)
-  {
-		if(rxdatacheck[i]!=0x00)
-		{
-			temp_flag=1;
-			break;
-		}
+	uart1_IoDeInit();	
+	
+	if((rxdatacheck[0]==0x5A)&&(rxdatacheck[1]==0x05)&&(rxdatacheck[2]==0x11)&&(rxdatacheck[3]==0x00)&&(rxdatacheck[4]==0x70))
+	{    		
+		temp_flag=1;
 	}
 	
 	if(temp_flag==1)
 	{	
 		return 1;
 	}
-	uart1_IoDeInit();	
 	
 	return 0;
 }
@@ -120,29 +113,22 @@ void tfsensor_read_distance(tfsensor_reading_t *tfsensor_reading)
   uint8_t rxdata[7] ={0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
 	uart1_IoInit();
+	HAL_Delay(1000);	
 	at_tfmini_data_receive(rxdata,2000);		
   uart1_IoDeInit();
 	
-	if ((rxdata[0] == 0x00)&&(rxdata[1] == 0x00))
+	if((rxdata[0] == 0x00)&&(rxdata[1] == 0x00)&&(rxdata[2] == 0x00)&&
+		 (rxdata[3] == 0x00)&&(rxdata[4] == 0x00)&(rxdata[5] == 0x00)&&(rxdata[6] == 0x00))
 	{
-		tfsensor_reading->distance_mm = 4095;
-		tfsensor_reading->distance_signal_strengh = 4095;		
-		if(debug_flags==1)
-		{			
-			PPRINTF("\r\n");					
-			PPRINTF("Reading out of LIDAR range \r\n");	
-		}			
+		tfsensor_reading->distance_mm = 0;
+		tfsensor_reading->distance_signal_strengh = 65534;	
+		tfsensor_reading->temperature = 0;			
 	} 
 	else 
 	{	
 		tfsensor_reading->distance_mm = (uint16_t)(((rxdata[1]<<8)+rxdata[0])*10);
 		tfsensor_reading->distance_signal_strengh = (uint16_t)((rxdata[3]<<8)+rxdata[2]);
 		tfsensor_reading->temperature = (int)((rxdata[5]*256+rxdata[4])/8-256);
-		if(debug_flags==1)
-		{			
-			PPRINTF("\r\n");		
-			PPRINTF("Dist:%dcm,Strength:%d,Temp:%d\r\n",tfsensor_reading->distance_mm/10,tfsensor_reading->distance_signal_strengh,tfsensor_reading->temperature);	
-		}
 	}
 }
 

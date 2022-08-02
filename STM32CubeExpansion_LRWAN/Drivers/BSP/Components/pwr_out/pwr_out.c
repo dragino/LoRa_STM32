@@ -74,11 +74,10 @@ void pwr_control_IoInit(void)
 void pwr_control_IoDeInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct={0};
-
-  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;
-
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	GPIO_InitStruct.Pin = PWR_OUT_PIN;
+  GPIO_InitStruct.Mode  = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull  = GPIO_NOPULL;
   HAL_GPIO_Init(PWR_OUT_PORT, &GPIO_InitStruct);
-	HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_SET);
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

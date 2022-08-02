@@ -63,13 +63,13 @@ Maintainer: Miguel Luis and Gregory Cristian
 #include "stm32l0xx_it.h"
 #include "iwdg.h"
 
-extern int exti_flag;
-extern uint8_t inmode;
-extern uint32_t COUNT;
+extern TIM_HandleTypeDef htim3;
+extern int exti_flag,exti_flag2,exti_flag3;
+extern uint8_t inmode,inmode2,inmode3;
+extern uint32_t COUNT,COUNT2;
 extern uint8_t mode;
-extern uint8_t switch_status;
-extern bool is_check_exit;
-extern bool joined_flags;
+extern uint8_t switch_status,switch_status2,switch_status3;
+extern bool join_network;
 /** @addtogroup STM32L1xx_HAL_Examples
   * @{
   */
@@ -246,7 +246,20 @@ void EXTI2_3_IRQHandler( void )
 
 void EXTI4_15_IRQHandler( void )
 {
-  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_4 );
+//  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_4 );
+ if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_4) != RESET) 
+  {
+	 if((inmode3!=0)&&(join_network==1))
+	 {
+		 if((mode==7)||(mode==9))
+		 {
+			 exti_flag3=1;	
+			 switch_status3=HAL_GPIO_ReadPin(GPIO_EXTI4_PORT,GPIO_EXTI4_PIN);
+		 }
+	 }
+	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_4);
+	 HAL_GPIO_EXTI_Callback(GPIO_PIN_4);
+  }
   
   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_5 );
 
@@ -269,27 +282,42 @@ void EXTI4_15_IRQHandler( void )
 //  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_14) != RESET) 
   { 
-	 if((inmode!=0)&&(joined_flags==1))
+	 if((inmode!=0)&&(join_network==1))
 	 {
-	  if((mode==6)&&((inmode==2)||(inmode==3)))
+	  if(((mode==6)||(mode==9))&&((inmode==2)||(inmode==3)))
 		{
 			exti_flag=1;
 			COUNT++;
 		}
-		else if(mode!=6)
+		else if((mode!=6)&&(mode!=9))
 		{
 			exti_flag=1;	
-			if(is_check_exit==0)
-			{
-				switch_status=HAL_GPIO_ReadPin(GPIO_EXTI_PORT,GPIO_EXTI_PIN);	
-			}				
+			switch_status=HAL_GPIO_ReadPin(GPIO_EXTI14_PORT,GPIO_EXTI14_PIN);			
 		}
 	 }
 	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);
    HAL_GPIO_EXTI_Callback(GPIO_PIN_14);		
   }
 
-  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_15 );
+//  HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_15 );
+ if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_15) != RESET) 
+  {
+	 if((inmode2!=0)&&(join_network==1))
+	 {
+		 if(mode==7)
+		 {
+			 exti_flag2=1;	
+			 switch_status2=HAL_GPIO_ReadPin(GPIO_EXTI15_PORT,GPIO_EXTI15_PIN);
+		 }
+		 else if((mode==9)&&((inmode2==2)||(inmode2==3)))
+		 {
+		   exti_flag2=1;	
+			 COUNT2++;
+		 }
+	 }
+	 __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_15);
+	 HAL_GPIO_EXTI_Callback(GPIO_PIN_15);
+  }
 }
 
 /**
@@ -300,5 +328,15 @@ void EXTI4_15_IRQHandler( void )
 void TIM21_IRQHandler(void)
 { 
   TIMER_IRQHandler();
+}
+
+/**
+  * @brief  This function handles TIM21 global interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM3_IRQHandler(void)
+{ 
+  HAL_TIM_IRQHandler(&htim3);
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

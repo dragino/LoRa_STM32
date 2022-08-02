@@ -1660,7 +1660,10 @@ typedef enum eLoRaMacRegion_t
      */
     LORAMAC_REGION_RU864,
 
-		LORAMAC_REGION_KZ865,		
+		LORAMAC_REGION_KZ865,	
+		
+		LORAMAC_REGION_MA869,	
+		
 }LoRaMacRegion_t;
 
 /*!

@@ -758,6 +758,11 @@
               <FilePath>..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac\region\RegionKZ865.c</FilePath>
             </File>
             <File>
+              <FileName>RegionMA869.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac\region\RegionMA869.c</FilePath>
+            </File>
+            <File>
               <FileName>LoRaMac.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\..\Middlewares\Third_Party\Lora\Mac\LoRaMac.c</FilePath>

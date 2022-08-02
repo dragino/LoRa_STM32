@@ -229,9 +229,15 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define ADC_Channel_Oil           ADC_CHANNEL_0
 
 /* ---------------------------  GPIO EXTI definition -------------------------------*/
-#define GPIO_EXTI_CLK_ENABLE()   __HAL_RCC_GPIOB_CLK_ENABLE()
-#define GPIO_EXTI_PORT          GPIOB	 
-#define GPIO_EXTI_PIN           GPIO_PIN_14
+#define GPIO_EXTI4_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()
+#define GPIO_EXTI4_PORT           GPIOA	 
+#define GPIO_EXTI4_PIN            GPIO_PIN_4
+#define GPIO_EXTI14_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()
+#define GPIO_EXTI14_PORT          GPIOB	 
+#define GPIO_EXTI14_PIN           GPIO_PIN_14
+#define GPIO_EXTI15_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()
+#define GPIO_EXTI15_PORT          GPIOB	 
+#define GPIO_EXTI15_PIN           GPIO_PIN_15
 
 /* ---------------------------  GPIO Digital Input definition -------------------------------*/
 #define GPIO_INPUT_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()

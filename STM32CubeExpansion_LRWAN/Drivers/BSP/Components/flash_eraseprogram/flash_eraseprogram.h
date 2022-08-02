@@ -78,17 +78,20 @@ Maintainer: Miguel Luis and Gregory Cristian
  * @note
  * @retval None
  */
-#define FLASH_USER_START_ADDR_CONFIG   (FLASH_BASE + FLASH_PAGE_SIZE * 800)        /* Start @ of user Flash area store config */
-#define FLASH_USER_END_ADDR            (FLASH_USER_START_ADDR + FLASH_PAGE_SIZE)   /* End @ of user Flash area store key*/
-
 #define FLASH_USER_START_ADDR_KEY      (FLASH_BASE + FLASH_PAGE_SIZE * 802)
+
+#define EEPROM_USER_START_ADDR_KEY     (DATA_EEPROM_BASE+0x04)
 #define EEPROM_USER_Firmware_FLAGS     (DATA_EEPROM_BASE+0x04*22)
+#define EEPROM_USER_START_ADDR_CONFIG  (DATA_EEPROM_BASE+0x04*24)
+#define EEPROM_USER_END_ADDR_CONFIG    (EEPROM_USER_START_ADDR_CONFIG+0x04*30)
 
 void  FLASH_erase(uint32_t page_address);
 void  FLASH_program(uint32_t add, uint32_t *data, uint8_t count);
 void  FLASH_program_on_addr(uint32_t addr,uint32_t data);
 uint32_t FLASH_read(uint32_t Address);
 void EEPROM_program(uint32_t add, uint32_t *data, uint8_t count);
+void EEPROM_erase_one_address(uint32_t address);
+void EEPROM_erase_lora_config(void);
 
 #ifdef __cplusplus
 }

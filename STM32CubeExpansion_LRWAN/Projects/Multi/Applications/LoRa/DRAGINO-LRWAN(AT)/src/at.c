@@ -63,11 +63,12 @@
 #include "delay.h"
 #include "gpio_exti.h"
 #include "weight.h"
+#include "bsp.h"
 
 bool debug_flags=0;
+bool message_flags=0;
 uint8_t symbtime1_value=0;  //RX1windowtimeout 
 uint8_t flag1=0;
-
 uint8_t symbtime2_value=0;  //RX2windowtimeout 
 uint8_t flag2=0;
 uint16_t power_time=0;
@@ -79,15 +80,21 @@ uint8_t dwelltime;
  * @brief Max size of the data that can be received
  */
 #define MAX_RECEIVED_DATA 255
+extern uint8_t RX2DR_setting_status;
+extern bool down_check;
+extern bool mac_response_flag;
 extern uint32_t LoRaMacState;
 extern uint32_t APP_TX_DUTYCYCLE;
 extern uint8_t mode;
-extern uint8_t inmode;
+extern uint8_t inmode,inmode2,inmode3;
 extern float GapValue;
 extern void Get_Maopi(void);
 extern bool fdr_flags;
 extern uint16_t REJOIN_TX_DUTYCYCLE;
 extern uint8_t response_level;
+extern uint8_t decrypt_flag;
+extern uint32_t COUNT,COUNT2;
+extern bool uplink_data_status;
 extern TimerEvent_t MacStateCheckTimer;
 extern TimerEvent_t TxDelayedTimer;
 extern TimerEvent_t AckTimeoutTimer;
@@ -95,6 +102,17 @@ extern TimerEvent_t RxWindowTimer1;
 extern TimerEvent_t RxWindowTimer2;
 extern TimerEvent_t TxTimer;
 extern TimerEvent_t ReJoinTimer;
+extern LoRaMainCallback_t *LoRaMainCallbacks;
+
+extern uint8_t downlink_detect_switch;
+extern uint16_t downlink_detect_timeout;
+
+extern uint8_t confirmed_uplink_counter_retransmission_increment_switch;
+extern uint8_t confirmed_uplink_retransmission_nbtrials;
+
+extern uint8_t LinkADR_NbTrans_uplink_counter_retransmission_increment_switch;
+extern uint8_t LinkADR_NbTrans_retransmission_nbtrials;
+extern uint16_t unconfirmed_uplink_change_to_confirmed_uplink_timeout;
 /* Private macro -------------------------------------------------------------*/
 /**
  * @brief Macro to return when an error occurs
@@ -233,9 +251,10 @@ ATEerror_t at_DEBUG_run(const char *param)
 
 ATEerror_t at_FDR(const char *param)
 {
-	FLASH_erase(0x8018F80);//page 799
-	FLASH_erase(FLASH_USER_START_ADDR_CONFIG);
+	EEPROM_erase_one_address(DATA_EEPROM_BASE);
+	EEPROM_erase_lora_config();
 	AT_PRINTF("OK\n\r");
+	HAL_Delay(50);
 	NVIC_SystemReset();
   return AT_OK;
 }
@@ -554,7 +573,7 @@ ATEerror_t at_PublicNetwork_get(const char *param)
   status = LoRaMacMibGetRequestConfirm(&mib);
   CHECK_STATUS(status);
   print_d(mib.Param.EnablePublicNetwork);
-
+	
   return AT_OK;
 }
 
@@ -640,6 +659,7 @@ ATEerror_t at_Rx2DataRate_set(const char *param)
     return AT_PARAM_ERROR;
   }
 
+	RX2DR_setting_status=1;
   status = LoRaMacMibSetRequestConfirm(&mib);
   CHECK_STATUS(status);
 
@@ -1164,14 +1184,15 @@ ATEerror_t at_RPL_set(const char *param)
 	 2 : confirm downlink data
 	 3 : MAC command
 	 4 : MAC command or confirm downlink data
+	 5 : Downlink data
 	 */
-	if(time<=4)
+	if(time<=5)
 	{
 		response_level=time;
 	}
 	else
 	{
-		PRINTF("The response level range is 0 to 4\n\r");
+		PRINTF("The response level range is 0 to 5\n\r");
 		return AT_PARAM_ERROR;	
 	}
 
@@ -1195,24 +1216,44 @@ ATEerror_t at_version_get(const char *param)
 
 ATEerror_t at_ack_set(const char *param)
 {
-  switch (param[0])
-  {
-    case '0':
-      lora_config_reqack_set(LORAWAN_UNCONFIRMED_MSG);
-      break;
-    case '1':
-      lora_config_reqack_set(LORAWAN_CONFIRMED_MSG);
-      break;
-    default:
-      return AT_PARAM_ERROR;
-  }
+	uint8_t mode,trials,increment_switch;
+	if(tiny_sscanf(param, "%d,%d,%d", &mode,&trials,&increment_switch) != 3)
+	{
+		if(tiny_sscanf(param, "%d", &mode) != 1)
+		{
+			return AT_PARAM_ERROR;
+		}
+		else
+		{
+			trials=7;
+			increment_switch=0;
+		}
+	}
+	
+	if(mode>1 || trials>7 || increment_switch>1)
+	{
+		return AT_PARAM_ERROR;
+	}
+	
+	if(mode==0)
+	{
+		lora_config_reqack_set(LORAWAN_UNCONFIRMED_MSG);
+		confirmed_uplink_retransmission_nbtrials=trials;
+		confirmed_uplink_counter_retransmission_increment_switch=0;
+	}
+	else if(mode==1)
+	{
+		lora_config_reqack_set(LORAWAN_CONFIRMED_MSG);
+		confirmed_uplink_retransmission_nbtrials=trials;
+		confirmed_uplink_counter_retransmission_increment_switch=increment_switch;
+	}
 
   return AT_OK;
 }
 
 ATEerror_t at_ack_get(const char *param)
 {
-  print_d (((lora_config_reqack_get() == LORAWAN_CONFIRMED_MSG) ? 1 : 0));
+  AT_PRINTF("%d,%d,%d\r\n", lora_config_reqack_get(),confirmed_uplink_retransmission_nbtrials,confirmed_uplink_counter_retransmission_increment_switch);
   return AT_OK;
 }
 
@@ -1261,7 +1302,7 @@ ATEerror_t at_CFG_run(const char *param)
 	TimerStop(&TxTimer);	
 	
 	printf_all_config();
-	DelayMs(500);	
+	HAL_Delay(500);	
 	
 	if (mac_status == LORAMAC_STATUS_OK)
 	{
@@ -1306,7 +1347,7 @@ ATEerror_t at_TDC_set(const char *param)
 
 ATEerror_t at_TDC_get(const char *param)
 { 
-	print_d(APP_TX_DUTYCYCLE);
+	print_u(APP_TX_DUTYCYCLE);
 	return AT_OK;
 }
 
@@ -1441,7 +1482,7 @@ ATEerror_t at_CHS_set(const char *param)
 
 ATEerror_t at_CHS_get(const char *param)
 { 
-	print_d(customize_freq1_get());
+	print_u(customize_freq1_get());
 	return AT_OK;
 }
 
@@ -1497,21 +1538,47 @@ ATEerror_t at_symbtimeout2LSB_set(const char *param)
 	return AT_OK;
 }
 
+ATEerror_t at_decrypt_set(const char *param)
+{
+	uint8_t temp;
+	if (tiny_sscanf(param, "%d", &temp) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+	
+	if(temp<=1)
+	{
+		decrypt_flag=temp;
+	}
+	else
+	{
+		return AT_PARAM_ERROR;
+	}
+	
+	return AT_OK;	
+}
+
+ATEerror_t at_decrypt_get(const char *param)
+{
+	PPRINTF("%d\r\n",decrypt_flag);
+	return AT_OK;	
+}
+
 ATEerror_t at_MOD_set(const char *param)
 { 
-	int workmode;
+	uint8_t workmode;
 	if (tiny_sscanf(param, "%d", &workmode) != 1)
   {
     return AT_PARAM_ERROR;
   }
-	if ((workmode>=1)&&(workmode<=6))
+	if ((workmode>=1)&&(workmode<=9))
   {
     mode=workmode;	
   	PPRINTF("Attention:Take effect after ATZ\r\n");			
 	}
 	else
 	{
-		PPRINTF("Mode of range is 1 to 6\r\n");	
+		PPRINTF("Mode of range is 1 to 9\r\n");	
     return AT_PARAM_ERROR;
 	}
 	
@@ -1524,7 +1591,8 @@ ATEerror_t at_MOD_get(const char *param)
 	return AT_OK;
 }
 
-ATEerror_t at_INTMOD_set(const char *param)
+
+ATEerror_t at_INTMOD1_set(const char *param)
 { 
 	uint8_t interrputmode;
 	if (tiny_sscanf(param, "%d", &interrputmode) != 1)
@@ -1537,33 +1605,75 @@ ATEerror_t at_INTMOD_set(const char *param)
 	}
 	else
 	{
-		PPRINTF("INTMode of range is 0 to 3\r\n");			
+		PPRINTF("INTMode1 of range is 0 to 3\r\n");			
     return AT_PARAM_ERROR;
 	}
-	switch(inmode)
-	{
-		case 0:
-			GPIO_EXTI_IoDeInit();
-	  break;
-		case 1:
-			GPIO_EXTI_RISING_FALLINGInit();
-	  break;
-		case 2:
-			GPIO_EXTI_FALLINGInit();
-	  break;
-		case 3:
-			GPIO_EXTI_RISINGInit();
-	  break;
-		default:
-		return AT_PARAM_ERROR;
-	}
+	
+	GPIO_EXTI14_IoInit(inmode);
+	
 	return AT_OK;
 }
 
-ATEerror_t at_INTMOD_get(const char *param)
+ATEerror_t at_INTMOD1_get(const char *param)
 { 
 	print_d(inmode);
 	return AT_OK;
+}
+
+ATEerror_t at_INTMOD2_set(const char *param)
+{
+	uint8_t interrputmode;
+	if (tiny_sscanf(param, "%d", &interrputmode) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+	if (interrputmode<=3)
+  {
+    inmode2=interrputmode;		
+	}
+	else
+	{
+		PPRINTF("INTMode2 of range is 0 to 3\r\n");			
+    return AT_PARAM_ERROR;
+	}
+	
+	GPIO_EXTI15_IoInit(inmode2);
+	
+	return AT_OK;	
+}
+
+ATEerror_t at_INTMOD2_get(const char *param)
+{
+	print_d(inmode2);
+	return AT_OK;	
+}
+
+ATEerror_t at_INTMOD3_set(const char *param)
+{
+	uint8_t interrputmode;
+	if (tiny_sscanf(param, "%d", &interrputmode) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }
+	if (interrputmode<=3)
+  {
+    inmode3=interrputmode;		
+	}
+	else
+	{
+		PPRINTF("INTMode3 of range is 0 to 3\r\n");			
+    return AT_PARAM_ERROR;
+	}
+	
+	GPIO_EXTI4_IoInit(inmode3);
+	
+	return AT_OK;	
+}
+
+ATEerror_t at_INTMOD3_get(const char *param)
+{
+	print_d(inmode3);
+	return AT_OK;	
 }
 
 ATEerror_t at_weightreset(const char *param)
@@ -1618,6 +1728,209 @@ ATEerror_t at_5Vtime_get(const char *param)
 {
 	print_d(power_time);
 	return AT_OK;
+}
+
+ATEerror_t at_SETCNT_set(const char *param)
+{
+	uint8_t coun;
+	uint32_t count_temp;
+  if (tiny_sscanf(param,"%d,%lu",&coun,&count_temp) != 2)
+	{
+		return AT_PARAM_ERROR;
+	}
+			
+	if(coun==1)
+	{
+		COUNT=count_temp;
+	}
+	else if(coun==2)
+	{
+		COUNT2=count_temp;			
+	}		
+	
+	return AT_OK;
+}
+
+ATEerror_t at_getsensorvaule_set(const char *param)
+{
+	uint8_t stus;
+	if (tiny_sscanf(param, "%d", &stus) != 1)
+  {
+    return AT_PARAM_ERROR;
+  }	
+	
+	if(stus==0)
+	{
+		if(( LoRaMacState & 0x00000001 ) == 0x00000001)
+		{
+			return AT_BUSY_ERROR;
+		}	
+		sensor_t sensor_message;
+		BSP_sensor_Read(&sensor_message,1);
+	}
+	else if(stus==1)
+	{
+		message_flags=1;
+		uplink_data_status=1;
+	}
+	else
+	{
+		return AT_PARAM_ERROR;
+	}
+	
+	return AT_OK;	
+}
+
+ATEerror_t at_downlink_detect_set(const char *param)
+{
+	uint8_t status;
+	uint16_t timeout1=0,timeout2=0;
+	if (tiny_sscanf(param, "%d,%lu,%lu", &status,&timeout1,&timeout2) != 3)
+  {
+    return AT_PARAM_ERROR;
+  }
+	
+	if(status<2)
+	{
+		downlink_detect_switch=status;
+	}
+	else
+		return AT_PARAM_ERROR;
+	
+	if(timeout1>0 && timeout1<=65535 && timeout2>0 && timeout2<=65535)
+	{
+		unconfirmed_uplink_change_to_confirmed_uplink_timeout=timeout1;
+		downlink_detect_timeout=timeout2;
+	}
+	else
+	{
+		PRINTF("The timeout range is 1 to 65535\n\r");
+		return AT_PARAM_ERROR;	
+	}
+	
+	PPRINTF("Attention:Take effect after ATZ\r\n");
+	
+	return AT_OK;	
+}
+
+ATEerror_t at_downlink_detect_get(const char *param)
+{
+	AT_PRINTF("%d,%d,%d\r\n", downlink_detect_switch,unconfirmed_uplink_change_to_confirmed_uplink_timeout,downlink_detect_timeout);
+	return AT_OK;	
+}
+
+ATEerror_t at_setmaxnbtrans_set(const char *param)
+{
+	uint8_t trials,increment_switch;
+	if(tiny_sscanf(param, "%d,%d", &trials,&increment_switch) != 2)
+	{
+		return AT_PARAM_ERROR;
+	}
+	
+	if(trials<1 || trials>15 || increment_switch>1)
+	{
+		return AT_PARAM_ERROR;
+	}
+	
+	LinkADR_NbTrans_retransmission_nbtrials=trials;
+  LinkADR_NbTrans_uplink_counter_retransmission_increment_switch=increment_switch;
+
+  return AT_OK;	
+}
+
+ATEerror_t at_setmaxnbtrans_get(const char *param)
+{
+  AT_PRINTF("%d,%d\r\n", LinkADR_NbTrans_retransmission_nbtrials,LinkADR_NbTrans_uplink_counter_retransmission_increment_switch);
+  return AT_OK;	
+}
+
+ATEerror_t at_disdownlinkcheck_set(const char *param)
+{
+	uint8_t temp1;
+	if (tiny_sscanf(param, "%d", &temp1) != 1)
+  {
+		return AT_PARAM_ERROR;
+	}		
+	
+	if(temp1<=1)
+	{
+		down_check=temp1;
+	}
+	else
+	{
+		return AT_PARAM_ERROR;
+	}
+	
+	return AT_OK;			
+}
+
+ATEerror_t at_disdownlinkcheck_get(const char *param)
+{
+	PPRINTF("%d\r\n",down_check);
+	return AT_OK;			
+}
+
+ATEerror_t at_dismac_answer_set(const char *param)
+{
+	uint8_t temp1;
+	if (tiny_sscanf(param, "%d", &temp1) != 1)
+  {
+		return AT_PARAM_ERROR;
+	}		
+	
+	if(temp1<=1)
+	{
+		mac_response_flag=temp1;
+	}
+	else
+	{
+		return AT_PARAM_ERROR;
+	}
+	
+	return AT_OK;		
+}
+
+ATEerror_t at_dismac_answer_get(const char *param)
+{
+	PPRINTF("%d\r\n",mac_response_flag);
+	return AT_OK;		
+}
+
+ATEerror_t at_rxdata_test(const char *param)
+{
+  const char *buf= param;
+  unsigned char bufSize= strlen(param);
+  unsigned size=0;
+  char hex[3];
+  uint8_t buff[30];
+	uint8_t length=0;
+
+  hex[2] = 0;
+  while ((size < 255) && (bufSize > 1))
+  {
+    hex[0] = buf[size*2];
+    hex[1] = buf[size*2+1];
+    if (tiny_sscanf(hex, "%hhx", &buff[size]) != 1)
+    {
+      return AT_PARAM_ERROR;
+    }
+    size++;
+    bufSize -= 2;
+  }
+	
+  if (bufSize != 0)
+  {
+    return AT_PARAM_ERROR;
+  }
+
+	length=size;	
+	lora_AppData_t rxappData;
+	rxappData.Port = 2;
+  rxappData.BuffSize = length;
+	rxappData.Buff=buff;
+  LoRaMainCallbacks->LORA_RxData( &rxappData );
+	
+	return AT_OK;		
 }
 
 /* Private functions ---------------------------------------------------------*/
@@ -1798,7 +2111,7 @@ void weightreset(void)
 	WEIGHT_SCK_Init();
 	WEIGHT_DOUT_Init();
 	Get_Maopi();	
-  DelayMs(500);
+  HAL_Delay(500);
   Get_Maopi();
 	WEIGHT_SCK_DeInit();
 	WEIGHT_DOUT_DeInit();		

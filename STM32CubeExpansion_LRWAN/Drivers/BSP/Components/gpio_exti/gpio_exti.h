@@ -78,11 +78,13 @@ Maintainer: Miguel Luis and Gregory Cristian
  * @note
  * @retval None
  */
-void  GPIO_EXTI_FALLINGInit( void  );
-void  GPIO_EXTI_RISINGInit( void  );
-void  GPIO_EXTI_RISING_FALLINGInit( void  );
-void  GPIO_EXTI_IoDeInit( void  );
+#include "hw.h"
+
+void GPIO_EXTI4_IoInit(uint8_t state);
+void GPIO_EXTI14_IoInit(uint8_t state);
+void GPIO_EXTI15_IoInit(uint8_t state);
 void  GPIO_INPUT_IoInit(void);
+void GPIO_INPUT_DeIoInit(void);
 #ifdef __cplusplus
 }
 #endif

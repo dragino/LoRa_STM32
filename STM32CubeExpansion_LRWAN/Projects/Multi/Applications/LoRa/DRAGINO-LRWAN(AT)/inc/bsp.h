@@ -65,12 +65,15 @@ Maintainer: Miguel Luis and Gregory Cristian
 #ifdef __cplusplus
  extern "C" {
 #endif
+
+#include "hw.h"
+
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 
 typedef struct{
 	
-  int   in1;/*GPIO Digital Input 0 or 1*/
+  uint8_t   in1;/*GPIO Digital Input 0 or 1*/
 	
 	float temp1;//DS18B20-1
 
@@ -88,15 +91,26 @@ typedef struct{
 	
 	float hum_sht;
 	
-	float illuminance;	
+	uint16_t illuminance;	
 	
-  int distance_mm;
+  uint16_t distance_mm;
 	
-	int distance_signal_strengh;
+	uint16_t distance_signal_strengh;
 	
+	int32_t Weight;
+
   /**more may be added*/
 } sensor_t;
 
+typedef struct{
+	
+	uint16_t firm_ver;
+	
+	uint8_t freq_band;
+	
+	uint8_t sub_band;
+	
+} device_t;
 
 /* Exported constants --------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/
@@ -116,7 +130,9 @@ void  BSP_sensor_Init( void  );
  * @note none
  * @retval sensor_data
  */
-void BSP_sensor_Read( sensor_t *sensor_data);
+void BSP_sensor_Read( sensor_t *sensor_data, uint8_t message);
+
+void Device_status( device_t *device_data);
 
 #ifdef __cplusplus
 }

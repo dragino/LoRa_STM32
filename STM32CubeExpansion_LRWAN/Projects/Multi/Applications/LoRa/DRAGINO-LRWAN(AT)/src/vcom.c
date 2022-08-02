@@ -47,7 +47,6 @@
 #include "hw.h"
 #include "vcom.h"
 #include "timeServer.h"
-#include "delay.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -360,14 +359,12 @@ void uart1_IoDeInit(void)
   GPIO_InitStruct.Pin = GPIO_PIN_9 ;
 	GPIO_InitStruct.Mode  = GPIO_MODE_ANALOG;
 	GPIO_InitStruct.Pull  = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct); 
 	
   GPIO_InitTypeDef  GPIO_InitStruct2;
   GPIO_InitStruct2.Pin = GPIO_PIN_10 ;
 	GPIO_InitStruct2.Mode  = GPIO_MODE_ANALOG;
 	GPIO_InitStruct2.Pull  = GPIO_NOPULL;
-	GPIO_InitStruct2.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct2); 
 }
 
@@ -377,12 +374,20 @@ void at_tfmini_data_receive(uint8_t rxdatatemp[],uint16_t delayvalue)
 	uint8_t begin=0,datanumber=0;
 	uint8_t txenoutput[5] ={0x5A,0x05,0x07,0x01,0x67};		  
 	
-  HAL_UART_Transmit(&UartHandle1,txenoutput, 5, 0xFFFF);	
+	num=0;
+  uint32_t currentTime = TimerGetCurrentTime();		
+	HAL_UART_Transmit_IT(&UartHandle1, txenoutput, 5);	
+	while(UartHandle1.gState != HAL_UART_STATE_READY)
+	{
+		if(TimerGetElapsedTime(currentTime) >= 5000)
+		{		
+			break;
+		}
+	}
 	flags_command=1;
 	HAL_UART_Receive_IT(&UartHandle1, (uint8_t *)aRxBuffer,1); 
-	DelayMs(delayvalue);		
+	HAL_Delay(delayvalue);		
 	flags_command=0;
-	num=0;
 	
 	for(uint8_t number=0;number<sizeof(response);number++)
 	{

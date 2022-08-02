@@ -72,8 +72,8 @@ Maintainer: Miguel Luis, Gregory Cristian and Wael Guibene
 #define TEST_VERSION (uint32_t) 0x00000000  /*1 lsb is always 0 in releases   */
 #define LRWAN_VERSION  (uint32_t) 0x00001140  /*3 next hex is i_cube release*/
 #define VERSION   (uint32_t) ( LORA_MAC_VERSION | LRWAN_VERSION | TEST_VERSION )
-#define AT_VERSION_STRING	"v1.7.2"
-#define AT_LoRaWan_VERSION_STRING	"DR-LWS-005"
+#define AT_VERSION_STRING	"v1.8.0"
+#define AT_LoRaWan_VERSION_STRING	"DR-LWS-007"
 
 /* Exported types ------------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/

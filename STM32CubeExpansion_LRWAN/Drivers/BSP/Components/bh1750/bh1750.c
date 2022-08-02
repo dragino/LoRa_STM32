@@ -50,7 +50,6 @@
 #include "delay.h"
 
 bool iic_noack=0;
-extern bool debug_flags;
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
@@ -62,18 +61,18 @@ float bh1750_read(void)
 {
 	uint8_t rxdata[2];	
 	uint16_t AD_code;
-	float luminance;	
+	uint16_t luminance;	
 
-	DelayMs(10);//Required	
+	HAL_Delay(10);//Required	
 	IIC_Write_Byte(0x23,0x01);  //power on
 	IIC_Write_Byte(0x23,0x20);  //read data
-  DelayMs(200);	
+  HAL_Delay(200);	
   IIC_Read_Len(0x23,2,rxdata);
 	IIC_Write_Byte(0x23,0x07);	//clear
 
 	if(iic_noack==1)
 	{
-		luminance=65535;
+		luminance=0;
 	}
 	else
 	{
@@ -82,11 +81,7 @@ float bh1750_read(void)
 	}
 	
 	iic_noack=0;	
-  if(debug_flags==1)
-	{		
-		PPRINTF("\r\n");			
-		PPRINTF("Luminance:%d lux\r\n",(int)luminance);
-	}
+
 	return luminance;
 }
 
@@ -107,7 +102,10 @@ void I2C_IoInit(void)
 void I2C_DoInit(void)
 {
 	static GPIO_InitTypeDef  GPIO_InitStruct;
-
+	
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	
+	GPIO_InitStruct.Mode  = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull  = GPIO_PULLUP;
 	GPIO_InitStruct.Pin  =IIC_SCL_PIN | IIC_SDA_PIN;
 
@@ -122,7 +120,6 @@ void SDA_IN(void)
    
   GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull  = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	GPIO_InitStruct.Pin  = IIC_SDA_PIN;
 
   HAL_GPIO_Init(GPIO_PORT_IIC, &GPIO_InitStruct); 

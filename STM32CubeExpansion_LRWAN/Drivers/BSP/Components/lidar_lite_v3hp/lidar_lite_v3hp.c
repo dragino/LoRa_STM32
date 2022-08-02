@@ -58,7 +58,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* I2C handler declaration */
-extern bool debug_flags;
 I2C_HandleTypeDef I2cHandle3;
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
@@ -129,32 +128,17 @@ uint16_t LidarLite(void)
 			distance=(rxdata1[0]<<8)+rxdata2[0];
 			if(distance>4000)
 			{
-				if(debug_flags==1)
-				{			
-					PPRINTF("\r\n");					
-					PRINTF("Distance is out of range\r\n",distance);
-				}
-				distance=65535;			
+				distance=0;			
 				return distance;			
 			}
 			else
 			{
-				if(debug_flags==1)
-				{			
-					PPRINTF("\r\n");					
-					PRINTF("Distance =%dcm\r\n",distance);
-				}
 				return distance*10;	
 			}			
 		}
 		else
 		{
-			if(debug_flags==1)
-			{			
-				PPRINTF("\r\n");					
-				PRINTF("lidar_lite is not connect\r\n");
-			}
-	   distance=4095;
+	   distance=65535;
 	   return distance;			
 		}
 }

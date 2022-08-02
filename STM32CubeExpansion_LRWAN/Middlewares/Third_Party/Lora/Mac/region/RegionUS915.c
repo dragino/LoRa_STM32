@@ -162,11 +162,25 @@ static LoRaMacStatus_t ComputeNext125kHzJoinChannel( uint8_t* newChannelIndex )
         // For even numbers we need the 8 LSBs and for uneven the 8 MSBs
         if( ( startIndex % 2 ) == 0 )
         {
-            channelMaskRemaining = ( ChannelsMaskRemaining[currentChannelsMaskRemainingIndex] & 0x00FF );
+					  if((customize_set8channel_get()==0)&&(startIndex==0))
+						{
+							channelMaskRemaining = ( ( ChannelsMaskRemaining[currentChannelsMaskRemainingIndex] >> 8 ) & 0x00FF );
+						}
+						else
+						{
+							channelMaskRemaining = ( ChannelsMaskRemaining[currentChannelsMaskRemainingIndex] & 0x00FF );
+						}
         }
         else
         {
-            channelMaskRemaining = ( ( ChannelsMaskRemaining[currentChannelsMaskRemainingIndex] >> 8 ) & 0x00FF );
+					  if((customize_set8channel_get()==0)&&(startIndex==1))
+						{
+							channelMaskRemaining = ( ChannelsMaskRemaining[currentChannelsMaskRemainingIndex] & 0x00FF );
+						}
+						else
+						{
+							channelMaskRemaining = ( ( ChannelsMaskRemaining[currentChannelsMaskRemainingIndex] >> 8 ) & 0x00FF );	
+						}					
         }
 
 
@@ -177,8 +191,28 @@ static LoRaMacStatus_t ComputeNext125kHzJoinChannel( uint8_t* newChannelIndex )
 
         if ( availableChannels > 0 )
         {
+            uint8_t channels_temp;
+					  if(customize_set8channel_get()==0)
+						{
+							if(startIndex==0)
+							{
+								channels_temp=1;
+							}
+							else if(startIndex==1)
+							{
+								channels_temp=0;
+							}
+							else
+							{
+								channels_temp=startIndex;
+							}
+						}
+						else
+						{
+							channels_temp=startIndex;
+						}
             // Choose randomly a free channel 125kHz
-            *newChannelIndex = ( startIndex * 8 ) + findAvailableChannelsIndex[randr( 0, ( availableChannels - 1 ) )];
+            *newChannelIndex = ( channels_temp * 8 ) + findAvailableChannelsIndex[randr( 0, ( availableChannels - 1 ) )];
         }
 
         // Increment start index
@@ -641,6 +675,7 @@ void RegionUS915ApplyCFList( ApplyCFListParams_t* applyCFList )
 				channel_mask[4]=1<<(index-1);
 				
 				RegionCommonChanMaskCopy( ChannelsJoinAcceptMask, channel_mask, 6 );
+				RegionCommonChanMaskCopy( ChannelsMask, ChannelsJoinAcceptMask, 6 );
 				
 				for(int i=0;i<6;i++)
 				{
@@ -1019,15 +1054,18 @@ uint8_t RegionUS915LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     // Update channelsMask if everything is correct
     if( status == 0x07 )
     {
-        // Copy Mask
-        RegionCommonChanMaskCopy( ChannelsMask, channelsMask, 6 );
+				if(customize_set8channel_get()==0)
+				{
+					// Copy Mask
+					RegionCommonChanMaskCopy( ChannelsMask, channelsMask, 6 );
 
-        ChannelsMaskRemaining[0] &= ChannelsMask[0];
-        ChannelsMaskRemaining[1] &= ChannelsMask[1];
-        ChannelsMaskRemaining[2] &= ChannelsMask[2];
-        ChannelsMaskRemaining[3] &= ChannelsMask[3];
-        ChannelsMaskRemaining[4] = ChannelsMask[4];
-        ChannelsMaskRemaining[5] = ChannelsMask[5];			
+					ChannelsMaskRemaining[0] &= ChannelsMask[0];
+					ChannelsMaskRemaining[1] &= ChannelsMask[1];
+					ChannelsMaskRemaining[2] &= ChannelsMask[2];
+					ChannelsMaskRemaining[3] &= ChannelsMask[3];
+					ChannelsMaskRemaining[4] = ChannelsMask[4];
+					ChannelsMaskRemaining[5] = ChannelsMask[5];		
+				}					
     }
 
 		 if((linkAdrParams.Datarate==0)&&(payloadlens>11)&&(payloadlens<53))
@@ -1205,7 +1243,16 @@ bool RegionUS915NextChannel( NextChanParams_t* nextChanParams, uint8_t* channel,
 				else
 				{
 						// Choose the next available channel
-						uint8_t i = 0;
+						uint8_t i;
+					  if((ChannelsMaskRemaining[4]&0x02)==0x02)
+						{
+							i=1;
+						}
+						else
+						{
+							i=0;
+						}
+						
 						while( ( ( ChannelsMaskRemaining[4] & CHANNELS_MASK_500KHZ_MASK ) & ( 1 << i ) ) == 0 )
 						{
 								i++;

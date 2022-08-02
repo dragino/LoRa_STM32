@@ -139,7 +139,7 @@ void HW_Init( void )
     
     TraceInit( );
 
-	  Read_Config();
+	  EEPROM_Read_Config();
     
     BSP_sensor_Init( );
 
@@ -340,13 +340,13 @@ uint8_t HW_GetBatteryLevel( void )
     batteryLevel_mV= (( (uint32_t) VDDA_VREFINT_CAL * (*VREFINT_CAL ) )/ measuredLevel);
   }
 
-  if (batteryLevel_mV > VDD_BAT)
+  if (batteryLevel_mV >= VDD_BAT)
   {
     batteryLevel = LORAWAN_MAX_BAT;
   }
   else if (batteryLevelmV < VDD_MIN)
   {
-    batteryLevel = 0;
+    batteryLevel = 1;
   }
   else
   {

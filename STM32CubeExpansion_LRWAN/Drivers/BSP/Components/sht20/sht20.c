@@ -60,9 +60,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* I2C handler declaration */
 #ifdef USE_SHT
-static int i=0,j=0;
 I2C_HandleTypeDef I2cHandle1;
-extern bool debug_flags;
 /* I2C TIMING Register define when I2C clock source is SYSCLK */
 /* I2C TIMING is calculated in case of the I2C Clock source is the SYSCLK = 32 MHz */
 #define I2C_TIMING    0x10A13E56 /* 100 kHz with analog Filter ON, Rise Time 400ns, Fall Time 100ns */ 
@@ -116,12 +114,14 @@ float SHT20_RH(void)
 		uint8_t rxdata[2];
 		uint16_t AD_code;
 		float hum;
-
+		bool read_status=1;
+		
 		uint32_t currentTime = TimerGetCurrentTime();
 		while(HAL_I2C_Master_Transmit(&I2cHandle1,0x80,txdata,1,1000) != HAL_OK)
     {
-			  if(TimerGetElapsedTime(currentTime) >= 1000)
+			  if(TimerGetElapsedTime(currentTime) >= 300)
 				{
+					read_status=0;
 					break;
 				}
         if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
@@ -133,35 +133,32 @@ float SHT20_RH(void)
     {
 			  if(TimerGetElapsedTime(currentTime) >= 1000)
 				{
+					read_status=0;
 					break;
 				}
         if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
         {}
     }
 
-	AD_code=(rxdata[0]<<8)+rxdata[1];
-	AD_code &=~0x0003;   //14bit
+	if(read_status==1)
+	{
+		AD_code=(rxdata[0]<<8)+rxdata[1];
+		AD_code &=~0x0003;   //14bit
 
-	hum=AD_code*125.0/65536-6;
-	if(hum>100.0)
-	{
-		hum=100.0;
-	}
-  if(hum<0.0)
-	{
-		i++;
-		if(i==2)
+		hum=AD_code*125.0/65536-6;
+		
+		if(hum>100)
 		{
-			BSP_sht20_Init();
+			hum=100;
+		}
+		else if(hum<0)
+		{
+			hum=0;
 		}
 	}
-  else
+	else
 	{
-		i=0;
-	}
-  if(debug_flags==1)
-	{	
-		PPRINTF("Humidity =%0.1f\r\n",hum);
+		hum=6553.5;
 	}
 	return hum;
 }
@@ -172,12 +169,14 @@ float SHT20_RT(void)
 		uint8_t rxdata[2];
 		uint16_t AD_code;
 		float tem;
-
+		bool read_status=1;
+		
 	  uint32_t currentTime = TimerGetCurrentTime();		
 		while(HAL_I2C_Master_Transmit(&I2cHandle1,0x80,txdata,1,1000) != HAL_OK)
     {
-			  if(TimerGetElapsedTime(currentTime) >= 1000)
+			  if(TimerGetElapsedTime(currentTime) >= 300)
 				{
+					read_status=0;
 					break;
 				}
         if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
@@ -189,32 +188,33 @@ float SHT20_RT(void)
     {
 			  if(TimerGetElapsedTime(currentTime) >= 1000)
 				{		
+					read_status=0;
 					break;
 				}
         if(HAL_I2C_GetError(&I2cHandle1) != HAL_I2C_ERROR_AF)
         {}
     }
 		
-	AD_code=(rxdata[0]<<8)+rxdata[1];
-	AD_code &=~0x0003;   //14bit
-	tem=AD_code*175.72/65536-46.85;
-	if((tem<-40.0)||(tem>125.0))
-	{
-		j++;
-		if(j==2)
+	if(read_status==1)
+	{		
+		AD_code=(rxdata[0]<<8)+rxdata[1];
+		AD_code &=~0x0003;   //14bit
+		tem=AD_code*175.72/65536-46.85;
+		
+		if(tem>125)
 		{
-			BSP_sht20_Init();		
+			tem=125;
+		}
+		else if(tem<-40)
+		{
+			tem=-40;
 		}
 	}
-	else
+	else 
 	{
-		j=0;
+		tem=3276.7;
 	}
-  if(debug_flags==1)
-	{		
-		PPRINTF("\r\n");		
-		PPRINTF("Temperature =%0.1f\r\n",tem);
-	}
+	
 	return tem;	
 }
 #endif

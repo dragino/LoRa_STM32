@@ -683,8 +683,11 @@ uint8_t RegionCN470LinkAdrReq( LinkAdrReqParams_t* linkAdrReq, int8_t* drOut, in
     // Update channelsMask if everything is correct
     if( status == 0x07 )
     {
-        // Copy Mask
-        RegionCommonChanMaskCopy( ChannelsMask, channelsMask, 6 );			
+				if(customize_set8channel_get()==0)
+				{			  
+					// Copy Mask
+					RegionCommonChanMaskCopy( ChannelsMask, channelsMask, 6 );
+				}					
     }
 		
 		 if(((linkAdrParams.Datarate==0)||(linkAdrParams.Datarate==1)||(linkAdrParams.Datarate==2))&&(payloadlens>=51))

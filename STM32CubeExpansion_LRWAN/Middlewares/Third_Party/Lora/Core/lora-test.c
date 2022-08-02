@@ -282,7 +282,7 @@ void certif_rx( McpsIndication_t *mcpsIndication, MlmeReqJoin_t* JoinParameters)
         case 6: // (ix)
         {										
 					TimerStop( &CertifTxNextPacketTimer );
-					DelayMs(500);
+					HAL_Delay(500);
 					
             MlmeReq_t mlmeReq;
 

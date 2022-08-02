@@ -68,6 +68,16 @@ void  BSP_oil_float_Init( void )
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(OIL_CONTROL_PORT, &GPIO_InitStruct);
 	
-	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(OIL_CONTROL_PORT,OIL_CONTROL_PIN,GPIO_PIN_RESET);
+}
+
+void  BSP_oil_float_DeInit( void )
+{
+	GPIO_InitTypeDef GPIO_InitStruct={0};
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	GPIO_InitStruct.Pin = OIL_CONTROL_PIN;
+	GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(OIL_CONTROL_PORT, &GPIO_InitStruct);
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
