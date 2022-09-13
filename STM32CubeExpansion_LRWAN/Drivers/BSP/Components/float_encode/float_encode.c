@@ -48,32 +48,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #include "float_encode.h"
 
 
-#define tamanhoExpoente 5
-#define tamanhoMantissa 10
-#define maxExp 15
-
-#define MAX_16BITS 65504
-
-
-int calculaPontoFlutuante(double data)
+int calculaPontoFlutuante(double data, int tamanhoExpoente, int tamanhoMantissa, int numeroBits, int maxExp)
 {
-	
-		// Se numero maior que maximo (7BFF), retorna FFFF = 65535
-		if (data > 65504)
-		{
-			return 65535; // FFFF
-		}
-	
-	
-    double fractpart, intpart;
+		double fractpart, intpart;
     
-    int sign                        = 0;
-    int expoente[tamanhoExpoente]   = {0};
-    int mantissa[tamanhoMantissa]   = {0};
+    int sign                  = 0;
+    int expoente[tamanhoExpoente];
+		// Inicializa array com 0s
+    memset( expoente, 0, tamanhoExpoente*sizeof(int) );
+    int mantissa[tamanhoMantissa];
+    memset( mantissa, 0, tamanhoMantissa*sizeof(int) );
     
     // separa parte inteira e parte fracionaria
     fractpart = modf(data , &intpart);
@@ -184,9 +173,10 @@ int calculaPontoFlutuante(double data)
 		
     
     // Calculo do valor inteiro (Base 2 para base 10)
-    int fullArray[16] = {0};
-    
-    // concatena tudo em um vetor (base 2)
+    int fullArray[numeroBits];
+    memset( fullArray, 0, numeroBits*sizeof(int) );
+
+		// concatena tudo em um vetor (base 2)
     fullArray[0] = sign;
     for (int i=0 ; i < tamanhoExpoente ; i++)
     {
@@ -201,7 +191,7 @@ int calculaPontoFlutuante(double data)
     long valorInteiro   = 0;
     int  multiplicador  = 1;
     
-    for (int i = 15; i >= 0; i--)
+    for (int i = numeroBits-1; i >= 0; i--)
     {
         valorInteiro += fullArray[i]*(multiplicador);
         multiplicador *= 2;
@@ -209,5 +199,40 @@ int calculaPontoFlutuante(double data)
     
     return valorInteiro;
 }
-//65545
+
+int calculaPontoFlutuante16Bits(double data)
+{
+		// Se numero maior que maximo (65504 - 7BFF), retorna FFFF = 65535
+		if (data > 65504)
+		{
+			return 0xFFFF; // FFFF
+		}
+		
+		
+		static const int tamanhoExpoente = 5 ;
+		static const int tamanhoMantissa = 10;
+		static const int maxExp          = 15;
+		static const int numeroBits      = 16;
+
+		return calculaPontoFlutuante(data, tamanhoExpoente, tamanhoMantissa, numeroBits, maxExp);
+}
+
+int calculaPontoFlutuante32Bits(double data)
+{
+	
+		// Se numero maior que maximo (??? - 0x7F7FFFFF), retorna FFFFFFFF
+		if (data >= 0x7F7FFFFF)
+		{
+			return 0xFFFFFFFF; // FFFF
+		}
+		
+		
+		static const int tamanhoExpoente = 8 ;
+		static const int tamanhoMantissa = 23;
+		static const int numeroBits      = 32;
+		static const int maxExp          = 127;
+
+		return calculaPontoFlutuante(data, tamanhoExpoente, tamanhoMantissa, numeroBits, maxExp);
+}
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

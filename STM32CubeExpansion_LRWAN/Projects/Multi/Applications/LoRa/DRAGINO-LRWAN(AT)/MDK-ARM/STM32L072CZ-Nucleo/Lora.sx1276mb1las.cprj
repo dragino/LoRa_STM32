@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<cprj schemaVersion="1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="CPRJ.xsd">
+
+  <created timestamp="2022-09-12T09:49:05" tool="uVision V5.36.0.0"/>
+
+  <info>
+    <name>Lora</name>
+    <description/>
+  </info>
+
+  <packages>
+    <package name="STM32L0xx_DFP" vendor="Keil"/>
+  </packages>
+
+  <compilers>
+    <compiler name="AC5" version="5.0.0:5.99.99"/>
+  </compilers>
+
+  <target Ddsp="NO_DSP" Dendian="Little-endian" Dfpu="NO_FPU" Dmve="NO_MVE" Dname="STM32L072CZTx" Dsecure="Non-secure" Dtz="NO_TZ" Dvendor="STMicroelectronics:13">
+    <output intdir="./sx1276mb1las/" name="NUCLEO_CUBE_LORA" outdir="./sx1276mb1las/" type="exe"/>
+    <ldflags add="--library_type=microlib --strict --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols --info sizes --info totals --info unused --info veneers --entry=Reset_Handler" compiler="AC5" file="./NUCLEO_CUBE_LORA.sx1276mb1las.sct"/>
+    <cflags add="--C99 --apcs=interwork --split_sections -D__MICROLIB -IC:/Users/CIC-028/AppData/Local/Arm/Packs/Keil/STM32L0xx_DFP/2.2.0/Device/Include -O3 -g" compiler="AC5"/>
+    <asflags add="--apcs=interwork --pd &quot;__MICROLIB SETA 1&quot; --xref -IC:/Users/CIC-028/AppData/Local/Arm/Packs/Keil/STM32L0xx_DFP/2.2.0/Device/Include -g" compiler="AC5"/>
+    <includes>../../../../../../../Drivers/BSP/Components/Common;../../../../../../../Drivers/BSP/Components/bh1750;../../../../../../../Drivers/BSP/Components/digital_inputs;../../../../../../../Drivers/BSP/Components/ds18b20;../../../../../../../Drivers/BSP/Components/flash_eraseprogram;../../../../../../../Drivers/BSP/Components/float_encode;../../../../../../../Drivers/BSP/Components/gpio_exti;../../../../../../../Drivers/BSP/Components/iwdg;../../../../../../../Drivers/BSP/Components/lidar_lite_v3hp;../../../../../../../Drivers/BSP/Components/lubcos;../../../../../../../Drivers/BSP/Components/oil_float;../../../../../../../Drivers/BSP/Components/opcom;../../../../../../../Drivers/BSP/Components/pwr_out;../../../../../../../Drivers/BSP/Components/sht20;../../../../../../../Drivers/BSP/Components/sht31;../../../../../../../Drivers/BSP/Components/sx1276;../../../../../../../Drivers/BSP/Components/tfsensor;../../../../../../../Drivers/BSP/Components/ult;../../../../../../../Drivers/BSP/Components/weight;../../../../../../../Drivers/BSP/STM32L0xx_Nucleo;../../../../../../../Drivers/BSP/sx1276mb1las;../../../../../../../Drivers/CMSIS/Device/ST/STM32L0xx/Include;../../../../../../../Drivers/CMSIS/Include;../../../../../../../Drivers/STM32L0xx_HAL_Driver/Inc;../../../../../../../Middlewares/Third_Party/Lora/Core;../../../../../../../Middlewares/Third_Party/Lora/Crypto;../../../../../../../Middlewares/Third_Party/Lora/Mac;../../../../../../../Middlewares/Third_Party/Lora/Phy;../../../../../../../Middlewares/Third_Party/Lora/Utilities;../../inc</includes>
+    <defines>REGION_AU915;STM32L072xx;USE_HAL_DRIVER;USE_SHT;USE_STM32L0XX_NUCLEO</defines>
+  </target>
+
+  <files>
+    <group name="Drivers/BSP/Components">
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/flash_eraseprogram/flash_eraseprogram.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/iwdg/iwdg.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/sx1276/sx1276.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/pwr_out/pwr_out.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/gpio_exti/gpio_exti.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/oil_float/oil_float.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/ds18b20/ds18b20.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/sht20/sht20.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/sht31/sht31.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/bh1750/bh1750.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/lidar_lite_v3hp/lidar_lite_v3hp.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/tfsensor/tfsensor.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/ult/ult.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/weight/weight.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/digital_inputs/digital_inputs.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/float_encode/float_encode.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/opcom/opcom.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/Components/lubcos/lubcos.c"/>
+    </group>
+    <group name="Drivers/BSP/STM32L0xx_Nucleo">
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/STM32L0xx_Nucleo/stm32l0xx_nucleo.c"/>
+    </group>
+    <group name="Drivers/BSP/sx1276mb1las">
+      <file category="sourceC" name="../../../../../../../Drivers/BSP/sx1276mb1las/sx1276mb1las.c"/>
+    </group>
+    <group name="Drivers/CMSIS">
+      <file category="sourceC" name="../../../../../../../Drivers/CMSIS/Device/ST/STM32L0xx/Source/Templates/system_stm32l0xx.c"/>
+    </group>
+    <group name="Drivers/STM32L0xx_HAL_Driver">
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_spi.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_uart.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_adc.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_rcc.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_rcc_ex.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_cortex.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_gpio.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_dma.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_pwr.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_pwr_ex.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_rtc.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_rtc_ex.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_tim.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_tim_ex.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_adc_ex.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_uart_ex.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_i2c.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_i2c_ex.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_flash_ex.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_flash.c"/>
+      <file category="sourceC" name="../../../../../../../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_iwdg.c"/>
+    </group>
+    <group name="Projects/MDK-ARM">
+      <file category="sourceAsm" name="./startup_stm32l072xx.s"/>
+    </group>
+    <group name="Projects/End_Node">
+      <file category="sourceC" name="../../src/bsp.c"/>
+      <file category="sourceC" name="../../src/debug.c"/>
+      <file category="sourceC" name="../../src/hw_gpio.c"/>
+      <file category="sourceC" name="../../src/hw_rtc.c"/>
+      <file category="sourceC" name="../../src/hw_spi.c"/>
+      <file category="sourceC" name="../../src/main.c"/>
+      <file category="sourceC" name="../../src/stm32l0xx_hal_msp.c"/>
+      <file category="sourceC" name="../../src/stm32l0xx_hw.c"/>
+      <file category="sourceC" name="../../src/stm32l0xx_it.c"/>
+      <file category="sourceC" name="../../src/vcom.c"/>
+      <file category="sourceC" name="../../src/at.c"/>
+      <file category="sourceC" name="../../src/command.c"/>
+      <file category="sourceC" name="../../src/lora.c"/>
+      <file category="sourceC" name="../../src/tiny_sscanf.c"/>
+      <file category="sourceC" name="../../src/tiny_vsnprintf.c"/>
+    </group>
+    <group name="Middlewares/Lora/Mac/region">
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/Region.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionAS923.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionAU915.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionCN470.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionCN779.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionCommon.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionEU433.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionEU868.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionIN865.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionKR920.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionUS915.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionRU864.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/region/RegionKZ865.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/LoRaMac.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Mac/LoRaMacCrypto.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Core/lora-test.c"/>
+    </group>
+    <group name="Middlewares/Lora/Utilities">
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Utilities/delay.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Utilities/low_power_manager.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Utilities/timeServer.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Utilities/utilities.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Utilities/trace.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Utilities/queue.c"/>
+    </group>
+    <group name="Middlewares/Lora/Crypto">
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Crypto/aes.c"/>
+      <file category="sourceC" name="../../../../../../../Middlewares/Third_Party/Lora/Crypto/cmac.c"/>
+    </group>
+  </files>
+
+</cprj>

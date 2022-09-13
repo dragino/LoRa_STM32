@@ -70,7 +70,46 @@ extern UART_HandleTypeDef UartHandle1;
 void lubcos_read_serial(lubcos_serial_reading_t *lubcos)
 {
 	uart1_IoInit();
-	at_lubcos_data_receive(lubcos, 1000);
+	
+
+	// Numero de parametros a serem buscados
+	#define numberOfParameters  5
+	
+	// Sequencia de strings a serem buscadas
+	const char *parameters[numberOfParameters];
+	parameters[0] = "Time";
+	parameters[1] = "AH";
+	parameters[2] = "PCBT";
+	parameters[3] = "RH";
+	parameters[4] = "T";
+	
+	// Roda funcao para encontrar os parametros, retorna na mesma ordemn que foi enviado
+	float r[numberOfParameters];
+	r[0] = 0xFFFFFFFF; // 32 bits convertion
+	r[1] = 0xFFFF;     // 16 bits convertion
+	r[2] = 0xFFFF;
+	r[3] = 0xFFFF;
+	r[4] = 0xFFFF;
+	
+	
+	// Tamanho de cada sequencia de strings a serem buscadas, na ordem
+	int parametersSizes[numberOfParameters] = {4,2,4,2,1};
+	
+	// Tempo de espera para chegar os dados por serial
+	uint16_t delayvalue = 1000;	
+
+	// Chama funcao de interrupcao
+	find_value(r, parameters, parametersSizes, numberOfParameters, delayvalue);
+	
+	
+	// Aloca os valores encontrados nas variaveis declarada na struct do lubcos
+	lubcos->horario							= r[0];
+	lubcos->umidade_absoluta		= r[1];
+	lubcos->temperatura_sensor	= r[2];
+	lubcos->umidade_relativa		= r[3];
+	lubcos->temperatura					= r[4];
+	
+	
 	uart1_IoDeInit();
 }
 

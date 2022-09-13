@@ -69,8 +69,40 @@ extern UART_HandleTypeDef UartHandle1;
 
 void opcom_read_serial(opcom_serial_reading_t *opcom)
 {
-	uart1_IoInit();
-	at_opcom_data_receive(opcom, 1000);
+	uart1_IoInit();	
+
+	// Numero de parametros a serem buscados
+	#define numberOfParameters  6
+	
+	// Sequencia de strings a serem buscadas
+	const char *parameters[numberOfParameters];
+	parameters[0] = "Time";
+	parameters[1] = "ISO4um";
+	parameters[2] = "ISO6um";
+	parameters[3] = "ISO14um";
+	parameters[4] = "ISO21um";
+	parameters[5] = "FIndex";
+	
+	// Tamanho de cada sequencia de strings a serem buscadas, na ordem
+	int parametersSizes[numberOfParameters] = {4,6,6,7,7,6};
+	
+	// Tempo de espera para chegar os dados por serial
+	uint16_t delayvalue = 1000;
+
+	
+	// Roda funcao para encontrar os parametros, retorna na mesma ordemn que foi enviado
+	float r[numberOfParameters];
+	find_value(r, parameters, parametersSizes, numberOfParameters, delayvalue);
+	
+	// Aloca os valores encontrados nas variaveis declarada na struct do lubcos
+	opcom->horario	= r[0];
+	opcom->v_4um		= r[1];
+	opcom->v_6um		= r[2];
+	opcom->v_14um		= r[3];
+	opcom->v_21um		= r[4];
+	opcom->findex		= r[5];
+	
+	
 	uart1_IoDeInit();
 }
 
@@ -92,69 +124,4 @@ void uart1_init_opcom(void)
   {
     Error_Handler();
   }
-}
-
-
-void opcom_GPIO_IoDeInit( void )
-{
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-  HW_GPIO_Init( GPIOB, GPIO_PIN_6, &GPIO_InitStruct );
-}
-
-
-void opcom_GPIO_EXTI_FALLINGInit( void )
-{
-	
-	opcom_GPIO_IoDeInit();
-	
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	
-	GPIO_InitStruct.Mode	= GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull	= GPIO_PULLUP;
-	GPIO_InitStruct.Pin		= GPIO_PIN_6;
-
-  HW_GPIO_Init( GPIOB, GPIO_PIN_6, &GPIO_InitStruct );
-	
-	/* Enable and set EXTI lines 4 to 15 Interrupt to the lowest priority */
-  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
-}
-
-
-void opcom_GPIO_INPUTS_IoInit(void)
-{
-	
-	opcom_GPIO_IoDeInit();
-	
-	
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	
-	GPIO_InitTypeDef GPIO_InitStruct1={0};
-	GPIO_InitTypeDef GPIO_InitStruct2={0};
-	GPIO_InitTypeDef GPIO_InitStruct3={0};
-
-	
-	//PB6
-	GPIO_InitStruct1.Pin = GPIO_PIN_6;
-	GPIO_InitStruct1.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct1.Pull = GPIO_PULLUP;
-  GPIO_InitStruct1.Speed = GPIO_SPEED_HIGH;
-  HW_GPIO_Init( GPIOB, GPIO_PIN_6, &GPIO_InitStruct1 );
-	
-	
-	//PB7
-	GPIO_InitStruct2.Pin = GPIO_PIN_7;
-	GPIO_InitStruct2.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct2.Pull = GPIO_PULLUP;
-  GPIO_InitStruct2.Speed = GPIO_SPEED_HIGH;
-  HW_GPIO_Init( GPIOB, GPIO_PIN_7, &GPIO_InitStruct2 );
-	
-	
-	//PB3
-	GPIO_InitStruct3.Pin = GPIO_PIN_3;
-	GPIO_InitStruct3.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct3.Pull = GPIO_PULLUP;
-  GPIO_InitStruct3.Speed = GPIO_SPEED_HIGH;
-  HW_GPIO_Init( GPIOB, GPIO_PIN_3, &GPIO_InitStruct3 );
 }

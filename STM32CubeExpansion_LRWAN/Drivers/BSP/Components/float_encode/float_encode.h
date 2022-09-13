@@ -64,15 +64,15 @@
  * @note
  * @retval None
  */
- 
-#include "hw.h"
 
-int calculaPontoFlutuante(double data);
+int calculaPontoFlutuante(double data, int tamanhoExpoente, int tamanhoMantissa, int numeroBits, int maxExp);
+int calculaPontoFlutuante16Bits(double data);
+int calculaPontoFlutuante32Bits(double data);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __LUBCOS_H__ */
+#endif /* __float_encode_H__ */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -652,22 +652,21 @@ static void Send( void )
 		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
 		AppData.Buff[i++] =batteryLevel_mV & 0xFF;
 				
-		int horario;						//Time
 		int temperatura;				//T
 		int temperatura_sensor; //PCBT
 		int umidade_relativa;		//RH
 		int umidade_absoluta;		//AH
+		int horario;						//Time
 		
+		//PPRINTF("%f\r\n%f\r\n%f\r\n%f\r\n%f\r\n", sensor_data.horario, sensor_data.temperatura, sensor_data.temperatura_sensor, sensor_data.umidade_relativa, sensor_data.umidade_absoluta);
 		// Tramsformacao de float para inteiro em representacao de pontoFlutuante
-		horario							= calculaPontoFlutuante(sensor_data.horario);
-		temperatura					= calculaPontoFlutuante(sensor_data.temperatura);
-		temperatura_sensor	= calculaPontoFlutuante(sensor_data.temperatura_sensor);
-		umidade_relativa		= calculaPontoFlutuante(sensor_data.umidade_relativa);
-		umidade_absoluta		= calculaPontoFlutuante(sensor_data.umidade_absoluta);
-		//PPRINTF("%i\r\n%i\r\n%i\r\n%i\r\n%i\r\n",horario, temperatura, temperatura_sensor, umidade_relativa, umidade_absoluta);
-	
-		AppData.Buff[i++]=(horario)>>8;
-		AppData.Buff[i++]=(horario) & 0xFF;
+		temperatura					= calculaPontoFlutuante16Bits(sensor_data.temperatura);
+		temperatura_sensor	= calculaPontoFlutuante16Bits(sensor_data.temperatura_sensor);
+		umidade_relativa		= calculaPontoFlutuante16Bits(sensor_data.umidade_relativa);
+		umidade_absoluta		= calculaPontoFlutuante16Bits(sensor_data.umidade_absoluta);
+		horario							= calculaPontoFlutuante32Bits(sensor_data.horario);
+		//PPRINTF("%i\r\n%i\r\n%i\r\n%i\r\n%i\r\n", horario, temperatura, temperatura_sensor, umidade_relativa, umidade_absoluta);
+
 		
 		AppData.Buff[i++]=(temperatura)>>8;
 		AppData.Buff[i++]=(temperatura) & 0xFF;	
@@ -677,6 +676,10 @@ static void Send( void )
 		
 		AppData.Buff[i++]=(umidade_relativa)>>8;
 		AppData.Buff[i++]=(umidade_relativa) & 0xFF;
+			
+		AppData.Buff[i++]=(umidade_absoluta)>>8;
+		AppData.Buff[i++]=(umidade_absoluta) & 0xFF;
+		
 		
 		AppData.Buff[i++] = (sensor_data.in1<<4 | 1);
 		
@@ -696,14 +699,15 @@ static void Send( void )
 		int stopLoop = i;
 		for(int j=i; j>stopLoop-11; j--)
     {
+			//PPRINTF("%x", AppData.Buff[i]);
 			AppData.Buff[i--] = 0;
 		}
 				
-		AppData.Buff[i++]=(umidade_absoluta)>>8;
-		AppData.Buff[i++]=(umidade_absoluta) & 0xFF;
+		AppData.Buff[i++]=(horario)>>24       ;
+		AppData.Buff[i++]=(horario)>>16 & 0xFF;
 		
-		AppData.Buff[i++]=0xFF;
-		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=(horario)>> 8 & 0xFF;
+		AppData.Buff[i++]=(horario)     & 0xFF;
 		
 		AppData.Buff[i++]=0xFF;
 		AppData.Buff[i++]=0xFF;
@@ -718,6 +722,7 @@ static void Send( void )
 		AppData.Buff[i++] = 2;
 	}
 	
+	
 	else if(mode==8)
 	{	
 		AppData.Buff[i++] =(batteryLevel_mV>>8);       //level of battery in mV
@@ -731,17 +736,16 @@ static void Send( void )
 		int findex; 	//FIndex
 		
 		// Tramsformacao de float para inteiro em representacao de pontoFlutuante
-		horario = calculaPontoFlutuante(sensor_data.horario);
-		v_4um		= calculaPontoFlutuante(sensor_data.v_4um);
-		v_6um		= calculaPontoFlutuante(sensor_data.v_6um);
-		v_14um	= calculaPontoFlutuante(sensor_data.v_14um);
-		v_21um	= calculaPontoFlutuante(sensor_data.v_21um);
-		findex	= calculaPontoFlutuante(sensor_data.findex);
-		//PPRINTF("%f\r\n%f\r\n%f\r\n%f\r\n%f\r\n%f\r\n", sensor_data.horario, sensor_data.v_4um, sensor_data.v_6um, sensor_data.v_14um, sensor_data.v_21um, sensor_data.findex);
-		//PPRINTF("%i\r\n%i\r\n%i\r\n%i\r\n%i\r\n%i\r\n", horario, v_4um, v_6um, v_14um, v_21um, findex);
+		v_4um		= calculaPontoFlutuante16Bits(sensor_data.v_4um);
+		v_6um		= calculaPontoFlutuante16Bits(sensor_data.v_6um);
+		v_14um	= calculaPontoFlutuante16Bits(sensor_data.v_14um);
+		v_21um	= calculaPontoFlutuante16Bits(sensor_data.v_21um);
+		findex	= calculaPontoFlutuante32Bits(sensor_data.findex);
+		horario = calculaPontoFlutuante32Bits(sensor_data.horario);
+		//PPRINTF("%f\r\n%f\r\n%f\r\n%f\r\n%f\r\n%f\r\n", sensor_data.v_4um, sensor_data.v_6um, sensor_data.v_14um, sensor_data.v_21um, sensor_data.findex, sensor_data.horario);
+		//PPRINTF("%i\r\n%i\r\n%i\r\n%i\r\n%i\r\n%i\r\n", v_4um, v_6um, v_14um, v_21um, findex, horario);
+		//PPRINTF("%f\r\n%i\r\n", sensor_data.v_4um, v_4um );
 		
-		AppData.Buff[i++]=(horario)>>8;
-		AppData.Buff[i++]=(horario) & 0xFF;
 		
 		AppData.Buff[i++]=(v_4um)>>8;
 		AppData.Buff[i++]=(v_4um) & 0xFF;	
@@ -750,7 +754,10 @@ static void Send( void )
 		AppData.Buff[i++]=(v_6um) & 0xFF;
 		
 		AppData.Buff[i++]=(v_14um)>>8;
-		AppData.Buff[i++]=(v_14um) & 0xFF;
+		AppData.Buff[i++]=(v_14um) & 0xFF;		
+		
+		AppData.Buff[i++]=(v_21um)>>8;
+		AppData.Buff[i++]=(v_21um) & 0xFF;
 		
 		AppData.Buff[i++]=1;
 		
@@ -771,18 +778,19 @@ static void Send( void )
     {
 			AppData.Buff[i--] = 0;
 		}
-				
-		AppData.Buff[i++]=(v_21um)>>8;
-		AppData.Buff[i++]=(v_21um) & 0xFF;
+
 		
-		AppData.Buff[i++]=(findex)>>8;
-		AppData.Buff[i++]=(findex) & 0xFF;
+		AppData.Buff[i++]=(findex)>>24       ;
+		AppData.Buff[i++]=(findex)>>16 & 0xFF;
 		
-		AppData.Buff[i++]=0xFF;
-		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=(findex)>> 8 & 0xFF;
+		AppData.Buff[i++]=(findex)     & 0xFF;
 		
-		AppData.Buff[i++]=0xFF;
-		AppData.Buff[i++]=0xFF;
+		AppData.Buff[i++]=(horario)>>24       ;
+		AppData.Buff[i++]=(horario)>>16 & 0xFF;
+		
+		AppData.Buff[i++]=(horario)>> 8 & 0xFF;
+		AppData.Buff[i++]=(horario)     & 0xFF;
 		
 		AppData.Buff[i++]=0xFF;
 		AppData.Buff[i++]=0xFF;
@@ -808,7 +816,7 @@ static void Send( void )
     }
 		
 		// ativa interrupcao
-		GPIOB_EXTI_FALLINGEDGE_PULLUP_PIN_Init( GPIO_PIN_6 );
+		//GPIOB_EXTI_FALLINGEDGE_PULLUP_PIN_Init( GPIO_PIN_6 );
 		interrupcao_flag = 0;
 	}
 	
@@ -1158,6 +1166,22 @@ static void LORA_RxData( lora_AppData_t *AppData )
 	}
 	else
 	{
+		/*
+		// Inicializa clock
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+		
+		
+		// Inicializa porta
+		GPIO_InitTypeDef GPIO_InitStruct={0};
+		
+		GPIO_InitStruct.Pin = GPIO_PIN_4;
+		GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+		GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+		HW_GPIO_Init( GPIOB, GPIO_PIN_4, &GPIO_InitStruct );
+		
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
+		
+		*/
 		AT_PRINTF("BuffSize:%d,Run AT+RECVB=? to see detail\r\n",AppData->BuffSize);		
 		
 	}

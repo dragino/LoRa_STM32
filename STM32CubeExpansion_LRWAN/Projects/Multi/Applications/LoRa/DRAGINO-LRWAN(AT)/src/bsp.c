@@ -101,9 +101,8 @@ extern I2C_HandleTypeDef I2cHandle3;
 tfsensor_reading_t reading_t;
 
 
-#define FFFF 65535 // 65535(base10) = FFFF(base16)
-lubcos_serial_reading_t lubcos_reading = {FFFF, FFFF, FFFF, FFFF, FFFF};
-opcom_serial_reading_t opcom_reading = {FFFF, FFFF, FFFF, FFFF, FFFF, FFFF};
+lubcos_serial_reading_t lubcos_reading;
+opcom_serial_reading_t opcom_reading;
 
 
 #endif

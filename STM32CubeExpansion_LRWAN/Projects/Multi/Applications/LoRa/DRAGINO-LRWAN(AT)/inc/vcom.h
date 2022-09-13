@@ -127,6 +127,7 @@ void uart1_IoDeInit(void);
 void at_tfmini_data_receive(uint8_t rxdatatemp[],uint16_t delayvalue);
 void at_lubcos_data_receive(lubcos_serial_reading_t*, uint16_t delayvalue);
 void at_opcom_data_receive(opcom_serial_reading_t*, uint16_t delayvalue);
+void find_value(float *r, const char **arrayParameters, int sizeParameters[], int numberOfParameters, uint16_t delayvalue);
 
 #if 1
 #define PPRINTF(...)     do{ } while( 0!= TraceSend(__VA_ARGS__) ) //Polling Mode

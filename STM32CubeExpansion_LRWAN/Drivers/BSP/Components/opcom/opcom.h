@@ -80,9 +80,6 @@ typedef struct {
 void opcom_read_serial(opcom_serial_reading_t*);
 void uart1_init_opcom(void);
 
-void opcom_GPIO_INPUTS_IoInit(void);
-void opcom_GPIO_EXTI_FALLINGInit( void );
-void opcom_GPIO_IoDeInit( void );
 
 
 #ifdef __cplusplus
