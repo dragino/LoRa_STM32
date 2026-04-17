@@ -58,6 +58,7 @@
 #include "gpio_exti.h"
 #include "weight.h"
 #include "iwdg.h"
+#include "dendrometer.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -640,38 +641,27 @@ static void Send( void )
 	
 	else if(mode==3)
 	{
-		AppData.Buff[i++] =(int)(sensor_data.oil)>>8;          //oil float
-		AppData.Buff[i++] =(int)sensor_data.oil;
-	
-		AppData.Buff[i++] =(int)(sensor_data.ADC_1)>>8;     
-		AppData.Buff[i++] =(int)(sensor_data.ADC_1);
-		AppData.Buff[i++] =(int)(sensor_data.ADC_2)>>8; 
-		AppData.Buff[i++] =(int)(sensor_data.ADC_2);
+		dendrometer_measurement_t measurement;
+		uint8_t status_mode_byte;
+		uint8_t written;
 
 		if(exit_temp==0)
 		{
 			switch_status=HAL_GPIO_ReadPin(GPIO_EXTI14_PORT,GPIO_EXTI14_PIN);		
 		}
-		AppData.Buff[i++]=(switch_status<<7)|(sensor_data.in1<<1)|0x08|(exit_temp&0x01);
-	
-		#if defined USE_SHT
-		if(bh1750flags==1)
-		{
-			AppData.Buff[i++] =(sensor_data.illuminance)>>8;      
-			AppData.Buff[i++] =(sensor_data.illuminance);
-			AppData.Buff[i++] = 0x00;   
-			AppData.Buff[i++] = 0x00;				
-		}	
-		else
-		{
-			AppData.Buff[i++] =(int)(sensor_data.temp_sht*10)>>8;      
-			AppData.Buff[i++] =(int)(sensor_data.temp_sht*10);
-			AppData.Buff[i++] =(int)(sensor_data.hum_sht*10)>>8;   
-			AppData.Buff[i++] =(int)(sensor_data.hum_sht*10);
-			}
-		#endif
-	
-		AppData.Buff[i++] =(int)(batteryLevel_mV/100);	
+		measurement.adc_signal_avg_raw = sensor_data.dendro_signal_avg_raw;
+		measurement.adc_reference_avg_raw = sensor_data.dendro_reference_avg_raw;
+		measurement.valid = sensor_data.dendro_valid;
+		measurement.flags = sensor_data.dendro_flags;
+		status_mode_byte = (switch_status<<7)|(sensor_data.in1<<1)|0x08|(exit_temp&0x01);
+		written = dendrometer_pack_mod3_payload(
+			batteryLevel_mV,
+			status_mode_byte,
+			&measurement,
+			&AppData.Buff[i],
+			(uint8_t)(LORAWAN_APP_DATA_BUFF_SIZE - i)
+		);
+		i += written;
 	}
 	
   else if(mode==4)

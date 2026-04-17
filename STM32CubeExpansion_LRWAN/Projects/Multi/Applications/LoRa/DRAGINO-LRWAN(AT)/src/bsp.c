@@ -53,6 +53,7 @@
 #include "delay.h"
 #include "vcom.h"
 #include "lora.h"
+#include "dendrometer.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #if defined(LoRa_Sensor_Node)
@@ -101,6 +102,40 @@ extern uint8_t mode;
 extern uint8_t inmode,inmode2,inmode3;
 extern uint16_t power_time;
 extern uint32_t COUNT,COUNT2;
+
+static void dendro_set_power_enabled(void *ctx, uint8_t enabled)
+{
+    (void)ctx;
+    HAL_GPIO_WritePin(PWR_OUT_PORT, PWR_OUT_PIN, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
+}
+
+static uint16_t dendro_read_adc_raw(void *ctx, uint8_t channel_id)
+{
+    (void)ctx;
+
+    switch (channel_id)
+    {
+        case DENDROMETER_CHANNEL_SIGNAL:
+            return HW_AdcReadChannel(ADC_Channel_Oil);
+        case DENDROMETER_CHANNEL_REFERENCE:
+            return HW_AdcReadChannel(ADC_Channel_IN1);
+        default:
+            return 0U;
+    }
+}
+
+static void dendro_delay_ms(void *ctx, uint16_t delay_ms)
+{
+    (void)ctx;
+    HAL_Delay(delay_ms);
+}
+
+static const dendrometer_board_ops_t dendro_board_ops = {
+    0,
+    dendro_set_power_enabled,
+    dendro_read_adc_raw,
+    dendro_delay_ms
+};
 
 void BSP_sensor_Read( sensor_t *sensor_data, uint8_t message)
 {	
@@ -151,7 +186,7 @@ void BSP_sensor_Read( sensor_t *sensor_data, uint8_t message)
 		}
 	}
 	
-  if((mode==1)||(mode==3))
+  if(mode==1)
   {		
 		#ifdef USE_SHT
 		if(flags==0)
@@ -227,7 +262,7 @@ void BSP_sensor_Read( sensor_t *sensor_data, uint8_t message)
   //+5V power sensors	
 	uint16_t adcdata[3][6];
 	
-	if(power_time!=0)
+	if((power_time!=0)&&(mode!=3))
 	{
 		HAL_GPIO_WritePin(PWR_OUT_PORT,PWR_OUT_PIN,GPIO_PIN_RESET);//Enable 5v power supply
 		for(uint16_t i=0;i<(uint16_t)(power_time/100);i++)
@@ -299,7 +334,24 @@ void BSP_sensor_Read( sensor_t *sensor_data, uint8_t message)
 			sensor_data->distance_signal_strengh = 65535;			
 		}			 
 	} 
-	else if((mode==3)||(mode==8))
+	else if(mode==3)
+	{
+		 dendrometer_measurement_t measurement = {0};
+		 measure_dendrometer(&dendro_board_ops, &measurement);
+
+		 sensor_data->dendro_signal_avg_raw = measurement.adc_signal_avg_raw;
+		 sensor_data->dendro_reference_avg_raw = measurement.adc_reference_avg_raw;
+		 sensor_data->dendro_valid = measurement.valid;
+		 sensor_data->dendro_flags = measurement.flags;
+
+		 if(message==1)
+		 {
+			 PPRINTF("DENDRO_PA0_RAW:%u\r\n",sensor_data->dendro_signal_avg_raw);
+			 PPRINTF("DENDRO_PA1_RAW:%u\r\n",sensor_data->dendro_reference_avg_raw);
+			 PPRINTF("DENDRO_VALID:%d FLAGS:0x%02X\r\n",sensor_data->dendro_valid,sensor_data->dendro_flags);
+		 }
+	}
+	else if(mode==8)
 	{	
 		 BSP_oil_float_Init();
 		 for(uint8_t w=0;w<6;w++)

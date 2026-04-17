@@ -87,6 +87,14 @@ typedef struct{
 	
 	float ADC_2;  //ADC2	
 
+	uint16_t dendro_signal_avg_raw;
+
+	uint16_t dendro_reference_avg_raw;
+
+	uint8_t dendro_valid;
+
+	uint8_t dendro_flags;
+
 	float temp_sht;
 	
 	float hum_sht;
