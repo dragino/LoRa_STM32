@@ -475,13 +475,13 @@ bool RegionCN470AdrNext( AdrNextParams_t* adrNext, int8_t* drOut, int8_t* txPowO
                         adrAckReq = false;
                         if( adrNext->UpdateChanMask == true )
                         {
-                            // Re-enable default channels
-                            ChannelsMask[0] = 0xFFFF;
-                            ChannelsMask[1] = 0xFFFF;
-                            ChannelsMask[2] = 0xFFFF;
-                            ChannelsMask[3] = 0xFFFF;
-                            ChannelsMask[4] = 0xFFFF;
-                            ChannelsMask[5] = 0xFFFF;
+//                            // Re-enable default channels
+//                            ChannelsMask[0] = 0xFFFF;
+//                            ChannelsMask[1] = 0xFFFF;
+//                            ChannelsMask[2] = 0xFFFF;
+//                            ChannelsMask[3] = 0xFFFF;
+//                            ChannelsMask[4] = 0xFFFF;
+//                            ChannelsMask[5] = 0xFFFF;
                         }
                     }
                 }
@@ -799,6 +799,7 @@ void RegionCN470CalcBackOff( CalcBackOffParams_t* calcBackOff )
 
 bool RegionCN470NextChannel( NextChanParams_t* nextChanParams, uint8_t* channel, TimerTime_t* time, TimerTime_t* aggregatedTimeOff )
 {
+    uint8_t channelNext = 0;
     uint8_t nbEnabledChannels = 0;
     uint8_t delayTx = 0;
     uint8_t enabledChannels[CN470_MAX_NB_CHANNELS] = { 0 };
@@ -807,12 +808,13 @@ bool RegionCN470NextChannel( NextChanParams_t* nextChanParams, uint8_t* channel,
     // Count 125kHz channels
     if( RegionCommonCountChannels( ChannelsMask, 0, 6 ) == 0 )
     { // Reactivate default channels
-        ChannelsMask[0] = 0xFFFF;
-        ChannelsMask[1] = 0xFFFF;
-        ChannelsMask[2] = 0xFFFF;
-        ChannelsMask[3] = 0xFFFF;
-        ChannelsMask[4] = 0xFFFF;
-        ChannelsMask[5] = 0xFFFF;
+//        ChannelsMask[0] = 0x0000;
+//        ChannelsMask[1] = 0x0000;
+//        ChannelsMask[2] = 0x0000;
+//        ChannelsMask[3] = 0x0000;
+//        ChannelsMask[4] = 0x0000;
+//        ChannelsMask[5] = 0xFFFF;
+			  RegionCommonChanMaskCopy( ChannelsMask, ChannelsDefaultMask, 6  );
     }
 
     if( nextChanParams->AggrTimeOff <= TimerGetElapsedTime( nextChanParams->LastAggrTx ) )
@@ -836,11 +838,26 @@ bool RegionCN470NextChannel( NextChanParams_t* nextChanParams, uint8_t* channel,
 
     if( nbEnabledChannels > 0 )
     {
-        // We found a valid channel
-        *channel = enabledChannels[randr( 0, nbEnabledChannels - 1 )];
+        for( uint8_t  i = 0, j = randr( 0, nbEnabledChannels - 1 ); i < 16; i++ )
+        {
+            channelNext = enabledChannels[j];
+            j = ( j + 1 ) % nbEnabledChannels;
 
-        *time = 0;
-        return true;
+            // Perform carrier sense for CN470_CARRIER_SENSE_TIME
+            // If the channel is free, we can stop the LBT mechanism
+            if( Radio.IsChannelFree( MODEM_LORA, Channels[channelNext].Frequency, CN470_RSSI_FREE_TH, CN470_CARRIER_SENSE_TIME ) == true )
+            {
+							// We found a valid channel
+							*channel = enabledChannels[randr( 0, nbEnabledChannels - 1 )];
+
+							*time = 0;
+
+							// Disable the channel in the mask
+							RegionCommonChanDisable( ChannelsMask, *channel, CN470_MAX_NB_CHANNELS );
+							return true;
+						}
+				}
+        return false;
     }
     else
     {

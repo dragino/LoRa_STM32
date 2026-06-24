@@ -54,6 +54,7 @@
 #include "flash_eraseprogram.h"
 #include "version.h"
 #include "stdlib.h"
+#include "LoRaMacTest.h"
 
 #if defined( REGION_AS923 )
 #define Firm_FQ 0x0001
@@ -217,8 +218,6 @@ static lora_configuration_t lora_config =
 #define OVER_THE_AIR_ACTIVATION_DUTYCYCLE           10000  // 10 [s] value in ms
 
 #if defined( REGION_EU868 )
-
-#include "LoRaMacTest.h"
 
 /*!
  * LoRaWAN ETSI duty cycle control enable/disable
@@ -526,7 +525,12 @@ void LORA_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
 
 void fdr_config(void)
 {
+	#if defined( REGION_EU868 )
+	lora_config.duty_cycle = LORA_ENABLE;
+	#else
 	lora_config.duty_cycle = LORA_DISABLE;
+	#endif
+	
 	lora_config.application_port=2;
 				
   #if defined( REGION_CN470 )	

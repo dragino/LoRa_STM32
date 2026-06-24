@@ -197,6 +197,16 @@
 #define CN470_STEPWIDTH_RX1_CHANNEL                 ( (uint32_t) 200000 )
 
 /*!
+ * RSSI threshold for a free channel [dBm]
+ */
+#define CN470_RSSI_FREE_TH                          -85
+
+/*!
+ * Specifies the time the node performs a carrier sense
+ */
+#define CN470_CARRIER_SENSE_TIME                    6
+
+/*!
  * Data rates table definition
  */
 static const uint8_t DataratesCN470[]  = { 12, 11, 10,  9,  8,  7 };
